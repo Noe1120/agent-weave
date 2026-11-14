@@ -8,11 +8,17 @@
 
 当前已继续完成[W08能力与适配基础](plan/W08-ADAPTER-FOUNDATION.md)、[W09依赖与授权资料](plan/W09-DEPENDENCIES-KNOWLEDGE.md)、[W10本机离线灾备基础](plan/W10-OFFLINE-RECOVERY.md)，停在管家Agent之前。后续工作直接沿用[AGENTS.md](AGENTS.md)，不重复确认既有要求。
 
+## 管家方案版本
+
+用户已确认修改后的[管家方案](plan/11-coordinator-agent.md)及关联源章为最新版（coordinator-core-review-1），本分支已纳入；这是设计确认，不是开始构建管家的授权。后续继续DSH接入，原生UI最后设计。
+
 ## DSH 接入增量 · 2026-11-15
 
 已实现[W11初始化生命周期](plan/W11-DSH-ACP-LIFECYCLE.md)：固定官方DeepSeek Harness安装，独立空home，ACP initialize、能力观测、授权只读状态和所属进程关闭。编译后控制器已用本机0.2.1-rc.3完成真实初始化→1000次读取（零DB写入）→正常退出；没有会话、prompt或模型调用，也没有附着已有Desktop聊天。
 
 这是可信进程内后端模块，**不是已接通真实任务的完整Agent，也未接入UI/HTTP/MCP**。原生界面和旧包不变，资格仍UNVERIFIED。默认验证只跑合成夹具；真实走查必须显式授权并传入固定配置。详见[阶段交付](evidence/dsh-lifecycle/COMPLETION.md)。
+
+下一步见[W12独立新会话预检](plan/W12-DSH-SESSION-PREFLIGHT.md)：仅完成官方包只读核查，真实新会话探针尚未执行。
 
 ## 打开本机已有便携包
 
@@ -43,7 +49,7 @@
 - 本机停稳development仓库的SQLite一致备份、Git对象/index/staged/unstaged/二进制闭包，校验后只恢复到新目录；旧凭据撤销，不自动恢复执行。
 - 这些都是可信进程内开发入口，**没有挂到UI或公共HTTP/MCP**，不代表真实Agent已连接。生产在线灾备/离机加密/安装升级、实际原客户端与OS隔离仍未完成。
 - 验证命令：npm run test:adapter、npm run test:foundations；编译走查：npm run test:adapter:walkthrough、npm run test:foundations:walkthrough。证据目录必须新建，不能覆盖旧结果。
-- [实施范围](plan/PRE-COORDINATOR-FOUNDATIONS.md) · [阶段交付](evidence/pre-coordinator/2026-11-14/COMPLETION.md)。管家方案保持待定，原生UI最后设计，旧便携包未重发。
+- [实施范围](plan/PRE-COORDINATOR-FOUNDATIONS.md) · [阶段交付](evidence/pre-coordinator/2026-11-14/COMPLETION.md)。管家方案以用户确认的coordinator-core-review-1为准，实施仍暂缓，原生UI最后设计，旧便携包未重发。
 
 ## W07 当前源码：开发进程运行器
 

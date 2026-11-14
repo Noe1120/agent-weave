@@ -1,0 +1,50 @@
+{
+  "date": "2026-11-15",
+  "user_design_revision": "coordinator-core-review-1",
+  "status": "SOURCE_PRESERVATION_PASS",
+  "exact_source_files": [
+    {
+      "path": "plan/02-data-contracts.md",
+      "byte_identical": true,
+      "sha256": "9f5c4240d90d3dd889f28f5ca5c4c11da1a61ee43c3d1bdb1472ecd01102300a"
+    },
+    {
+      "path": "plan/04-reliability-security-operations.md",
+      "byte_identical": true,
+      "sha256": "a9f30b316294cdd8872f54afca696a69261d1fff8f6cd6f56aba3796d27b358e"
+    },
+    {
+      "path": "plan/10-delivery-risks-and-controls.md",
+      "byte_identical": true,
+      "sha256": "e40f323c35d99f4841226a13c934a914927981d74b7552891a276e890edcebac"
+    },
+    {
+      "path": "plan/11-coordinator-agent.md",
+      "byte_identical": true,
+      "sha256": "fef348dae30e19a630299ab1a224cce8ca33a885811ee6b9d3822fc8a9920966"
+    },
+    {
+      "path": "plan/12-protocol-closure-and-validation.md",
+      "byte_identical": true,
+      "sha256": "4e54ae82e61ed55768443bd50476717c4c126718fbbe4d1077410b121ac300fb"
+    },
+    {
+      "path": "plan/validation/coordinator-eval-corpus.json",
+      "byte_identical": true,
+      "sha256": "356b6722023498a3653ee5e4edfa39c260fd86a76b9d3c868a842aaba38ebe61"
+    }
+  ],
+  "shared_documents_original_added_content_preserved": true,
+  "coordinator_corpus": {
+    "revision": "coordinator-quality/1.1",
+    "base_cases": 20,
+    "variants": 6,
+    "steps": 38,
+    "status": "NOT_RUN",
+    "oracle_status": "DRAFT_REVIEW_REQUIRED",
+    "runs": 0
+  },
+  "implementation_authorized": false,
+  "coordinator_implemented": false,
+  "review": "AUTHOR_SELF_CHECK_NOT_INDEPENDENT_REVIEW"
+}

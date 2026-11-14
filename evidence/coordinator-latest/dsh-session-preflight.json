@@ -1,0 +1,37 @@
+{
+  "date": "2026-11-15",
+  "timezone": "Asia/Tokyo",
+  "status": "STATIC_PREFLIGHT_ONLY",
+  "source": "Installed official package; no claim of latest online release",
+  "client_version": "0.2.1-rc.3",
+  "archive_sha256": "04b32e3a872826ba15cfb2081c6a929a8d4ecaa65e09a2543e5a6b30e2eff1f0",
+  "source_sha256": {
+    "dsh/node_modules/@deepseek-ai/dsh-acp/lib/index.js": "9df25827fbf2ac7c0b168f22e5bea151153c1492ef118511be96688dc3039989",
+    "dsh/node_modules/@deepseek-ai/dsh-llm/lib/index.js": "d18d8ae4c8d961e628708c1e4698e09716a0ebb80e55a672e0bde1029bec1155",
+    "dsh/node_modules/@deepseek-ai/dsh-llm-deepseek-api-key/lib/index.js": "67f9cbc26ce0ea07009e0c36ee4a7cc058542cdf85b873549885922646cacd35",
+    "dsh/node_modules/@deepseek-ai/dsh-llm-deepseek/lib/index.js": "21fedb71f8d9aafea73b35ee13bc73737a8271d7ffa261697d4208e8563196cb",
+    "dsh/node_modules/@deepseek-ai/dsh-base/cordis.patch.yml": "a2cc57868a4d016609801e28781262515483dde29b41c2742d9a3b27a6f52f77"
+  },
+  "observations": [
+    "session/new composes an Agent, obtains config options and flushes persistence",
+    "Requested MCP endpoints are mounted during creation; proposed probe must use mcpServers=[]",
+    "ACP profile disables session-title-llm; no prompt is proposed",
+    "Configuration options resolve the selected route and enumerate provider catalogs",
+    "Bundled API-key catalog path skips network listing when credentials are absent; this is source evidence, not network-isolation proof",
+    "session/close disposes the specific owned session; persisted session remains, so close is not deletion"
+  ],
+  "proposed_requests": [
+    "initialize",
+    "session/new",
+    "session/close"
+  ],
+  "credential_reuse": false,
+  "model_prompt_proposed": false,
+  "session_list_or_resume_proposed": false,
+  "real_client_started_this_step": false,
+  "real_session_created": false,
+  "real_model_called": false,
+  "authorization": "REQUIRES_EXPLICIT_NEW_SESSION_PROBE_APPROVAL",
+  "windows_isolation": "UNVERIFIED",
+  "qualification": "UNVERIFIED"
+}

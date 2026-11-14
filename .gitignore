@@ -104,3 +104,11 @@ qa-runtime/
 !/evidence/dsh-lifecycle/author-self-review.json
 !/evidence/dsh-lifecycle/protection-check.json
 !/evidence/dsh-lifecycle/real-initialize-report.json
+
+# Approved latest design integration summaries; source diffs and raw inspection stay local.
+!/evidence/coordinator-latest/
+/evidence/coordinator-latest/*
+!/evidence/coordinator-latest/COMPLETION.md
+!/evidence/coordinator-latest/verification-summary.json
+!/evidence/coordinator-latest/source-import-check.json
+!/evidence/coordinator-latest/dsh-session-preflight.json

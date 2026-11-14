@@ -1,0 +1,72 @@
+{
+  "date": "2026-11-15",
+  "timezone": "Asia/Tokyo",
+  "scope": "Latest user coordinator design integration; DSH new-session static preflight only",
+  "source_design": "coordinator-core-review-1",
+  "user_confirmation": "Latest design approved for repository; coordinator implementation remains paused",
+  "node": {
+    "tests": 317,
+    "pass": 317,
+    "fail": 0,
+    "skipped": 0,
+    "command": "npm run verify"
+  },
+  "native": {
+    "logic_groups_passed": 14,
+    "static_tests_passed": 1,
+    "click_acceptance": "NOT_RUN"
+  },
+  "portable_package": {
+    "files": 989,
+    "status": "PASS",
+    "rewritten": false
+  },
+  "design": {
+    "files": 50,
+    "manifest_entries": 49,
+    "document_checks": "PASS",
+    "manifest_checks": "PASS",
+    "p0_tests_passed": 12
+  },
+  "user_content": {
+    "exact_source_files": 6,
+    "shared_documents": 3,
+    "generated_files_regenerated": 3,
+    "details": "source-import-check.json"
+  },
+  "runtime_source_changed_from": "63ecce69d7b3ade427ad4a91275848270ffde731",
+  "runtime_source_changed": false,
+  "coordinator_eval": {
+    "base_cases": 20,
+    "variants": 6,
+    "steps": 38,
+    "status": "NOT_RUN",
+    "oracle_status": "DRAFT_REVIEW_REQUIRED"
+  },
+  "dsh_session_preflight": {
+    "status": "STATIC_PREFLIGHT_ONLY",
+    "real_client_started": false,
+    "real_session_created": false,
+    "prompt_sent": false,
+    "old_credentials_or_history_read": false,
+    "next_probe": "AWAITING_EXPLICIT_SESSION_AUTHORIZATION"
+  },
+  "qualification": "UNVERIFIED",
+  "windows_isolation": "UNVERIFIED",
+  "product_cases": "250 NOT_RUN",
+  "coordinator_implemented": false,
+  "independent_review": false,
+  "local_log_sha256": {
+    "verify.log": "321ee71fbdda0d7a445204d0ccb33ea1c2f2eef859813e32daff1adfd5ac1bb5",
+    "native.log": "98785e7b3102b803954a2865231e14273c8303c5ab150759e236ad57060f9d6e",
+    "package.log": "77c06975809839528ad44681a225adfd36628db49898b4eac30815809a5f75dd",
+    "design-refresh.log": "de1fd2f4091ef367002e3f73e90b4a335a3ac59ff35c562c632f240a7d47bc5a",
+    "design-readonly.log": "de1fd2f4091ef367002e3f73e90b4a335a3ac59ff35c562c632f240a7d47bc5a",
+    "p0.log": "0f70e437d5565baed1bf0ffdc25fdcd4eb238d31a05f615b16449fb44b5e1817"
+  },
+  "notes": [
+    "Existing W11 real initialization report remains historical evidence; not rerun in this step",
+    "No model call, credential reuse, UI action, OS policy change or installation performed",
+    "Original user changes must be snapshotted and rechecked before fast-forward main integration"
+  ]
+}

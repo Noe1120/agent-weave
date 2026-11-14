@@ -10,11 +10,19 @@
 
 参考项目研究：[Agents Anywhere 本机接入评估](research/2026-11-14-agents-anywhere.md)。仅静态源码证据；区分自有进程与原客户端会话附着，不替换 Claude Desktop，不改变原生 UI 或 G0/G1 门槛。
 
-当前阶段：[管家前实施范围](PRE-COORDINATOR-FOUNDATIONS.md)、[W08适配基础](W08-ADAPTER-FOUNDATION.md)、[W09依赖/授权资料](W09-DEPENDENCIES-KNOWLEDGE.md)、[W10离线灾备](W10-OFFLINE-RECOVERY.md)已实现限定开发范围。真实客户端保持UNVERIFIED，不把底座当Agent上线。用户明确管家方案未定，本轮停在管家之前。持续工作规则见项目根AGENTS.md。
+当前阶段：[管家前实施范围](PRE-COORDINATOR-FOUNDATIONS.md)、[W08适配基础](W08-ADAPTER-FOUNDATION.md)、[W09依赖/授权资料](W09-DEPENDENCIES-KNOWLEDGE.md)、[W10离线灾备](W10-OFFLINE-RECOVERY.md)已实现限定开发范围。真实客户端保持UNVERIFIED，不把底座当Agent上线。用户已确认coordinator-core-review-1为最新管家方案；实现仍停在管家之前。持续工作规则见项目根AGENTS.md。
 
 ## DSH初始化增量 · 2026-11-15
 
-[W11 DSH ACP生命周期](W11-DSH-ACP-LIFECYCLE.md)已实现固定安装的独立initialize、能力观测、授权只读状态、关闭与断线处理，且完成真实编译走查；没有session/prompt/模型请求，没有接管原Desktop。初始化成功不是L1–L3资格，所有执行能力仍关闭。模块仅可信进程内使用，UI最后；原工作区未提交管家设计保留且不在本分支内，管家仍不构建。
+[W11 DSH ACP生命周期](W11-DSH-ACP-LIFECYCLE.md)已实现固定安装的独立initialize、能力观测、授权只读状态、关闭与断线处理，且完成真实编译走查；没有session/prompt/模型请求，没有接管原Desktop。初始化成功不是L1–L3资格，所有执行能力仍关闭。模块仅可信进程内使用，UI最后；用户于2026-11-15确认的最新管家设计已纳入本分支，管家仍不构建。
+
+## 最新管家设计 · 2026-11-15确认
+
+用户确认以下修改为最新版并授权提交；不再以旧版“方案未定”描述当前基线，不据此开放管家实现。
+
+本轮管家设计补充（2026-11-14，coordinator-core-review-1）：已将九类核心清单与记忆/上下文/工具审查写入 [02](02-data-contracts.md) §7、[04](04-reliability-security-operations.md) §9/12、[10](10-delivery-risks-and-controls.md) §8、[11](11-coordinator-agent.md) §4/7/9/13/19；覆盖和验收入口见 [12](12-protocol-closure-and-validation.md) §7.3–7.5。样本升级为 coordinator-quality/1.1：20项基础题 + 6组连续变体/38步骤，均未运行，参考判断待独立人工审阅。平台v1.6/管家v1.2和250项AT/CA编号不变；这些是设计规则，不改变当前后端阶段或原客户端资格。
+
+下一步：[W12 DSH独立新会话预检](W12-DSH-SESSION-PREFLIGHT.md)，只读预检完成；最小零prompt新建/关闭探针尚待具体授权，未启动真实会话。
 
 ## 阅读与交接
 

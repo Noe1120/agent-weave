@@ -19,3 +19,7 @@ W07的source-manifest、before-manifest和evidence-manifest是该阶段完成时
 ## DSH初始化生命周期
 
 [W11交付](dsh-lifecycle/COMPLETION.md)与同目录明确白名单的汇总、真实初始化走查、保护检查和作者自检记录。真实客户端只做initialize，平台状态为隔离内存夹具；不是原生窗口点击或完整Agent任务验收。配置、原始日志、DSH home和运行数据库不上网。
+
+## 最新管家方案确认与DSH下一步预检
+
+[整合记录](coordinator-latest/COMPLETION.md)登记用户确认的最新版设计、源内容保留核验和DSH只读预检。本轮未构建管家或创建真实DSH会话；评估材料仍未运行。仅4份明确白名单摘要上传，原始diff、安装源码和日志保留本机。
