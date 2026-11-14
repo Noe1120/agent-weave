@@ -56,14 +56,18 @@
 
 实测 Windows 11 x64，Node **24.14.0**、TypeScript **5.9.3**、.NET SDK **10.0.404** / Windows Desktop Runtime **10.0.15**。SDK 仅在 `.tools`，无系统安装；固定官方 ZIP 及 SHA512，版本见 `global.json`。
 
+新克隆需先准备Node 24.14.0与Git并放入PATH；原生测试显式使用当前Node路径，不依赖作者机器目录。以下命令验证源码，不要求已有便携包：
+
 ```powershell
+$env:TEAM_TEST_NODE = (Get-Command node -ErrorAction Stop).Source
+$env:BROKER_GIT = (Get-Command git -ErrorAction Stop).Source
 npm ci --ignore-scripts --no-audit --no-fund --registry=https://registry.npmjs.org
 npm run bootstrap:native
 npm run verify
 npm run test:native
-# 本轮不运行build:native，不覆盖既有0.3.0包；发布需独立版本与迁移验证
-npm run test:native:package
 ```
+
+旧包完整性检查仅适用于本机已有完整0.3.0包：运行npm run test:native:package。仓库不附带该包；未持有该包不是源码测试失败，也不要为凑齐此检查覆盖旧包。新发布需单独版本、迁移与打包验证。
 
 `build:native` 发布自包含 .NET 运行时，并复制固定 Node、已编译服务与锁定的生产依赖；不包含 web 资源、测试浏览器、SDK、数据库、凭据或证据。`package-manifest.json` 对全部分发文件逐项校验 SHA256；许可保留在包内。
 
@@ -85,17 +89,16 @@ npm run test:native:package
 [W05 阶段记录](plan/W05-NATIVE-DESKTOP.md) 区分服务/原生核心测试、包检查和真实桌面操作。**Computer Use 未获准读取 Team 窗口，本轮不能宣称完成了真实点击走查，也没有伪造截图。** 原生窗口可启动、子进程可回收已另行记录。
 
 ```powershell
+$env:TEAM_TEST_NODE = (Get-Command node -ErrorAction Stop).Source
+$env:BROKER_GIT = (Get-Command git -ErrorAction Stop).Source
 npm run verify
 npm run test:native
-# 本轮不运行build:native，不覆盖既有0.3.0包；发布需独立版本与迁移验证
-npm run test:native:package
-# 原有 Web 回归（独立测试浏览器，不进入原生分发包）
-$env:PLAYWRIGHT_MODULE = 'C:/Users/1/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'
-$env:UI_EVIDENCE = '.runtime/browser-evidence'
-npm run test:browser
-& 'D:\UAV\conda\python.exe' -B plan/tools/test_p0_readiness.py -v
-& 'D:\UAV\conda\python.exe' -B plan/tools/verify_design.py
+# 设计校验需使用已安装jsonschema的Python环境
+python -B plan/tools/test_p0_readiness.py -v
+python -B plan/tools/verify_design.py
 ```
+
+本机已有旧包时另跑npm run test:native:package；旧Web浏览器回归需先配置PLAYWRIGHT_MODULE为本机Playwright模块绝对路径，再运行npm run test:browser。两者不能冒充原生窗口点击验收。
 
 作者自检，不冒称独立审查。前序证据：[W04](plan/W04-LOCAL-WORKSPACE.md)、[W03](plan/W03-CONTRACT-BASELINE.md)。
 

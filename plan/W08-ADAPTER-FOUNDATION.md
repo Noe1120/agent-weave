@@ -79,7 +79,7 @@ assert.equal(evaluateCapability({ ...facts, currentFingerprint: 'b'.repeat(64) }
 
 **Files:** 新增packages/service/src/adapter-registry.ts、tests/adapter-registry.test.ts、tests/adapter-helpers.ts；修改packages/service/src/domain.ts的内部Action联合。复用store.ts/auth.ts，不放宽core/1.0。
 
-**Interfaces:** AdapterRegistry(store, now?)；register(token, value: unknown)；read(token, projectId, bindingId)；invalidate(token, projectId, bindingId, expectedRevision)。新增内部adapter_configure/adapter_read动作，与现有policy/grant/run/resource求交。
+**Interfaces:** AdapterRegistry(store, now?)；register(token, value: unknown)；read(token, projectId, bindingId)；invalidate(token, projectId, bindingId, expectedRevision, actionId)。新增内部adapter_configure/adapter_read动作，与现有policy/grant/run/resource求交。
 
 - [ ] RED：合成项目A/B、同成员公开/私密运行各有独立scope；未授权、跨项目、跨scope、撤权、过期和依赖不可见均不能登记或读派生信息。
 - [ ] RED：登记存为Resource<AdapterRegistration>，kind=adapter_binding，携带task/成员绑定所需资源依赖；重试稳定action_id与相同载荷不新增记录，不同载荷冲突。expectedRevision不匹配不覆盖既有数据。
