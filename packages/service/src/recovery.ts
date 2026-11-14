@@ -234,9 +234,14 @@ function quiescent(db: DatabaseSync) {
   demand(
     db
       .prepare(
-        "SELECT id FROM runs WHERE json_extract(data,'$.state') IS NOT 'closed' LIMIT 1",
+        "SELECT id FROM resources WHERE kind='adapter_runtime' AND (json_extract(data,'$.mode') IS NOT 'initialize_only' OR json_extract(data,'$.state') IS NOT 'closed' OR json_extract(data,'$.exit.exit_observed') IS NOT 1 OR json_extract(data,'$.exit.forced') IS NOT 0 OR json_extract(data,'$.exit.code') IS NOT 0) LIMIT 1",
       )
       .get() === undefined &&
+      db
+        .prepare(
+          "SELECT id FROM runs WHERE json_extract(data,'$.state') IS NOT 'closed' LIMIT 1",
+        )
+        .get() === undefined &&
       db
         .prepare("SELECT id FROM broker_claims WHERE state!='released' LIMIT 1")
         .get() === undefined &&

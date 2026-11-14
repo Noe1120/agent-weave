@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-15",
+  "timezone": "Asia/Tokyo",
+  "base_commit": "d9e225d16d0feca8a3fe25ac52a032759c818f7a",
+  "original_workspace_modified_files": 12,
+  "original_user_patch_byte_identical": true,
+  "original_patch_sha256": "a865c72a60e1733712e9a249a8c2e49a073dca39d42a9d8bcec87d3e3f34f717",
+  "protected_sources_unchanged": [
+    "packages/desktop",
+    "packages/contracts",
+    "packages/service/migrations",
+    "packages/runner",
+    "plan/contracts"
+  ],
+  "existing_dsh_process_count": 6,
+  "dsh_pid_creation_parent_executable_unchanged": true,
+  "portable_package_files_verified": 989,
+  "real_database_opened": false,
+  "ui_click_acceptance": "NOT_RUN",
+  "coordinator_implemented": false
+}

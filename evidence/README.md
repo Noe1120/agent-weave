@@ -15,3 +15,7 @@ W07的source-manifest、before-manifest和evidence-manifest是该阶段完成时
 ## 管家之前的W08–W10开发阶段
 
 [交付记录](pre-coordinator/2026-11-14/COMPLETION.md)及同目录6份明确白名单文件提供本轮结果；原始日志、合成数据库、Git仓库、备份包和恢复目录仅在本机保留，不进入仓库。作者自检不是独立审查；真实客户端/隔离/原生点击仍未验收。
+
+## DSH初始化生命周期
+
+[W11交付](dsh-lifecycle/COMPLETION.md)与同目录明确白名单的汇总、真实初始化走查、保护检查和作者自检记录。真实客户端只做initialize，平台状态为隔离内存夹具；不是原生窗口点击或完整Agent任务验收。配置、原始日志、DSH home和运行数据库不上网。

@@ -2,7 +2,9 @@
 
 > 2026-11-14：开发实现增量：W08仅可信进程内登记、能力原因投影、配置失效与本地detach。普通调用方不能自报VERIFIED或注入执行命令；真实发送/回答/审批/打断未开放，详见W08-ADAPTER-FOUNDATION.md。
 
-本文件优先保留用户明确点名的 Codex、Claude Desktop 和 DeepSeek Harness。能力仅有文档依据，尚无本项目的运行测试结果。03 与 05 的门槛是实施团队必须完成的验证工作。
+> 2026-11-15：W11已用本机官方DeepSeek Harness 0.2.1-rc.3完成独立ACP initialize生命周期实测，ACP协议1/bridge 0.0.1；没有session/prompt或原Desktop附着。声明能力不是可执行资格，详见[W11](W11-DSH-ACP-LIFECYCLE.md)。
+
+本文件优先保留用户明确点名的 Codex、Claude Desktop 和 DeepSeek Harness。除上述DSH初始化生命周期外，原客户端工作能力尚无本项目的真实运行验收结果。03 与 05 的门槛是实施团队必须完成的验证工作。
 
 ## 1. 接入等级与发布口径
 

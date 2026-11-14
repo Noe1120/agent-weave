@@ -1450,6 +1450,7 @@
     "W08-ADAPTER-FOUNDATION.md",
     "W09-DEPENDENCIES-KNOWLEDGE.md",
     "W10-OFFLINE-RECOVERY.md",
+    "W11-DSH-ACP-LIFECYCLE.md",
     "contracts/core.schema.json",
     "contracts/error-mapping.json",
     "contracts/resource.schema.json",

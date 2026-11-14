@@ -1,0 +1,56 @@
+{
+  "date": "2026-11-15",
+  "review_type": "AUTHOR_SELF_REVIEW",
+  "independent": false,
+  "status": "ACCEPTABLE_FOR_INITIALIZE_ONLY_SCOPE",
+  "reviewed_files": [
+    "package.json",
+    "packages/service/src/dsh-acp.ts",
+    "packages/service/src/dsh-runtime.ts",
+    "packages/service/src/recovery.ts",
+    "tests/dsh-acp.test.ts",
+    "tests/dsh-runtime.test.ts",
+    "tests/dsh-live-walkthrough.mjs",
+    "tests/fixtures/dsh-acp-fixture.mjs",
+    "tests/recovery.test.ts"
+  ],
+  "checks": [
+    "Only hardcoded initialize RPC; no general request/session/prompt API",
+    "Trusted launch configuration is pinned and cannot be supplied through runtime requests",
+    "Grant/policy/run/resource closure rechecked before and after async preparation, on publication and via background monitoring",
+    "Idempotent start/close reauthorize and never restart an old instance",
+    "Read path performs no process/network action or database write; known transport faults override stale ready",
+    "Only owned live child handles are closed; restart loses ownership and reports unknown",
+    "Forced or unobserved exits never prove execution stop or release locks",
+    "No invented native session ID or capability qualification; declarations remain disabled",
+    "Raw provider payload/stderr excluded from projections; bounded local diagnostics and visible failure",
+    "Recovery refuses active/unknown/unproven runtime state",
+    "Default test commands never launch official DSH",
+    "Original user changes and protected source/package boundaries verified"
+  ],
+  "fixed_findings": [
+    {
+      "issue": "Recovery quiescence missed new adapter_runtime rows",
+      "root_cause": "Old guard enumerated prior runtime kinds only",
+      "regression": "Three RED negative cases, closed-exit positive case, full suite GREEN"
+    },
+    {
+      "issue": "Initialization success promise could publish ready after same-chunk duplicate frame",
+      "root_cause": "Ready promise is historical and cannot encode later transport failure",
+      "regression": "Duplicate-and-hang RED, synchronous health check GREEN"
+    },
+    {
+      "issue": "Later protocol/pipe failure remained ready until process close",
+      "root_cause": "Read projection consulted persistent state without current owned transport health",
+      "regression": "Late duplicate RED and injected response-pipe EOF RED, pure in-memory projection GREEN"
+    }
+  ],
+  "remaining_risks": [
+    "Author review is not independent security review",
+    "Installation file checks are not a defense against malicious same-identity TOCTOU replacement",
+    "No SID/ACL/network enforced isolation",
+    "No real-session or product-UI acceptance",
+    "Conservative recovery rejects pre-spawn failure rows without exit proof"
+  ],
+  "real_client_claim": "Actual official installed ACP initialize/EOF only, with synthetic platform state; no claim of model tasks or desktop attachment"
+}

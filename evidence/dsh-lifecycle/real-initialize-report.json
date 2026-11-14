@@ -1,0 +1,58 @@
+{
+  "status": "REAL_DSH_INITIALIZE_LIFECYCLE_PASS",
+  "observed_at": "2026-11-14T16:09:51.274Z",
+  "platform_state": "synthetic isolated in-memory fixture",
+  "client_version": "0.2.1-rc.3",
+  "configuration_fingerprint": "a45ba57f484f4245cd029afc7b3e997a0a86c6f24d61b3b23a9569e01de36732",
+  "steps": [
+    {
+      "step": "initialize",
+      "state": "ready",
+      "protocol": 1,
+      "bridge_version": "0.0.1",
+      "advertised": {
+        "mcp_http": true,
+        "image": false,
+        "audio": false,
+        "embedded_context": false,
+        "session_list": true,
+        "session_resume": true,
+        "session_close": true
+      }
+    },
+    {
+      "step": "read_progress",
+      "reads": 1000,
+      "database_writes": 0
+    },
+    {
+      "step": "close",
+      "state": "closed",
+      "exit": {
+        "code": 0,
+        "signal": null,
+        "exit_observed": true,
+        "forced": false,
+        "fault": null,
+        "stderr_bytes": 0,
+        "initialize_requests": 1,
+        "initialize_responses": 1
+      }
+    },
+    {
+      "step": "old_start_retry",
+      "state": "closed",
+      "restarted": false
+    },
+    {
+      "step": "revoke",
+      "read": "denied"
+    }
+  ],
+  "model_requests": 0,
+  "sessions_created": 0,
+  "existing_desktop_attached": false,
+  "client_qualification": "UNVERIFIED",
+  "windows_isolation": "UNVERIFIED",
+  "coordinator_implemented": false
+}

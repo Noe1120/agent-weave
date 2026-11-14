@@ -95,3 +95,12 @@ qa-runtime/
 !/evidence/pre-coordinator/2026-11-14/protection-check.json
 !/evidence/pre-coordinator/2026-11-14/adapter-walkthrough-report.json
 !/evidence/pre-coordinator/2026-11-14/backend-walkthrough-report.json
+
+# Reviewed DSH initialize-only summaries; local profiles/config/diagnostics stay ignored.
+!/evidence/dsh-lifecycle/
+/evidence/dsh-lifecycle/*
+!/evidence/dsh-lifecycle/COMPLETION.md
+!/evidence/dsh-lifecycle/verification-summary.json
+!/evidence/dsh-lifecycle/author-self-review.json
+!/evidence/dsh-lifecycle/protection-check.json
+!/evidence/dsh-lifecycle/real-initialize-report.json

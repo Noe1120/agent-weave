@@ -1,0 +1,100 @@
+{
+  "date": "2026-11-15",
+  "timezone": "Asia/Tokyo",
+  "scope": "DSH initialize-only lifecycle; not full native client execution",
+  "node_full": {
+    "command": "npm run verify",
+    "status": "PASS",
+    "tests": 317,
+    "passed": 317,
+    "failed": 0,
+    "skipped": 0
+  },
+  "dsh_tests_in_full_suite": 49,
+  "added_recovery_tests": 4,
+  "native": {
+    "logic_groups": 14,
+    "passed": 14,
+    "static_wpf_checks": 1,
+    "click_acceptance": "NOT_RUN"
+  },
+  "portable_package": {
+    "status": "PASS",
+    "files": 989,
+    "rewritten": false
+  },
+  "compiled_synthetic_walkthroughs": {
+    "adapter": "PASS",
+    "dependencies_knowledge_offline_recovery": "PASS",
+    "model_calls": 0
+  },
+  "real_dsh": {
+    "status": "REAL_DSH_INITIALIZE_LIFECYCLE_PASS",
+    "client_version": "0.2.1-rc.3",
+    "observed_at_utc": "2026-11-14T16:09:51.274Z",
+    "observed_local_date": "2026-11-15",
+    "initialize_requests": 1,
+    "initialize_responses": 1,
+    "reads": 1000,
+    "database_writes_from_reads": 0,
+    "exit_code": 0,
+    "forced": false,
+    "existing_desktop_processes_unchanged": 6,
+    "platform_state": "synthetic isolated in-memory fixture",
+    "session_requests": 0,
+    "prompt_requests": 0,
+    "existing_desktop_attached": false
+  },
+  "design": {
+    "files": 49,
+    "manifest_entries": 48,
+    "status": "PASS",
+    "p0_tests_passed": 12,
+    "product_cases": 250,
+    "product_tests": "NOT_RUN"
+  },
+  "source_sha256": {
+    "package.json": "05cbfd3ee157dae84f4eef55565a46a63680d321e3d71d5fa625bea2e1e86d53",
+    "packages/service/src/dsh-acp.ts": "7f14a7339e5c5adafef46f5895b4bac5ec6b406c4cb0465e02592c3d957ff41b",
+    "packages/service/src/dsh-runtime.ts": "5ec6fdd67764a8633166c4a80d3af113240c57d2f09e618af00a0beffc1aebd8",
+    "packages/service/src/recovery.ts": "ef8d6b7f9ce6707a4b6d22fc1bca25fa6f70e4c72f6d5ff523d45b25055860f3",
+    "tests/dsh-acp.test.ts": "a3f4e95aceb044fdbe73e006712e064b642aa8347fd57c82bb99369a1824dcb0",
+    "tests/dsh-runtime.test.ts": "2dfb58769a9b7468d46c4e3fd14fa809e58f137dfeef1911101f52f56ff1b634",
+    "tests/dsh-live-walkthrough.mjs": "a777357f50d4f0d0150092b349d2073cd98a61805aa570f38574b3fec70a14bc",
+    "tests/fixtures/dsh-acp-fixture.mjs": "4835c85b06d0d7f58ff38e014663a7cc1be72b12bae64f8db08cd2685967d3cc",
+    "tests/recovery.test.ts": "81d22a9a7ad59dcbc69f7a697e3205489bf9c7c4be8321019da7b65c44a4341f"
+  },
+  "local_log_sha256": {
+    "verify-closeout.log": "e9994bbc41a0db519991e987fb9fdedb0a7e7be822a4730e618dfd0dd13d2b3d",
+    "native-final.log": "b03a9bccea1526b5eedf6c3b9a16a44c9ee0d3008c1c43922cef50da8e9f06fe",
+    "package-final.log": "77c06975809839528ad44681a225adfd36628db49898b4eac30815809a5f75dd",
+    "adapter-walkthrough.log": "7ec38dd5657965c31884df14399c2186b4bfd17829a9ec76d62d9b7034e68450",
+    "backend-walkthrough.log": "52ecdcd811cc3a2ee131cc67198346af41a9a1797922e72f7d3664a0d96aabb3",
+    "design-refresh.log": "3219be4321d0c6e1e79b026696b20f4a3de86a93cc4f61cca8d49714245d2e5d",
+    "p0.log": "37103baa268d6e713ebd6487944ce8447448029a7bd9124d797d4d5afac47139",
+    "ready-race-red.log": "8e40ebcc35576dbdc9819c7c078f60a8b5f2c11b3f6f2652c7c0184f63b804c7",
+    "ready-read-red.log": "94bdc6b90d5e755fe1337e66ac968f2a22b0aeea40e508cd4576871aa9d3f5eb",
+    "pipe-red.log": "621fefad3b4a148ffb04daf25d937654b1cce88562a6509cb35ab2df8dfbbc6c",
+    "recovery-red.log": "703bc96741d9d8150cdccfb7f4c53273c250cd08d711e03b550f13c063cb2a00",
+    "design-closeout.log": "3219be4321d0c6e1e79b026696b20f4a3de86a93cc4f61cca8d49714245d2e5d",
+    "design-readonly.log": "3219be4321d0c6e1e79b026696b20f4a3de86a93cc4f61cca8d49714245d2e5d",
+    "p0-closeout.log": "fc1ccb0f7e810d407b10e6d8a99b95a0b57f8f0d2876b1a2940bdd4f3612bf0a"
+  },
+  "qualification": "UNVERIFIED",
+  "windows_isolation": "UNVERIFIED",
+  "contract_freeze": "NOT_FROZEN",
+  "coordinator_implemented": false,
+  "independent_review": false,
+  "limitations": [
+    "No main/HTTP/MCP/WPF wiring",
+    "No session or model authorization",
+    "No OS identity/ACL/firewall changes",
+    "No production online/offsite recovery or signed installer/updater",
+    "Missing exit proof conservatively blocks offline recovery, including pre-spawn failures",
+    "Original workspace coordinator design edits remain outside this branch"
+  ],
+  "warnings": [
+    "Node SQLite experimental warning remains visible"
+  ],
+  "publication": "Reviewed summaries only; config, raw logs, profiles, databases, caches and private history excluded"
+}

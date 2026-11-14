@@ -8,6 +8,12 @@
 
 当前已继续完成[W08能力与适配基础](plan/W08-ADAPTER-FOUNDATION.md)、[W09依赖与授权资料](plan/W09-DEPENDENCIES-KNOWLEDGE.md)、[W10本机离线灾备基础](plan/W10-OFFLINE-RECOVERY.md)，停在管家Agent之前。后续工作直接沿用[AGENTS.md](AGENTS.md)，不重复确认既有要求。
 
+## DSH 接入增量 · 2026-11-15
+
+已实现[W11初始化生命周期](plan/W11-DSH-ACP-LIFECYCLE.md)：固定官方DeepSeek Harness安装，独立空home，ACP initialize、能力观测、授权只读状态和所属进程关闭。编译后控制器已用本机0.2.1-rc.3完成真实初始化→1000次读取（零DB写入）→正常退出；没有会话、prompt或模型调用，也没有附着已有Desktop聊天。
+
+这是可信进程内后端模块，**不是已接通真实任务的完整Agent，也未接入UI/HTTP/MCP**。原生界面和旧包不变，资格仍UNVERIFIED。默认验证只跑合成夹具；真实走查必须显式授权并传入固定配置。详见[阶段交付](evidence/dsh-lifecycle/COMPLETION.md)。
+
 ## 打开本机已有便携包
 
 双击 **`artifacts/Team-0.3.0-win-x64/Team.exe`**。整个目录需放在一起；这是自包含 Windows x64 便携开发包，不要求安装 Node、.NET、npm 或浏览器，不需要输入地址或配对码。未签名，不是正式安装器；不要关闭系统防护。

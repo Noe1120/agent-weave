@@ -327,3 +327,57 @@ test("Broker committed metadata absent from the working index is still tracked",
     f.dispose();
   }
 });
+
+for (const state of ["ready", "unknown", "closed"])
+  test(
+    "unreconciled ACP runtime blocks an offline recovery cut: " + state,
+    async () => {
+      const f = setup();
+      try {
+        f.s.putResource({
+          id: "dsh-test-runtime",
+          project_id: f.ids.project,
+          kind: "adapter_runtime",
+          revision: "1",
+          domain: f.g.domain,
+          acl: [f.g.id],
+          dependencies: [],
+          data: { mode: "initialize_only", state, exit: null },
+        });
+        await assert.rejects(
+          createRecovery(f.options),
+          /RECOVERY_NOT_QUIESCENT/,
+        );
+        assert.equal(
+          existsSync(join(f.options.destination, "manifest.json")),
+          false,
+        );
+      } finally {
+        f.dispose();
+      }
+    },
+  );
+
+test("normally closed initialize-only ACP resource can be backed up without resuming it", async () => {
+  const f = setup();
+  try {
+    f.s.putResource({
+      id: "dsh-closed-runtime",
+      project_id: f.ids.project,
+      kind: "adapter_runtime",
+      revision: "1",
+      domain: f.g.domain,
+      acl: [f.g.id],
+      dependencies: [],
+      data: {
+        mode: "initialize_only",
+        state: "closed",
+        exit: { exit_observed: true, forced: false, code: 0 },
+      },
+    });
+    const result = await createRecovery(f.options);
+    assert.equal(result.status, "COMPLETE");
+  } finally {
+    f.dispose();
+  }
+});
