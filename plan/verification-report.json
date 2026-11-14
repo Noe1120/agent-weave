@@ -1,0 +1,1675 @@
+{
+  "date": "2026-11-14",
+  "timezone": "Asia/Tokyo",
+  "design_version": "1.6",
+  "coordinator_design_version": "1.2",
+  "scope": "Offline document/schema checks only, not product/agent/model/security/performance/user tests.",
+  "document_checks_status": "PASS",
+  "requirement_count": 33,
+  "platform_acceptance_case_count": 190,
+  "coordinator_acceptance_case_count": 60,
+  "acceptance_case_count": 250,
+  "product_acceptance_status": "NOT_RUN",
+  "not_run_product_acceptance_cases": [
+    "AT-01",
+    "AT-02",
+    "AT-03",
+    "AT-04",
+    "AT-05",
+    "AT-06",
+    "AT-07",
+    "AT-08",
+    "AT-09",
+    "AT-10",
+    "AT-11",
+    "AT-12",
+    "AT-13",
+    "AT-14",
+    "AT-15",
+    "AT-16",
+    "AT-17",
+    "AT-18",
+    "AT-19",
+    "AT-20",
+    "AT-21",
+    "AT-22",
+    "AT-23",
+    "AT-24",
+    "AT-25",
+    "AT-26",
+    "AT-27",
+    "AT-28",
+    "AT-29",
+    "AT-30",
+    "AT-31",
+    "AT-32",
+    "AT-33",
+    "AT-34",
+    "AT-35",
+    "AT-36",
+    "AT-37",
+    "AT-38",
+    "AT-39",
+    "AT-40",
+    "AT-41",
+    "AT-42",
+    "AT-43",
+    "AT-44",
+    "AT-45",
+    "AT-46",
+    "AT-47",
+    "AT-48",
+    "AT-49",
+    "AT-50",
+    "AT-51",
+    "AT-52",
+    "AT-53",
+    "AT-54",
+    "AT-55",
+    "AT-56",
+    "AT-57",
+    "AT-58",
+    "AT-59",
+    "AT-60",
+    "AT-61",
+    "AT-62",
+    "AT-63",
+    "AT-64",
+    "AT-65",
+    "AT-66",
+    "AT-67",
+    "AT-68",
+    "AT-69",
+    "AT-70",
+    "AT-71",
+    "AT-72",
+    "AT-73",
+    "AT-74",
+    "AT-75",
+    "AT-76",
+    "AT-77",
+    "AT-78",
+    "AT-79",
+    "AT-80",
+    "AT-81",
+    "AT-82",
+    "AT-83",
+    "AT-84",
+    "AT-85",
+    "AT-86",
+    "AT-87",
+    "AT-88",
+    "AT-89",
+    "AT-90",
+    "AT-91",
+    "AT-92",
+    "AT-93",
+    "AT-94",
+    "AT-95",
+    "AT-96",
+    "AT-97",
+    "AT-98",
+    "AT-99",
+    "AT-100",
+    "AT-101",
+    "AT-102",
+    "AT-103",
+    "AT-104",
+    "AT-105",
+    "AT-106",
+    "AT-107",
+    "AT-108",
+    "AT-109",
+    "AT-110",
+    "AT-111",
+    "AT-112",
+    "AT-113",
+    "AT-114",
+    "AT-115",
+    "AT-116",
+    "AT-117",
+    "AT-118",
+    "AT-119",
+    "AT-120",
+    "AT-121",
+    "AT-122",
+    "AT-123",
+    "AT-124",
+    "AT-125",
+    "AT-126",
+    "AT-127",
+    "AT-128",
+    "AT-129",
+    "AT-130",
+    "AT-131",
+    "AT-132",
+    "AT-133",
+    "AT-134",
+    "AT-135",
+    "AT-136",
+    "AT-137",
+    "AT-138",
+    "AT-139",
+    "AT-140",
+    "AT-141",
+    "AT-142",
+    "AT-143",
+    "AT-144",
+    "AT-145",
+    "AT-146",
+    "AT-147",
+    "AT-148",
+    "AT-149",
+    "AT-150",
+    "AT-151",
+    "AT-152",
+    "AT-153",
+    "AT-154",
+    "AT-155",
+    "AT-156",
+    "AT-157",
+    "AT-158",
+    "AT-159",
+    "AT-160",
+    "AT-161",
+    "AT-162",
+    "AT-163",
+    "AT-164",
+    "AT-165",
+    "AT-166",
+    "AT-167",
+    "AT-168",
+    "AT-169",
+    "AT-170",
+    "AT-171",
+    "AT-172",
+    "AT-173",
+    "AT-174",
+    "AT-175",
+    "AT-176",
+    "AT-177",
+    "AT-178",
+    "AT-179",
+    "AT-180",
+    "AT-181",
+    "AT-182",
+    "AT-183",
+    "AT-184",
+    "AT-185",
+    "AT-186",
+    "AT-187",
+    "AT-188",
+    "AT-189",
+    "AT-190",
+    "CA-01",
+    "CA-02",
+    "CA-03",
+    "CA-04",
+    "CA-05",
+    "CA-06",
+    "CA-07",
+    "CA-08",
+    "CA-09",
+    "CA-10",
+    "CA-11",
+    "CA-12",
+    "CA-13",
+    "CA-14",
+    "CA-15",
+    "CA-16",
+    "CA-17",
+    "CA-18",
+    "CA-19",
+    "CA-20",
+    "CA-21",
+    "CA-22",
+    "CA-23",
+    "CA-24",
+    "CA-25",
+    "CA-26",
+    "CA-27",
+    "CA-28",
+    "CA-29",
+    "CA-30",
+    "CA-31",
+    "CA-32",
+    "CA-33",
+    "CA-34",
+    "CA-35",
+    "CA-36",
+    "CA-37",
+    "CA-38",
+    "CA-39",
+    "CA-40",
+    "CA-41",
+    "CA-42",
+    "CA-43",
+    "CA-44",
+    "CA-45",
+    "CA-46",
+    "CA-47",
+    "CA-48",
+    "CA-49",
+    "CA-50",
+    "CA-51",
+    "CA-52",
+    "CA-53",
+    "CA-54",
+    "CA-55",
+    "CA-56",
+    "CA-57",
+    "CA-58",
+    "CA-59",
+    "CA-60"
+  ],
+  "requirement_to_acceptance": {
+    "FR-01": [
+      "AT-01",
+      "AT-02",
+      "AT-48",
+      "AT-61"
+    ],
+    "FR-02": [
+      "AT-03",
+      "AT-48",
+      "AT-142"
+    ],
+    "FR-03": [
+      "AT-04",
+      "AT-05",
+      "AT-06",
+      "AT-47",
+      "AT-48"
+    ],
+    "FR-04": [
+      "AT-07",
+      "AT-08",
+      "AT-48",
+      "AT-61",
+      "AT-136",
+      "AT-138",
+      "AT-170",
+      "AT-186",
+      "CA-25",
+      "CA-28",
+      "CA-58"
+    ],
+    "FR-05": [
+      "AT-09",
+      "AT-10",
+      "AT-48",
+      "AT-78",
+      "AT-88",
+      "AT-89",
+      "AT-98",
+      "AT-109",
+      "AT-110",
+      "AT-131",
+      "AT-163",
+      "AT-167",
+      "AT-175",
+      "AT-179",
+      "AT-183",
+      "AT-190",
+      "CA-10",
+      "CA-11",
+      "CA-47",
+      "CA-50",
+      "CA-53",
+      "CA-55"
+    ],
+    "FR-06": [
+      "AT-11",
+      "AT-12",
+      "AT-13",
+      "AT-48",
+      "AT-99",
+      "AT-110"
+    ],
+    "FR-07": [
+      "AT-14",
+      "AT-15",
+      "AT-16",
+      "AT-48",
+      "AT-64",
+      "AT-85",
+      "AT-90",
+      "AT-94",
+      "AT-96",
+      "AT-107",
+      "AT-129",
+      "AT-177"
+    ],
+    "FR-08": [
+      "AT-17",
+      "AT-18",
+      "AT-19",
+      "AT-20",
+      "AT-48",
+      "AT-87",
+      "AT-89",
+      "AT-91",
+      "AT-110",
+      "AT-111",
+      "AT-112",
+      "AT-113",
+      "AT-114",
+      "AT-115",
+      "AT-116",
+      "AT-117",
+      "AT-118",
+      "AT-119",
+      "AT-125",
+      "AT-140",
+      "AT-143",
+      "AT-147",
+      "AT-175",
+      "AT-183",
+      "CA-53",
+      "CA-55"
+    ],
+    "FR-09": [
+      "AT-06",
+      "AT-13",
+      "AT-21",
+      "AT-22",
+      "AT-23",
+      "AT-48",
+      "AT-78",
+      "AT-80",
+      "AT-84",
+      "AT-100",
+      "AT-101",
+      "AT-106",
+      "AT-131",
+      "AT-132",
+      "AT-134",
+      "AT-135",
+      "AT-148",
+      "AT-150",
+      "AT-151",
+      "AT-157",
+      "AT-164",
+      "AT-167",
+      "AT-171",
+      "AT-176",
+      "AT-177",
+      "AT-178",
+      "AT-185",
+      "AT-188",
+      "CA-15",
+      "CA-29",
+      "CA-51",
+      "CA-54",
+      "CA-60"
+    ],
+    "FR-10": [
+      "AT-24",
+      "AT-25",
+      "AT-26",
+      "AT-27",
+      "AT-28",
+      "AT-29",
+      "AT-47",
+      "AT-48",
+      "AT-66",
+      "AT-71",
+      "AT-79",
+      "AT-80",
+      "AT-93",
+      "AT-95",
+      "AT-104",
+      "AT-109",
+      "AT-130",
+      "AT-153",
+      "AT-154",
+      "AT-160",
+      "AT-168",
+      "AT-169",
+      "AT-176",
+      "AT-177",
+      "AT-179",
+      "AT-180",
+      "AT-181",
+      "AT-188",
+      "AT-190",
+      "CA-12",
+      "CA-13",
+      "CA-14",
+      "CA-18",
+      "CA-37",
+      "CA-48",
+      "CA-54",
+      "CA-56",
+      "CA-60"
+    ],
+    "FR-11": [
+      "AT-30",
+      "AT-31",
+      "AT-32",
+      "AT-33",
+      "AT-48",
+      "AT-62",
+      "AT-63",
+      "AT-70",
+      "AT-83",
+      "AT-86",
+      "AT-102",
+      "AT-110",
+      "AT-139",
+      "AT-146",
+      "AT-149",
+      "AT-159",
+      "AT-161",
+      "AT-173",
+      "AT-174"
+    ],
+    "FR-12": [
+      "AT-34",
+      "AT-35",
+      "AT-36",
+      "AT-48",
+      "AT-93",
+      "AT-94",
+      "AT-95",
+      "AT-96",
+      "AT-97",
+      "AT-109",
+      "AT-152",
+      "AT-153",
+      "AT-155",
+      "AT-172",
+      "CA-38"
+    ],
+    "FR-13": [
+      "AT-37",
+      "AT-38",
+      "AT-47",
+      "AT-48",
+      "AT-57",
+      "AT-103",
+      "AT-133",
+      "AT-178",
+      "AT-183",
+      "AT-184",
+      "AT-188",
+      "CA-55"
+    ],
+    "FR-14": [
+      "AT-02",
+      "AT-16",
+      "AT-39",
+      "AT-40",
+      "AT-41",
+      "AT-42",
+      "AT-48",
+      "AT-52",
+      "AT-61",
+      "AT-68",
+      "AT-81",
+      "AT-82",
+      "AT-83",
+      "AT-84",
+      "AT-97",
+      "AT-100",
+      "AT-105",
+      "AT-106",
+      "AT-108",
+      "AT-109",
+      "AT-124",
+      "AT-148",
+      "AT-155",
+      "AT-156",
+      "AT-158",
+      "AT-160",
+      "AT-161",
+      "AT-165",
+      "AT-170",
+      "AT-173",
+      "AT-179",
+      "AT-182",
+      "CA-03",
+      "CA-06",
+      "CA-07",
+      "CA-08",
+      "CA-09",
+      "CA-29",
+      "CA-30",
+      "CA-57"
+    ],
+    "FR-15": [
+      "AT-43",
+      "AT-44",
+      "AT-45",
+      "AT-48",
+      "AT-174",
+      "AT-190"
+    ],
+    "FR-16": [
+      "AT-08",
+      "AT-19",
+      "AT-46",
+      "AT-48",
+      "AT-72",
+      "AT-88",
+      "AT-89",
+      "AT-90",
+      "AT-91",
+      "AT-107",
+      "AT-110",
+      "AT-111",
+      "AT-112",
+      "AT-115",
+      "AT-120",
+      "AT-128",
+      "AT-136",
+      "AT-137",
+      "AT-138",
+      "AT-139",
+      "AT-140",
+      "AT-170",
+      "AT-186",
+      "CA-22",
+      "CA-26",
+      "CA-27",
+      "CA-58"
+    ],
+    "FR-17": [
+      "AT-05",
+      "AT-48",
+      "AT-49",
+      "AT-50",
+      "AT-51",
+      "AT-52",
+      "AT-53",
+      "AT-58",
+      "AT-59",
+      "AT-60",
+      "AT-74",
+      "AT-77",
+      "AT-81",
+      "AT-82",
+      "AT-83",
+      "AT-97",
+      "AT-105",
+      "AT-106",
+      "AT-108",
+      "AT-127",
+      "AT-138",
+      "AT-145",
+      "AT-156",
+      "AT-165",
+      "AT-166",
+      "AT-182",
+      "AT-189",
+      "CA-06",
+      "CA-07",
+      "CA-24",
+      "CA-43",
+      "CA-44",
+      "CA-45",
+      "CA-57",
+      "CA-60"
+    ],
+    "FR-18": [
+      "AT-48",
+      "AT-54",
+      "AT-55",
+      "AT-56",
+      "AT-57",
+      "AT-58",
+      "AT-60",
+      "AT-63",
+      "AT-75",
+      "AT-77",
+      "AT-98",
+      "AT-99",
+      "AT-100",
+      "AT-101",
+      "AT-102",
+      "AT-103",
+      "AT-104",
+      "AT-108",
+      "AT-162",
+      "AT-180",
+      "AT-181",
+      "AT-182",
+      "AT-190",
+      "CA-04",
+      "CA-05",
+      "CA-17",
+      "CA-19",
+      "CA-23",
+      "CA-56",
+      "CA-57"
+    ],
+    "FR-19": [
+      "AT-48",
+      "AT-64",
+      "AT-65",
+      "AT-66",
+      "AT-73",
+      "AT-92",
+      "AT-93",
+      "AT-109",
+      "AT-177"
+    ],
+    "FR-20": [
+      "AT-27",
+      "AT-48",
+      "AT-66",
+      "AT-67",
+      "AT-68",
+      "AT-69",
+      "AT-70",
+      "AT-71",
+      "AT-72",
+      "AT-73",
+      "AT-74",
+      "AT-75",
+      "AT-79",
+      "AT-80",
+      "AT-84",
+      "AT-85",
+      "AT-86",
+      "AT-87",
+      "AT-88",
+      "AT-90",
+      "AT-92",
+      "AT-107",
+      "AT-109",
+      "AT-110",
+      "AT-126",
+      "AT-128",
+      "AT-129",
+      "AT-130",
+      "AT-169",
+      "AT-173",
+      "AT-175",
+      "AT-177",
+      "AT-184",
+      "AT-185",
+      "CA-49",
+      "CA-53"
+    ],
+    "FR-21": [
+      "AT-48",
+      "AT-76",
+      "AT-77",
+      "AT-78",
+      "AT-127",
+      "AT-134",
+      "AT-144",
+      "AT-162",
+      "AT-163",
+      "AT-186",
+      "CA-04",
+      "CA-05",
+      "CA-06",
+      "CA-40",
+      "CA-58"
+    ],
+    "FR-22": [
+      "AT-126",
+      "AT-127",
+      "AT-128",
+      "AT-129",
+      "AT-130",
+      "AT-172",
+      "AT-189",
+      "CA-20",
+      "CA-21",
+      "CA-22",
+      "CA-23",
+      "CA-24",
+      "CA-52",
+      "CA-60"
+    ],
+    "FR-23": [
+      "AT-115",
+      "AT-116",
+      "AT-117",
+      "AT-118",
+      "AT-119",
+      "AT-120",
+      "AT-137",
+      "AT-183",
+      "AT-186",
+      "AT-187",
+      "CA-36",
+      "CA-55",
+      "CA-58",
+      "CA-59"
+    ],
+    "FR-24": [
+      "AT-121",
+      "AT-122",
+      "AT-123",
+      "AT-124",
+      "AT-125",
+      "AT-150",
+      "AT-154",
+      "AT-184"
+    ],
+    "FR-25": [
+      "AT-131",
+      "AT-132",
+      "AT-133",
+      "AT-134",
+      "AT-135",
+      "AT-150",
+      "AT-171",
+      "AT-178",
+      "CA-33",
+      "CA-34",
+      "CA-51",
+      "CA-54"
+    ],
+    "FR-26": [
+      "AT-113",
+      "AT-141",
+      "AT-142",
+      "AT-143",
+      "AT-144",
+      "AT-145",
+      "AT-186",
+      "AT-188",
+      "AT-189",
+      "CA-58",
+      "CA-60"
+    ],
+    "FR-27": [
+      "AT-146",
+      "AT-147",
+      "AT-148",
+      "AT-149",
+      "AT-150",
+      "AT-172",
+      "AT-174",
+      "AT-187",
+      "CA-39",
+      "CA-59"
+    ],
+    "FR-28": [
+      "AT-123",
+      "AT-151",
+      "AT-152",
+      "AT-153",
+      "AT-154",
+      "AT-155",
+      "AT-184",
+      "AT-185"
+    ],
+    "FR-29": [
+      "AT-156",
+      "AT-157",
+      "AT-158",
+      "AT-159",
+      "AT-160",
+      "AT-166",
+      "AT-173",
+      "AT-189",
+      "CA-32",
+      "CA-46",
+      "CA-60"
+    ],
+    "FR-30": [
+      "AT-161",
+      "AT-162",
+      "AT-163",
+      "AT-171",
+      "AT-172",
+      "AT-176",
+      "AT-180",
+      "AT-181",
+      "AT-182",
+      "AT-186",
+      "AT-187",
+      "AT-190",
+      "CA-01",
+      "CA-02",
+      "CA-03",
+      "CA-04",
+      "CA-05",
+      "CA-09",
+      "CA-10",
+      "CA-13",
+      "CA-14",
+      "CA-17",
+      "CA-19",
+      "CA-33",
+      "CA-34",
+      "CA-35",
+      "CA-36",
+      "CA-37",
+      "CA-38",
+      "CA-39",
+      "CA-40",
+      "CA-52",
+      "CA-54",
+      "CA-56",
+      "CA-57",
+      "CA-58",
+      "CA-59"
+    ],
+    "FR-31": [
+      "AT-163",
+      "AT-164",
+      "AT-165",
+      "AT-166",
+      "AT-171",
+      "CA-11",
+      "CA-15",
+      "CA-41",
+      "CA-42",
+      "CA-43",
+      "CA-44",
+      "CA-45",
+      "CA-46",
+      "CA-51"
+    ],
+    "FR-32": [
+      "AT-167",
+      "AT-168",
+      "AT-169",
+      "AT-175",
+      "AT-176",
+      "AT-179",
+      "AT-181",
+      "AT-183",
+      "AT-190",
+      "CA-11",
+      "CA-12",
+      "CA-13",
+      "CA-15",
+      "CA-16",
+      "CA-18",
+      "CA-47",
+      "CA-48",
+      "CA-49",
+      "CA-50",
+      "CA-53",
+      "CA-54",
+      "CA-55",
+      "CA-56"
+    ],
+    "FR-33": [
+      "AT-170",
+      "AT-172",
+      "AT-186",
+      "AT-187",
+      "CA-07",
+      "CA-08",
+      "CA-25",
+      "CA-26",
+      "CA-27",
+      "CA-28",
+      "CA-29",
+      "CA-30",
+      "CA-31",
+      "CA-32",
+      "CA-38",
+      "CA-39",
+      "CA-58",
+      "CA-59"
+    ]
+  },
+  "coordinator_to_platform_acceptance": {
+    "CA-01": [
+      "AT-161"
+    ],
+    "CA-02": [
+      "AT-161"
+    ],
+    "CA-03": [
+      "AT-156",
+      "AT-161"
+    ],
+    "CA-04": [
+      "AT-162"
+    ],
+    "CA-05": [
+      "AT-162"
+    ],
+    "CA-06": [
+      "AT-77"
+    ],
+    "CA-07": [
+      "AT-81",
+      "AT-82"
+    ],
+    "CA-08": [
+      "AT-84"
+    ],
+    "CA-09": [
+      "AT-83"
+    ],
+    "CA-10": [
+      "AT-163"
+    ],
+    "CA-11": [
+      "AT-164",
+      "AT-167"
+    ],
+    "CA-12": [
+      "AT-168"
+    ],
+    "CA-13": [
+      "AT-168"
+    ],
+    "CA-14": [
+      "AT-169"
+    ],
+    "CA-15": [
+      "AT-164",
+      "AT-167"
+    ],
+    "CA-16": [
+      "AT-167"
+    ],
+    "CA-17": [
+      "AT-162"
+    ],
+    "CA-18": [
+      "AT-169"
+    ],
+    "CA-19": [
+      "AT-98"
+    ],
+    "CA-20": [
+      "AT-126"
+    ],
+    "CA-21": [
+      "AT-127"
+    ],
+    "CA-22": [
+      "AT-128"
+    ],
+    "CA-23": [
+      "AT-128"
+    ],
+    "CA-24": [
+      "AT-127"
+    ],
+    "CA-25": [
+      "AT-170"
+    ],
+    "CA-26": [
+      "AT-136"
+    ],
+    "CA-27": [
+      "AT-170"
+    ],
+    "CA-28": [
+      "AT-170"
+    ],
+    "CA-29": [
+      "AT-170"
+    ],
+    "CA-30": [
+      "AT-170"
+    ],
+    "CA-31": [
+      "AT-170"
+    ],
+    "CA-32": [
+      "AT-166"
+    ],
+    "CA-33": [
+      "AT-131"
+    ],
+    "CA-34": [
+      "AT-134"
+    ],
+    "CA-35": [
+      "AT-161"
+    ],
+    "CA-36": [
+      "AT-117"
+    ],
+    "CA-37": [
+      "AT-169"
+    ],
+    "CA-38": [
+      "AT-172"
+    ],
+    "CA-39": [
+      "AT-172"
+    ],
+    "CA-40": [
+      "AT-162"
+    ],
+    "CA-41": [
+      "AT-163"
+    ],
+    "CA-42": [
+      "AT-164"
+    ],
+    "CA-43": [
+      "AT-165"
+    ],
+    "CA-44": [
+      "AT-165"
+    ],
+    "CA-45": [
+      "AT-166"
+    ],
+    "CA-46": [
+      "AT-166"
+    ],
+    "CA-47": [
+      "AT-167"
+    ],
+    "CA-48": [
+      "AT-168"
+    ],
+    "CA-49": [
+      "AT-169"
+    ],
+    "CA-50": [
+      "AT-167"
+    ],
+    "CA-51": [
+      "AT-171"
+    ],
+    "CA-52": [
+      "AT-172"
+    ],
+    "CA-53": [
+      "AT-175",
+      "AT-179"
+    ],
+    "CA-54": [
+      "AT-176",
+      "AT-178",
+      "AT-179"
+    ],
+    "CA-55": [
+      "AT-177",
+      "AT-183"
+    ],
+    "CA-56": [
+      "AT-180",
+      "AT-181"
+    ],
+    "CA-57": [
+      "AT-181",
+      "AT-182"
+    ],
+    "CA-58": [
+      "AT-186"
+    ],
+    "CA-59": [
+      "AT-187"
+    ],
+    "CA-60": [
+      "AT-188",
+      "AT-189"
+    ]
+  },
+  "defined_evidence_sources": [
+    "E01",
+    "E02",
+    "E03",
+    "E04",
+    "E05",
+    "E06",
+    "E07",
+    "E08",
+    "E09",
+    "E10",
+    "E11",
+    "E12",
+    "E13",
+    "E14",
+    "E15",
+    "E16",
+    "E17",
+    "E18",
+    "E19",
+    "E20",
+    "E21",
+    "E22",
+    "E23",
+    "E24",
+    "E25",
+    "E26",
+    "E27",
+    "E28",
+    "E29",
+    "E30",
+    "E31",
+    "E32",
+    "E33",
+    "E34",
+    "E35",
+    "P01",
+    "P02",
+    "P03",
+    "P04",
+    "P05"
+  ],
+  "sources_reread_this_revision": [
+    "E33"
+  ],
+  "layout_revision": "plan-layout-1",
+  "sources_read_during_directory_reorganization": [],
+  "required_clause_checks": [
+    {
+      "name": "private execution intersection",
+      "file": "02-data-contracts.md",
+      "passed": true
+    },
+    {
+      "name": "logical single writer",
+      "file": "02-data-contracts.md",
+      "passed": true
+    },
+    {
+      "name": "unknown writer quarantine",
+      "file": "02-data-contracts.md",
+      "passed": true
+    },
+    {
+      "name": "disclosure separate",
+      "file": "11-coordinator-agent.md",
+      "passed": true
+    },
+    {
+      "name": "joint configuration",
+      "file": "12-protocol-closure-and-validation.md",
+      "passed": true
+    },
+    {
+      "name": "partial execution",
+      "file": "12-protocol-closure-and-validation.md",
+      "passed": true
+    },
+    {
+      "name": "no automatic rollback",
+      "file": "12-protocol-closure-and-validation.md",
+      "passed": true
+    },
+    {
+      "name": "atomic wait register",
+      "file": "12-protocol-closure-and-validation.md",
+      "passed": true
+    },
+    {
+      "name": "continuation intent",
+      "file": "12-protocol-closure-and-validation.md",
+      "passed": true
+    },
+    {
+      "name": "external not exactly once",
+      "file": "12-protocol-closure-and-validation.md",
+      "passed": true
+    },
+    {
+      "name": "zero model progress",
+      "file": "02-data-contracts.md",
+      "passed": true
+    },
+    {
+      "name": "full handoff",
+      "file": "02-data-contracts.md",
+      "passed": true
+    },
+    {
+      "name": "backup closure",
+      "file": "02-data-contracts.md",
+      "passed": true
+    },
+    {
+      "name": "human oracle",
+      "file": "12-protocol-closure-and-validation.md",
+      "passed": true
+    },
+    {
+      "name": "public not holdout",
+      "file": "12-protocol-closure-and-validation.md",
+      "passed": true
+    },
+    {
+      "name": "fairness no force unlock",
+      "file": "12-protocol-closure-and-validation.md",
+      "passed": true
+    },
+    {
+      "name": "four journeys",
+      "file": "12-protocol-closure-and-validation.md",
+      "passed": true
+    }
+  ],
+  "document_structure": {
+    "json_examples_parsed": 6,
+    "markdown_tables": 78,
+    "checks": "numbering,mappings,links,sources,fences,tables"
+  },
+  "schema_verification": {
+    "dialect": "2020-12",
+    "meta_schema_check": "PASS",
+    "wire_examples": [
+      {
+        "id": "WIRE-01",
+        "schema_valid": true,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-02",
+        "schema_valid": true,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-03",
+        "schema_valid": true,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-04",
+        "schema_valid": true,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-05",
+        "schema_valid": true,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-06",
+        "schema_valid": true,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-07",
+        "schema_valid": true,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-08",
+        "schema_valid": true,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-09",
+        "schema_valid": true,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-10",
+        "schema_valid": true,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-11",
+        "schema_valid": true,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-12",
+        "schema_valid": true,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-13",
+        "schema_valid": true,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-14",
+        "schema_valid": false,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-15",
+        "schema_valid": false,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-16",
+        "schema_valid": false,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-17",
+        "schema_valid": false,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-18",
+        "schema_valid": false,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-19",
+        "schema_valid": false,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-20",
+        "schema_valid": false,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-21",
+        "schema_valid": false,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-22",
+        "schema_valid": false,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-23",
+        "schema_valid": true,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-24",
+        "schema_valid": true,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-25",
+        "schema_valid": true,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      },
+      {
+        "id": "WIRE-26",
+        "schema_valid": true,
+        "matches_expected": true,
+        "service_semantics": "NOT_RUN"
+      }
+    ],
+    "service_semantics": "NOT_RUN"
+  },
+  "materials": {
+    "protocol_fixtures": 16,
+    "public_quality_cases": 20,
+    "compatibility_records": 4,
+    "benchmark_workloads": 4,
+    "human_oracle_review": "NOT_RUN",
+    "holdout": "NOT_CREATED",
+    "runtime_status": "NOT_RUN"
+  },
+  "combined_volume_matches_chapters": true,
+  "coordinator_single_source_chapter_valid": true,
+  "organization_record": "organization-record.json",
+  "organization_status": "COMPLETE",
+  "organization_cleanup_status": "COMPLETE",
+  "files": [
+    "01-product-architecture.md",
+    "02-data-contracts.md",
+    "03-agent-integration.md",
+    "04-reliability-security-operations.md",
+    "05-delivery-acceptance.md",
+    "06-evidence-decisions.md",
+    "07-directed-messages-progress.md",
+    "08-core-operating-decisions.md",
+    "09-review-closure-and-gates.md",
+    "10-delivery-risks-and-controls.md",
+    "11-coordinator-agent.md",
+    "12-protocol-closure-and-validation.md",
+    "CHANGELOG.md",
+    "DESIGN-REVIEW.md",
+    "P0-PROBE-PLAN.md",
+    "README.md",
+    "SHA256SUMS.txt",
+    "W03-CONTRACT-BASELINE.md",
+    "W04-LOCAL-WORKSPACE.md",
+    "W05-NATIVE-DESKTOP.md",
+    "W06-CONTROLLED-BROKER.md",
+    "W07-DEVELOPMENT-RUNNER.md",
+    "W08-ADAPTER-FOUNDATION.md",
+    "contracts/core.schema.json",
+    "contracts/error-mapping.json",
+    "contracts/resource.schema.json",
+    "contracts/transport-bindings.json",
+    "contracts/wire-examples.json",
+    "contracts/workspace-bindings.json",
+    "contracts/workspace.schema.json",
+    "organization-record.json",
+    "research/2026-11-13-agent-group-chat-platform.md",
+    "research/2026-11-13-multi-agent-workbench.md",
+    "research/2026-11-14-agents-anywhere.md",
+    "source-verification.json",
+    "tools/test_p0_readiness.py",
+    "tools/verify_design.py",
+    "validation/collaboration-benchmarks.json",
+    "validation/compatibility-matrix.json",
+    "validation/coordinator-eval-corpus.json",
+    "validation/p0-probe-manifest.json",
+    "validation/protocol-fixtures.json",
+    "verification-report.json",
+    "完整方案.md",
+    "项目交接说明.md"
+  ],
+  "failures": [],
+  "limitations": [
+    "All 250 product cases remain NOT_RUN.",
+    "Schema/phrase checks are not semantic proof or independent audit.",
+    "This design-only validator does not execute the separate W03 reference service; its synthetic runtime evidence is outside plan. No live model/native-client/Windows isolation/product recovery/performance/user qualification is claimed.",
+    "Quality oracles need human review; public examples are not holdout.",
+    "E33 was read during the earlier v1.6 content revision; this directory reorganization did not retrieve external sources."
+  ],
+  "cleanup_result": {
+    "status": "COMPLETE",
+    "date": "2026-11-14",
+    "planned_files": [
+      {
+        "path": "deliverables/agent-group-platform-plan-2026-11-14-v1.5.zip",
+        "bytes": 328454,
+        "sha256": "7dcdf1665a013832223db8e31d2bf6a40258b1c4beb896eb8a8d9a4fa141339f"
+      },
+      {
+        "path": "deliverables/coordinator-agent-plan-2026-11-14-v1.1.md",
+        "bytes": 58605,
+        "sha256": "acc053dc2bfce86f2017c95038b19bf8fe682b6017617f99edb934b0bd69b293"
+      },
+      {
+        "path": "deliverables/coordinator-agent-plan-2026-11-14-v1.1.verification.json",
+        "bytes": 704,
+        "sha256": "b6643c5e36ad5fa80460ec6bf21b8abbfd20369c10066a25ef30f6f6fd0403be"
+      }
+    ],
+    "replacements": [
+      "deliverables/agent-group-platform-plan-2026-11-14-v1.6.zip",
+      "deliverables/coordinator-agent-plan-2026-11-14-v1.2.md",
+      "deliverables/coordinator-agent-plan-2026-11-14-v1.2.verification.json"
+    ],
+    "previous_revision_cleanup": {
+      "status": "COMPLETE",
+      "scope": "Five explicit obsolete files only; preserve historical research with unique GitHub context.",
+      "entries": [
+        {
+          "relative_path": "deliverables/agent-group-platform-plan-2026-11-14-v1.3.zip",
+          "absolute_path": "D:\\Users\\1\\Desktop\\team\\deliverables\\agent-group-platform-plan-2026-11-14-v1.3.zip",
+          "bytes": 198235,
+          "sha256": "41444e034e3597027eaeb63e84442af0bcb2ab00fe4d287b24ea44b46a9a4575",
+          "replacement": "deliverables/agent-group-platform-plan-2026-11-14-v1.5.zip",
+          "status": "DELETED"
+        },
+        {
+          "relative_path": "deliverables/agent-group-platform-plan-2026-11-14-v1.4.zip",
+          "absolute_path": "D:\\Users\\1\\Desktop\\team\\deliverables\\agent-group-platform-plan-2026-11-14-v1.4.zip",
+          "bytes": 252189,
+          "sha256": "606cc4a04801f6d8eb86a0faddf1c6dad027f8c8118fa1ac4f1767142f72f6c3",
+          "replacement": "deliverables/agent-group-platform-plan-2026-11-14-v1.5.zip",
+          "status": "DELETED"
+        },
+        {
+          "relative_path": "deliverables/coordinator-agent-plan-2026-11-14-v1.0.md",
+          "absolute_path": "D:\\Users\\1\\Desktop\\team\\deliverables\\coordinator-agent-plan-2026-11-14-v1.0.md",
+          "bytes": 44164,
+          "sha256": "6ae52decdc2e2847d1a8c830a26c02fb44f9964cac7c001b772a9f5ac297b90e",
+          "replacement": "docs/agent-group-platform-v1/11-coordinator-agent.md",
+          "status": "DELETED"
+        },
+        {
+          "relative_path": "deliverables/coordinator-agent-plan-2026-11-14-v1.0.verification.json",
+          "absolute_path": "D:\\Users\\1\\Desktop\\team\\deliverables\\coordinator-agent-plan-2026-11-14-v1.0.verification.json",
+          "bytes": 808,
+          "sha256": "72d6248eb7a8dfb9cebf84fa8b150ccd445bd28161f7d54d3997c44d2df2b264",
+          "replacement": "deliverables/coordinator-agent-plan-2026-11-14-v1.1.verification.json",
+          "status": "DELETED"
+        },
+        {
+          "relative_path": "docs/superpowers/specs/2026-11-14-coordinator-agent-design.md",
+          "absolute_path": "D:\\Users\\1\\Desktop\\team\\docs\\superpowers\\specs\\2026-11-14-coordinator-agent-design.md",
+          "bytes": 44164,
+          "sha256": "6ae52decdc2e2847d1a8c830a26c02fb44f9964cac7c001b772a9f5ac297b90e",
+          "replacement": "docs/agent-group-platform-v1/11-coordinator-agent.md",
+          "status": "DELETED"
+        }
+      ],
+      "removed_file_count": 5,
+      "removed_bytes": 539560,
+      "previous_revision_cleanup": {
+        "status": "COMPLETE_FOR_UNUSED_FILES",
+        "date": "2026-11-14",
+        "deleted_file_count": 14,
+        "deleted_bytes": 1979940,
+        "deleted_files": [
+          {
+            "path": "deliverables/agent-group-platform-plan-2026-11-13.zip",
+            "bytes": 87220,
+            "sha256": "64d1572bebfb7ce67f6f34077c17747478c03a8f9e2ecea820b4cf09d3110d7e"
+          },
+          {
+            "path": "deliverables/agent-group-platform-plan-2026-11-13-v1.1.zip",
+            "bytes": 108080,
+            "sha256": "04c8dea4902b1c756a388d2d0a4facaa10901fea9cbd0333478bb8ef143fd8b8"
+          },
+          {
+            "path": "deliverables/agent-group-platform-plan-2026-11-13-v1.2.zip",
+            "bytes": 144282,
+            "sha256": "959b4673b51ab79cb66c47f6c4b76e9e03f7bd5ffc482f1b3b00b8fc3d07ddde"
+          },
+          {
+            "path": ".research-cache/2026-11-14/codex-input.txt",
+            "bytes": 106105,
+            "sha256": "b9e75507755ba0be2ebc615ca1f4399a54a386125f3935f615405ea93efe77f2"
+          },
+          {
+            "path": ".research-cache/2026-11-14/deepseek-acp.txt",
+            "bytes": 13587,
+            "sha256": "f72402f208acd96fa65359cd8ea083e3944c7f30b0f835eb9fd2ce1705bf432b"
+          },
+          {
+            "path": ".research-cache/2026-11-14/git-bundle.txt",
+            "bytes": 51396,
+            "sha256": "9c97c26cdca8a49e0d4dfb0e7bf5d33d5a3b573c7096c68b63bb322deba9a029"
+          },
+          {
+            "path": ".research-cache/2026-11-14/mcp-security.txt",
+            "bytes": 256156,
+            "sha256": "a3dee5158840cdb29e0a7f95032506c2176db1be120d4f7975166d86d766d99f"
+          },
+          {
+            "path": ".research-cache/2026-11-14/openai-evals.txt",
+            "bytes": 814582,
+            "sha256": "5f6b512aaee13f7ecb2a9643d3028b5790018ba5df2bc8af5e93694b14b6eda0"
+          },
+          {
+            "path": ".research-cache/2026-11-14/owasp-ssrf.txt",
+            "bytes": 117270,
+            "sha256": "6d0b82f55ef090b50a591693e8b2147289b5dd8bbe4f19ee8e28bd3b99fcc492"
+          },
+          {
+            "path": ".research-cache/2026-11-14/playwright-contexts.txt",
+            "bytes": 57672,
+            "sha256": "042ff9accf800b9a8b087042206992f7a9e6ddb2755585b0fc48cf7e4ae1890b"
+          },
+          {
+            "path": ".research-cache/2026-11-14/windows-access.txt",
+            "bytes": 61059,
+            "sha256": "0cdffa37b0bacbe9e039ed78ddeca249d1d256e63e2b99d28a29f281ee72217a"
+          },
+          {
+            "path": ".research-cache/2026-11-14/windows-appcontainer.txt",
+            "bytes": 50269,
+            "sha256": "fa0943a77124c78e0d7a91f77c15253a01c8a9db701fc1e70bea1c91a5c7d03c"
+          },
+          {
+            "path": ".research-cache/2026-11-14/windows-dacl.txt",
+            "bytes": 50573,
+            "sha256": "42977a0fdd6d8303d991633c1936a9830c8bd1069dd2ef5cce0e75e8ad30106d"
+          },
+          {
+            "path": ".research-cache/2026-11-14/windows-job.txt",
+            "bytes": 61689,
+            "sha256": "d30aa6f15a4e8b8faf8f42ea103717f3d2cb09edfc0de9733564bb578ab86304"
+          }
+        ],
+        "preserved_referenced_baseline": "deliverables/agent-group-platform-plan-2026-11-14-v1.3.zip",
+        "preservation_reason": "The independently added coordinator-agent design still explicitly references v1.3; it and its deliverables were not modified.",
+        "temporary_cache_removed": true
+      },
+      "removed_empty_directories": [
+        "D:\\Users\\1\\Desktop\\team\\docs\\superpowers\\specs",
+        "D:\\Users\\1\\Desktop\\team\\docs\\superpowers"
+      ],
+      "prerequisite_package_sha256": "6fdb714ae9252d5870e76b1a09bdbc310e08a368adfe48d38fc859089515affd",
+      "previous_revision_cleanup_note": "Nested prior cleanup is historical v1.4 evidence; any prior retained v1.3/coordinator paths have now been superseded by this revision."
+    },
+    "previous_revision_cleanup_note": "Nested records are historical v1.5/v1.4 evidence, not current retained dependencies.",
+    "removed_files": [
+      {
+        "path": "deliverables/agent-group-platform-plan-2026-11-14-v1.5.zip",
+        "bytes": 328454,
+        "sha256": "7dcdf1665a013832223db8e31d2bf6a40258b1c4beb896eb8a8d9a4fa141339f"
+      },
+      {
+        "path": "deliverables/coordinator-agent-plan-2026-11-14-v1.1.md",
+        "bytes": 58605,
+        "sha256": "acc053dc2bfce86f2017c95038b19bf8fe682b6017617f99edb934b0bd69b293"
+      },
+      {
+        "path": "deliverables/coordinator-agent-plan-2026-11-14-v1.1.verification.json",
+        "bytes": 704,
+        "sha256": "b6643c5e36ad5fa80460ec6bf21b8abbfd20369c10066a25ef30f6f6fd0403be"
+      }
+    ],
+    "removed_file_count": 3,
+    "removed_bytes": 387763,
+    "prerequisite_package_sha256": "d5102a820acd2a4727ea60aed2ab8354414bd756d6a5548be70ffed4c6a4a173",
+    "prerequisite_note": "Pre-cleanup replacement ZIP verified byte-for-byte against 26 source entries and 25 manifest hashes; after this cleanup record is saved, regenerate manifest/ZIP and perform a final read-only verification.",
+    "safety": "Exact files only; resolved under workspace/deliverables, regular files, byte length and SHA256 rechecked before deletion; no recursive delete."
+  },
+  "source_retrieval_summary": {
+    "applies_to": "prior v1.6 content revision, not this directory reorganization",
+    "official_sources_read": 1,
+    "source_ids": [
+      "E33"
+    ],
+    "method": "Approved read-only HTTP after empty web output",
+    "all_http_200": true,
+    "raw_page_files_persisted": false
+  }
+}

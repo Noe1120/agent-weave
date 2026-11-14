@@ -1,0 +1,125 @@
+{
+  "suite_revision": "collaboration/1.0",
+  "status": "NOT_RUN",
+  "baseline": "同一多Agent分工/输入工作集合在串行调度下运行；不以单Agent替代产品",
+  "repeats": 3,
+  "fixed_dimensions": [
+    "项目/输入/验收版本",
+    "成员与客户端/模型 fingerprint",
+    "生成器及输出清单",
+    "CPU/RAM/并发限制",
+    "锁策略与资源清单",
+    "随机种子",
+    "root预算/费用授权"
+  ],
+  "metrics": {
+    "lock_wait_ms": "请求具备全部其他条件起，到锁授予；同时保留总等待/依赖阻塞的独立时间",
+    "lock_hold_ms": "有效锁取得到真实安全释放",
+    "ready_to_write_wait_ratio": "每任务因锁阻塞时间 / 该任务就绪可写阶段墙钟时间；分母0记N/A，不跨任务相加冒充总墙钟",
+    "useful_concurrency": "同一采样窗口有可验证任务进展的活动运行数；报告完整时间序列",
+    "accepted_delivery_wall_time": "固定需求起点到同范围验收完成的墙钟时间",
+    "integration_rework_ms": "由集成失败关联的修复时间，单列并标重叠",
+    "cost_per_accepted_obligation": "已确认费用/已验收义务数量；另报unknown与总预留；分母0记N/A",
+    "waiting_model_calls": "仅因轮询锁/进度产生的模型调用，应为0"
+  },
+  "cases": [
+    {
+      "id": "BM-01",
+      "name": "独立前后端/文档",
+      "tasks": 3,
+      "write_sets": [
+        [
+          "frontend/**"
+        ],
+        [
+          "backend/**"
+        ],
+        [
+          "docs/feature.md"
+        ]
+      ],
+      "unknown_output": false,
+      "expectation": "观察真实并行能力，锁不能让无关模块长期饥饿",
+      "status": "NOT_RUN",
+      "runs": []
+    },
+    {
+      "id": "BM-02",
+      "name": "共享接口/依赖锁文件热点",
+      "tasks": 3,
+      "write_sets": [
+        [
+          "contracts/task.json",
+          "frontend/**"
+        ],
+        [
+          "contracts/task.json",
+          "backend/**"
+        ],
+        [
+          "package-lock.json"
+        ]
+      ],
+      "unknown_output": false,
+      "expectation": "共享路径单写者，原子集合获锁，完整变更集交接",
+      "status": "NOT_RUN",
+      "runs": []
+    },
+    {
+      "id": "BM-03",
+      "name": "未知输出生成器",
+      "tasks": 3,
+      "write_sets": [
+        [
+          "unknown_project_outputs"
+        ],
+        [
+          "frontend/**"
+        ],
+        [
+          "backend/**"
+        ]
+      ],
+      "unknown_output": true,
+      "expectation": "项目独占请求不被新小锁无限饿死；实际排空后获得，未知写者不被抢锁",
+      "status": "NOT_RUN",
+      "runs": []
+    },
+    {
+      "id": "BM-04",
+      "name": "失败/人工介入与恢复",
+      "tasks": 3,
+      "write_sets": [
+        [
+          "backend/**"
+        ],
+        [
+          "frontend/**"
+        ],
+        [
+          "tests/**"
+        ]
+      ],
+      "unknown_output": false,
+      "expectation": "受影响链暂停，独立分支继续，人工同步与恢复时间单列",
+      "status": "NOT_RUN",
+      "runs": []
+    }
+  ],
+  "thresholds": {
+    "status": "PROPOSED_NOT_MEASURED_PRE_RUN_SIGNOFF_REQUIRED",
+    "independent_lock_wait_ratio_review_above": 0.2,
+    "eligible_wait_review_above_seconds": 120,
+    "hard_fail": [
+      "单写者违规",
+      "永久死锁/饥饿",
+      "锁等待期间模型轮询",
+      "未知写者未撤写就交接"
+    ],
+    "rule": "观察线不是所有设备性能承诺；P0固定负载与阈值，失败后不能删样本或降低阈值掩盖结果"
+  },
+  "acceptance_refs": [
+    "AT-184",
+    "AT-185"
+  ]
+}

@@ -1,0 +1,3 @@
+# Preserve exact source/evidence bytes and SHA256 manifests on every checkout.
+# -text disables newline conversion, not normal text diffs.
+* -text

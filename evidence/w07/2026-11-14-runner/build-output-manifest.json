@@ -1,0 +1,216 @@
+{
+  "scope": "Compiled service output and native RunnerHost; not a distributable release",
+  "date": "2026-11-14",
+  "files": [
+    {
+      "path": "artifacts/runner-host/Team.RunnerHost.deps.json",
+      "sha256": "131185921d1d17e0b1be7fe49298c666e326f61b5f2d504951aa75237863421f",
+      "bytes": 439
+    },
+    {
+      "path": "artifacts/runner-host/Team.RunnerHost.dll",
+      "sha256": "01c7cbde0b401bb5e460ff8b6dc8bc0eebd25a69f25871743f0919cbb5acc121",
+      "bytes": 27136
+    },
+    {
+      "path": "artifacts/runner-host/Team.RunnerHost.runtimeconfig.json",
+      "sha256": "3e965cd7cfd553c2ff4e842d8d8019aaae2da0a21d92ff85a87573dd8d1b95c6",
+      "bytes": 399
+    },
+    {
+      "path": "dist/packages/contracts/src/generated/core.js",
+      "sha256": "a0eb380fbcc00ba89e4d250439d1c7a9e3c38aa9581cb45bb527b0ff3aebef08",
+      "bytes": 61
+    },
+    {
+      "path": "dist/packages/contracts/src/generated/core.schema.json",
+      "sha256": "26d3a20ce0871061095337bbd9a9ff571b8bff524e0c1c4b4bde3e245cac000d",
+      "bytes": 38960
+    },
+    {
+      "path": "dist/packages/contracts/src/generated/error-mapping.json",
+      "sha256": "eb3ceb4e225b16d5a62faa537537d3057d703a4de00205bc2e382a947f6f53b2",
+      "bytes": 3685
+    },
+    {
+      "path": "dist/packages/contracts/src/generated/resources.js",
+      "sha256": "a0eb380fbcc00ba89e4d250439d1c7a9e3c38aa9581cb45bb527b0ff3aebef08",
+      "bytes": 61
+    },
+    {
+      "path": "dist/packages/contracts/src/generated/resources.schema.json",
+      "sha256": "ba6336a90b37ed3ad683ed167f9b5208b6d2007674f617e95d544276aac95da3",
+      "bytes": 12098
+    },
+    {
+      "path": "dist/packages/contracts/src/generated/transport-bindings.json",
+      "sha256": "02fb2fa4734db92a4d7727b8e31274764552f7d8e09db34f1feb723074e04302",
+      "bytes": 2516
+    },
+    {
+      "path": "dist/packages/contracts/src/generated/workspace.js",
+      "sha256": "a0eb380fbcc00ba89e4d250439d1c7a9e3c38aa9581cb45bb527b0ff3aebef08",
+      "bytes": 61
+    },
+    {
+      "path": "dist/packages/contracts/src/generated/workspace.schema.json",
+      "sha256": "b979d8745a29c77c05cc2da8eeaa95dccc56fd2a33fa3e7a549f769ad2591cd8",
+      "bytes": 13458
+    },
+    {
+      "path": "dist/packages/contracts/src/index.js",
+      "sha256": "8a7c6073515e083994dc6ef6826e59cd939dff4a9c27682935796e1edb371b91",
+      "bytes": 1441
+    },
+    {
+      "path": "dist/packages/service/migrations/001_core.sql",
+      "sha256": "9bb5a4c1d968cb2d2540a6bf88099700bddaaa9c549618e9d8118b6ee168a18f",
+      "bytes": 2207
+    },
+    {
+      "path": "dist/packages/service/migrations/002_workspace.sql",
+      "sha256": "258e3a959ec2ec13432e7c4a0471b4014b0e2cc60f7cfa3d0e5ea4fdf79ff25a",
+      "bytes": 2764
+    },
+    {
+      "path": "dist/packages/service/migrations/003_broker.sql",
+      "sha256": "380e8b5afd86f872ecd319518ac6a02ff930a50a9ab7bca844b5bba16942d556",
+      "bytes": 1321
+    },
+    {
+      "path": "dist/packages/service/migrations/004_runner.sql",
+      "sha256": "2ea0575b491a2fed2a101fb15a0204aed84116bcae1883c28019dddd5d941236",
+      "bytes": 738
+    },
+    {
+      "path": "dist/packages/service/src/auth.js",
+      "sha256": "91677c7b9e9230c9f076f2c6488d0eb038fe1f8ea1466e8c4535fad91aca7181",
+      "bytes": 2960
+    },
+    {
+      "path": "dist/packages/service/src/broker-git.js",
+      "sha256": "6f17bcddbede8b423214080f575f2f1185efa9075892026ca74ac7afef9b2d30",
+      "bytes": 5623
+    },
+    {
+      "path": "dist/packages/service/src/broker-paths.js",
+      "sha256": "d39675bc462cec03289d072bcec9aeea4652143fbd23fdf235c3e52d46117f66",
+      "bytes": 4793
+    },
+    {
+      "path": "dist/packages/service/src/broker.js",
+      "sha256": "3bf1867e0b3573ab61f0cc67bc63018784d59db6547ce50f358ffa6fdb9cdb00",
+      "bytes": 21579
+    },
+    {
+      "path": "dist/packages/service/src/desktop-entry.js",
+      "sha256": "6c85fe4b008ddeb6a0941499e22cd0df2324c19a998ce7aaaa9dac067bf35b5b",
+      "bytes": 2755
+    },
+    {
+      "path": "dist/packages/service/src/domain.js",
+      "sha256": "079d6114afea652148c9b4d7f1cda8409bf08eb2c362f5ee5aff24c52b56d0b5",
+      "bytes": 659
+    },
+    {
+      "path": "dist/packages/service/src/errors.js",
+      "sha256": "72511ad333d71820209330613f265a02b38a09b588c55adf347f790493d1c1cb",
+      "bytes": 849
+    },
+    {
+      "path": "dist/packages/service/src/http-transport.js",
+      "sha256": "94ee6cef2dd7b7813ad16505cb9293093cb1eb1f61460c04cbb756cd3915f062",
+      "bytes": 1540
+    },
+    {
+      "path": "dist/packages/service/src/http.js",
+      "sha256": "f2854c0a39e4a547d2a1fec505729a2944b4fa24df8326ba876e5bdaf2247740",
+      "bytes": 5552
+    },
+    {
+      "path": "dist/packages/service/src/main.js",
+      "sha256": "c1816e663586a5f3b80b0925efe1afcc96f9223312464ac943e95f135469958d",
+      "bytes": 1882
+    },
+    {
+      "path": "dist/packages/service/src/pair.js",
+      "sha256": "346ee8d23a4168f4afeabd6e70d88718a0542a9edc22ce139df331a193533167",
+      "bytes": 627
+    },
+    {
+      "path": "dist/packages/service/src/plans.js",
+      "sha256": "1effc8aca22ce135b3c7323b79c944e871edf3cd95f1b5948c71bce560ce6f2e",
+      "bytes": 7453
+    },
+    {
+      "path": "dist/packages/service/src/runner-host.js",
+      "sha256": "914cef6fc42e16da31c217d9e94c646d37031b0d2d5837ca74b65262beea355a",
+      "bytes": 6956
+    },
+    {
+      "path": "dist/packages/service/src/runner-protocol.js",
+      "sha256": "c0bf12b5e47d1aea6a2a00c3f3a8073fed0952d293da73f5b80d9caf7ae379fd",
+      "bytes": 3771
+    },
+    {
+      "path": "dist/packages/service/src/runner.js",
+      "sha256": "0fada811c9b07ba107eb7650662905b8ad4bd3a420ccf34c57c64394bcc38748",
+      "bytes": 13905
+    },
+    {
+      "path": "dist/packages/service/src/service.js",
+      "sha256": "121c8b112bc9b8ded1539257902e50f6f6b3e94ddbd5b2c0798395f3a210935a",
+      "bytes": 8721
+    },
+    {
+      "path": "dist/packages/service/src/store.js",
+      "sha256": "1447749c26392632466e57ed4155523abf9095a964e32a8fce1b654177d816ec",
+      "bytes": 7966
+    },
+    {
+      "path": "dist/packages/service/src/waits.js",
+      "sha256": "71734ef51f5bbe582169e0dcdf1c4aa8c1076b1fa6adf67c0dc954e90153f806",
+      "bytes": 6287
+    },
+    {
+      "path": "dist/packages/service/src/workspace-auth.js",
+      "sha256": "f4eb75104d62288f8fbf381b6205b7b869403d7052e592b1c11c6a975c305c9a",
+      "bytes": 3684
+    },
+    {
+      "path": "dist/packages/service/src/workspace-feed.js",
+      "sha256": "737553d3016e2392a42771b16dba3df2369e1128801cdf413148f9e355077b58",
+      "bytes": 6661
+    },
+    {
+      "path": "dist/packages/service/src/workspace-http.js",
+      "sha256": "1ce7c07f0d728c5660dd9c25367334621ae623d36c3fe97eb1d8b947945e7a58",
+      "bytes": 5170
+    },
+    {
+      "path": "dist/packages/service/src/workspace-schema.js",
+      "sha256": "8251b0ba1b864cd408c32343d2a4cd9e194c8ab5bba9b876baf4fc8223c05fdf",
+      "bytes": 387
+    },
+    {
+      "path": "dist/packages/service/src/workspace-service.js",
+      "sha256": "10b131daf05df67ec96ce72ba8f3b2c7d118901f95f98dc88e1b71f56b9e0a25",
+      "bytes": 14003
+    },
+    {
+      "path": "dist/packages/web/app.js",
+      "sha256": "58bec756bb71e910b24c946ec5bc3da65dbd40379623e638cacd95ca1b114fff",
+      "bytes": 30340
+    },
+    {
+      "path": "dist/packages/web/index.html",
+      "sha256": "8ac3a5b1337a56c29add5db3ab432146a969c9795dc79cfd148d218b5c16ff25",
+      "bytes": 10783
+    },
+    {
+      "path": "dist/packages/web/style.css",
+      "sha256": "41847a10c803adb21cc74775bd98446bdace8ead67b6f070bb014bfefcfec087",
+      "bytes": 20033
+    }
+  ]
+}

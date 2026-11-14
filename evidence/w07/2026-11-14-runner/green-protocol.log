@@ -1,0 +1,12 @@
+(node:67644) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ runner admission rejects original client identity, commands and unknown fields before execution (1.2083ms)
+✔ runner frames are strict, bounded and cannot impersonate native exit evidence (0.7312ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 289.0512

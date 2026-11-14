@@ -1,0 +1,43 @@
+{
+  "name": "agent-group-core-baseline",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.14.0 <25"
+  },
+  "scripts": {
+    "generate": "node scripts/generate-contracts.mjs",
+    "generate:check": "node scripts/generate-contracts.mjs --check",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json && node scripts/copy-assets.mjs",
+    "test": "node --test tests/*.test.ts",
+    "verify": "npm run generate:check && npm run format:check && npm run typecheck && npm run check:web && npm test && npm run build && npm run test:smoke",
+    "start": "node dist/packages/service/src/main.js",
+    "test:smoke": "node tests/build-smoke.mjs",
+    "format:check": "prettier --check \"packages/service/src/*.ts\" \"packages/contracts/src/index.ts\" \"tests/**/*.ts\" \"tests/**/*.mjs\" \"scripts/*.mjs\" package.json tsconfig.json tsconfig.build.json \"packages/web/*\"",
+    "pair": "node dist/packages/service/src/pair.js",
+    "check:web": "node --check packages/web/app.js",
+    "test:browser": "node tests/browser-workspace.mjs",
+    "bootstrap:native": "powershell -NoProfile -File scripts/bootstrap-dotnet.ps1",
+    "build:native": "powershell -NoProfile -File scripts/build-native.ps1",
+    "test:native": "\".tools\\dotnet\\dotnet.exe\" run --project tests/desktop/Team.Tests.csproj && node --test tests/native-shell.test.mjs",
+    "test:native:package": "node tests/native-package.mjs",
+    "test:broker": "node --test tests/broker*.test.ts",
+    "test:broker:walkthrough": "npm run build && node tests/broker-walkthrough.mjs",
+    "pretest": "npm run build:runner",
+    "build:runner": "powershell -NoProfile -File scripts/build-runner.ps1",
+    "test:runner": "npm run build:runner && node --test tests/runner*.test.ts",
+    "test:runner:walkthrough": "npm run build:runner && npm run build && node tests/runner-walkthrough.mjs"
+  },
+  "dependencies": {
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.5",
+    "json-schema-to-typescript": "16.0.0",
+    "prettier": "3.10.1",
+    "typescript": "5.9.3"
+  }
+}

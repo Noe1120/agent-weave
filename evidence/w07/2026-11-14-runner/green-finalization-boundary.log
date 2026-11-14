@@ -1,0 +1,12 @@
+(node:66888) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ runner unauthorized_patch cannot escape its scope or release before process exit (1003.1729ms)
+✔ runner complete_hold cannot escape its scope or release before process exit (3026.9013ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4338.321

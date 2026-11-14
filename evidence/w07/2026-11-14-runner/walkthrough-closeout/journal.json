@@ -1,0 +1,48 @@
+{
+  "claim": {
+    "id": "e923c42d-e259-458b-8a57-8b99b380af93",
+    "project_id": "d78e6ec3-a51a-4c53-b75b-c00ec64d23ef",
+    "workspace_id": "5447cebc-2fe3-4a05-a997-7a9e74e41a11",
+    "grant_id": "e6504b87-ec0c-408f-a729-9b19e24fff90",
+    "scope_id": "960ceba5-2fb3-44b1-b4fa-fb0b403efccb",
+    "scope_revision": "1",
+    "task_id": "dfd7f8dc-dc6e-473f-913f-4a85ba39452c",
+    "task_revision": "3",
+    "candidate_id": "e1b40251-c9d8-4754-adfc-c061c5bfdde7",
+    "candidate_revision": "2",
+    "run_id": "a9cee9bf-bcdf-4edc-b3f3-a53d12da3c6b",
+    "run_epoch": "1",
+    "paths": [
+      "src/main.txt",
+      "src/extra.txt"
+    ],
+    "metadata_path": ".team/changes/e923c42d-e259-458b-8a57-8b99b380af93.md",
+    "base_commit": "ed83f3a692d73118a10ff6b93f91860c157b6423",
+    "lease_until": 1794646860000,
+    "state": "released"
+  },
+  "edits": [
+    {
+      "observed_at": "2026-11-14T09:00:00.000Z",
+      "action_id": "795bb1c2-321e-43e2-a367-44e0e9cf335c",
+      "claim_id": "e923c42d-e259-458b-8a57-8b99b380af93",
+      "phase": "checkpointed",
+      "parent": "ed83f3a692d73118a10ff6b93f91860c157b6423",
+      "commit": "baf058de8a3e3c219c8000d52143b8e26a054e91",
+      "tree": "fdc6743eec045b68d6aa9c463d90eea9edea9241",
+      "diff": "diff --git a/.team/changes/e923c42d-e259-458b-8a57-8b99b380af93.md b/.team/changes/e923c42d-e259-458b-8a57-8b99b380af93.md\nnew file mode 100644\nindex 0000000..3505fe9\n--- /dev/null\n+++ b/.team/changes/e923c42d-e259-458b-8a57-8b99b380af93.md\n@@ -0,0 +1,9 @@\n+# Change e923c42d-e259-458b-8a57-8b99b380af93\n+\n+Development evidence; not accepted or merged.\n+\n+## Action 795bb1c2-321e-43e2-a367-44e0e9cf335c\n+\n+Parent: ed83f3a692d73118a10ff6b93f91860c157b6423\n+\n+- \"src/main.txt\": absent → 6d7e58fd3ba9d28a04ddf6dcab72e4ddd145e813e49c1ab924318e6114ab6130\ndiff --git a/src/main.txt b/src/main.txt\nnew file mode 100644\nindex 0000000..00d66f2\n--- /dev/null\n+++ b/src/main.txt\n@@ -0,0 +1 @@\n+Development runner checkpoint",
+      "edits": [
+        {
+          "path": "src/main.txt",
+          "before_digest": null,
+          "text": "Development runner checkpoint\n"
+        },
+        {
+          "path": ".team/changes/e923c42d-e259-458b-8a57-8b99b380af93.md",
+          "before_digest": null,
+          "text": "# Change e923c42d-e259-458b-8a57-8b99b380af93\n\nDevelopment evidence; not accepted or merged.\n\n## Action 795bb1c2-321e-43e2-a367-44e0e9cf335c\n\nParent: ed83f3a692d73118a10ff6b93f91860c157b6423\n\n- \"src/main.txt\": absent → 6d7e58fd3ba9d28a04ddf6dcab72e4ddd145e813e49c1ab924318e6114ab6130\n"
+        }
+      ]
+    }
+  ]
+}

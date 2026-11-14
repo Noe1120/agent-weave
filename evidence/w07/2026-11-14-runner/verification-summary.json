@@ -1,0 +1,176 @@
+{
+  "date": "2026-11-14",
+  "timezone": "Asia/Tokyo",
+  "stage": "W07-DEVELOPMENT-RUNNER",
+  "result": "PASS_WITH_EXPLICIT_SCOPE_LIMITS",
+  "node_tests": {
+    "passed": 177,
+    "failed": 0,
+    "skipped": 0,
+    "new_since_w06": 27
+  },
+  "native_core": {
+    "passed": 14,
+    "failed": 0
+  },
+  "native_shell_static": {
+    "passed": 1,
+    "failed": 0
+  },
+  "runner_host_build": {
+    "result": "PASS",
+    "warnings": 0,
+    "errors": 0
+  },
+  "generated_artifacts": {
+    "checked": 9,
+    "result": "PASS"
+  },
+  "format_typecheck_legacy_web_syntax_build_compiled_smoke": "PASS",
+  "offline_p0": {
+    "passed": 12,
+    "failed": 0,
+    "qualification": "Offline readiness checks only"
+  },
+  "design": {
+    "files": 44,
+    "manifest_entries": 43,
+    "result": "PASS",
+    "requirements": 33,
+    "AT": 190,
+    "CA": 60
+  },
+  "portable_package": {
+    "files": 989,
+    "result": "EXISTING_MANIFEST_HASH_CHECK_PASS",
+    "rebuilt": false,
+    "databases": 0
+  },
+  "walkthrough": {
+    "result": "PASS",
+    "scope": "COMPILED_DEVELOPMENT_BACKEND_WALKTHROUGH",
+    "date": "2026-11-14",
+    "steps": [
+      "trusted task admission",
+      "fixed fixture launch",
+      "read-only progress",
+      "Broker edit",
+      "Git checkpoint",
+      "in_review",
+      "cancel and still observe",
+      "visible protocol failure"
+    ],
+    "results": [
+      {
+        "scenario": "success",
+        "state": "succeeded",
+        "reason": null,
+        "job_empty": true,
+        "task_status": "in_review",
+        "locks_retained": 0,
+        "events": 3
+      },
+      {
+        "scenario": "idle",
+        "state": "stopped",
+        "reason": "USER_STOP",
+        "job_empty": true,
+        "task_status": "running",
+        "locks_retained": 3,
+        "events": 1
+      },
+      {
+        "scenario": "malformed",
+        "state": "failed",
+        "reason": "PROTOCOL_JSON",
+        "job_empty": true,
+        "task_status": "running",
+        "locks_retained": 3,
+        "events": 0
+      }
+    ],
+    "original_clients_started": 0,
+    "model_calls": 0,
+    "native_ui_exercised": false,
+    "os_isolation": "UNVERIFIED",
+    "qualification": "Not a production or original-client acceptance test",
+    "evidence": "walkthrough-closeout/",
+    "real_synthetic_git_commits": 2,
+    "note": "Compiled service with test-fixture bootstrap; not the native UI or original-client path"
+  },
+  "source": {
+    "baseline": 139,
+    "current": 157,
+    "modified": 19,
+    "added": 18,
+    "removed": 0,
+    "unchanged": 120
+  },
+  "preservation": {
+    "protected": 47,
+    "result": "PASS",
+    "baseline_snapshot_files": 139
+  },
+  "database_schema": {
+    "source": 4,
+    "old_portable": 2,
+    "user_database_migrations": 0
+  },
+  "review": "AUTHOR_SELF_REVIEW_ONLY",
+  "ui_design": "DEFERRED_BY_USER",
+  "native_ui_user_walkthrough": "NOT_EXECUTED_PERMISSION_BOUNDARY",
+  "product_acceptance": "250 NOT_RUN",
+  "client_compatibility": "UNVERIFIED",
+  "formal_contract_freeze": "NOT_FROZEN",
+  "os_isolation": "UNVERIFIED",
+  "native_agent_clients_started": 0,
+  "model_calls": 0,
+  "public_runner_api": "NOT_MOUNTED",
+  "adapter": "development_fixture",
+  "binding_mode": "owned_process",
+  "repository_upload": {
+    "repository": "Noe1120/agent-weave",
+    "authorized_by_user": true,
+    "remote_inspected": false,
+    "workspace_git_initialized": false,
+    "pushed": false,
+    "priority": "Complete current construction first"
+  },
+  "warnings": [
+    "Node SQLite experimental warning retained, not suppressed",
+    "No Windows isolation or arbitrary-client lifecycle guarantee",
+    "Stopped/failed task stays running/WIP with quarantined locks",
+    "No new portable release; source schema 4 must not be opened by schema 2 package",
+    "Denied cleanup paths preserved without retry; see preservation-check.json"
+  ],
+  "logs": [
+    {
+      "path": "verify-closeout.log",
+      "sha256": "b57c87dda7f68089bc47472a349563ae8edd6dd9cfe70408b7f5d1bca6344ff0"
+    },
+    {
+      "path": "native-closeout.log",
+      "sha256": "3a3d323abe261a310c4633b5cebfe885ac3d338e57792a514b6561385227db57"
+    },
+    {
+      "path": "package-closeout.log",
+      "sha256": "77c06975809839528ad44681a225adfd36628db49898b4eac30815809a5f75dd"
+    },
+    {
+      "path": "walkthrough-closeout.log",
+      "sha256": "2cfdca6c1ded712614fccd400558497d63067fc896a9d9f73f551ac5b2befc56"
+    },
+    {
+      "path": "design-refresh-closeout.log",
+      "sha256": "c9fc285ac0dc193862de62805231d7a75cbb5136bbd2b4304bd466411ab4b9c1"
+    },
+    {
+      "path": "design-verify-closeout.log",
+      "sha256": "c9fc285ac0dc193862de62805231d7a75cbb5136bbd2b4304bd466411ab4b9c1"
+    },
+    {
+      "path": "p0-closeout.log",
+      "sha256": "fc1ccb0f7e810d407b10e6d8a99b95a0b57f8f0d2876b1a2940bdd4f3612bf0a"
+    }
+  ]
+}

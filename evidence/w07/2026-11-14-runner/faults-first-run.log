@@ -1,0 +1,60 @@
+(node:60436) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ runner rejects drift and unauthorized starts without reserving work or acquiring claims (559.6131ms)
+✔ actual development process patches through Broker, creates a real checkpoint and only reaches in_review (3364.2605ms)
+✔ progress reads are side-effect free; stop revokes worker but leaves supervisor access and locks (917.8039ms)
+✔ runner surfaces malformed, never succeeds and retains quarantined locks (857.2082ms)
+✔ runner surfaces oversized, never succeeds and retains quarantined locks (1077.0733ms)
+✔ runner surfaces invalid_utf8, never succeeds and retains quarantined locks (1016.3441ms)
+✔ runner surfaces stderr, never succeeds and retains quarantined locks (1025.2557ms)
+✔ runner surfaces fake_exit, never succeeds and retains quarantined locks (1025.812ms)
+✔ runner surfaces out_of_order, never succeeds and retains quarantined locks (1017.3836ms)
+✔ runner surfaces nonzero, never succeeds and retains quarantined locks (973.5877ms)
+✔ runner surfaces no_complete, never succeeds and retains quarantined locks (1021.847ms)
+✔ runner surfaces conflict, never succeeds and retains quarantined locks (2875.83ms)
+✖ runner surfaces flood, never succeeds and retains quarantined locks (1215.6555ms)
+✔ identical patch replay receives the same receipt without repeating a Git checkpoint (3162.7991ms)
+✔ timeout, expired lease and revoked execution each stop the owned process without releasing locks (3694.3716ms)
+✔ observer permissions are rechecked for every derivative, and another scope cannot read this execution (953.321ms)
+✖ runner success and Broker release must share a transaction, not leave a released claim when recording success fails (3303.4898ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 15
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 36019.1001
+
+✖ failing tests:
+
+test at tests\runner-process.test.ts:51:13
+✖ runner surfaces flood, never succeeds and retains quarantined locks (1215.6555ms)
+  AssertionError [ERR_ASSERTION]: {"execution_id":"6e3a0ed3-f060-4b65-96ec-f5d565ccd1b4","project_id":"940a73a3-1bbc-4475-a96a-c7e4f1a8ede5","grant_id":"0db58c40-cbb0-41af-9e12-6778662f997f","run_id":"80c7a7b1-f872-4895-a9d8-bab7f1293592","scope_id":"b6426f38-23fb-41a2-9b05-5b0fc41d289a","claim_id":"c12fbf8c-5d88-4c7d-8af5-1eda4e733eb1","task_id":"1954e18c-fc21-493c-ba1d-97615bbbde4d","candidate_id":"242eb4f9-f2c7-4d26-b7bb-9f3fe0d1ad4e","profile_digest":"c0ead990aeb4bf5d793f983302f4be55c9037791fc0bd64c2170bb6d4996b078","binding_mode":"owned_process","adapter":"development_fixture","state":"unknown","reason":"HOST_INPUT_CLOSED","worker_pid":56740,"host_pid":20064,"seq":1,"complete":false,"exit":null,"started_at":1794646800000,"ended_at":1794646800000,"input_count":513,"stderr_bytes":0,"progress_source":"worker_reported","events":[{"seq":1,"kind":"progress","text":"flood"}]}
+  + actual - expected
+  
+  + 'unknown'
+  - 'failed'
+  
+      at TestContext.<anonymous> (file:///D:/Users/1/Desktop/team/tests/runner-process.test.ts:52:197)
+      at async Test.run (node:internal/test_runner/test:1125:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'unknown',
+    expected: 'failed',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\runner-process.test.ts:63:1
+✖ runner success and Broker release must share a transaction, not leave a released claim when recording success fails (3303.4898ms)
+  Error: test storage failure
+      at RunnerController.save (file:///D:/Users/1/Desktop/team/packages/service/src/runner.ts:27:108)
+      at RunnerController.exited (file:///D:/Users/1/Desktop/team/packages/service/src/runner.ts:76:8)
+      at file:///D:/Users/1/Desktop/team/packages/service/src/runner.ts:45:49
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+    code: 'ERR_SQLITE_ERROR',
+    errcode: 1811,
+    errstr: 'constraint failed'
+  }

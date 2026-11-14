@@ -1,0 +1,51 @@
+{
+  "execution_id": "ab308389-d667-4dee-8f5c-4fe6367c118b",
+  "project_id": "d78e6ec3-a51a-4c53-b75b-c00ec64d23ef",
+  "grant_id": "e6504b87-ec0c-408f-a729-9b19e24fff90",
+  "run_id": "a9cee9bf-bcdf-4edc-b3f3-a53d12da3c6b",
+  "scope_id": "960ceba5-2fb3-44b1-b4fa-fb0b403efccb",
+  "claim_id": "e923c42d-e259-458b-8a57-8b99b380af93",
+  "task_id": "dfd7f8dc-dc6e-473f-913f-4a85ba39452c",
+  "candidate_id": "e1b40251-c9d8-4754-adfc-c061c5bfdde7",
+  "profile_digest": "4b7b7292047dfd4f430220c3abcaa315d64df950c5827f6fc89a8341b7318552",
+  "binding_mode": "owned_process",
+  "adapter": "development_fixture",
+  "state": "succeeded",
+  "reason": null,
+  "worker_pid": 60236,
+  "host_pid": 53196,
+  "seq": 3,
+  "complete": true,
+  "exit": {
+    "exit_code": 0,
+    "job_empty": true,
+    "reason": null
+  },
+  "started_at": 1794646800000,
+  "ended_at": 1794646800000,
+  "input_count": 4,
+  "stderr_bytes": 0,
+  "progress_source": "worker_reported",
+  "events": [
+    {
+      "seq": 1,
+      "kind": "progress",
+      "text": "{\"input_count\":1,\"env\":[\"SystemRoot\",\"TEMP\",\"TMP\"],\"cwd\":\"C:\\\\Users\\\\1\\\\AppData\\\\Local\\\\Temp\\\\team-w03-BzGoP6\\\\runner-wJCh2u\"}"
+    },
+    {
+      "seq": 2,
+      "kind": "patch",
+      "edits": [
+        {
+          "path": "src/main.txt",
+          "before_digest": null,
+          "text": "Development runner checkpoint\n"
+        }
+      ]
+    },
+    {
+      "seq": 3,
+      "kind": "complete"
+    }
+  ]
+}

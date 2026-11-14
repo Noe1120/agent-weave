@@ -1,0 +1,30 @@
+node_modules/
+dist/
+.runtime/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+__pycache__/
+.tools/
+artifacts/
+**/bin/
+**/obj/
+
+# Never publish local credentials, private runtime data or temporary evidence.
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+*.p12
+*.pfx
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm
+qa-runtime/
+
+# Evidence is private by default. Only the reviewed W07 export below is tracked.
+
+!/evidence/README.md

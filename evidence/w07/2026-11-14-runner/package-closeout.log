@@ -1,0 +1,11 @@
+
+> agent-group-core-baseline@0.3.0 test:native:package
+> node tests/native-package.mjs
+
+{
+  "package": "PASS",
+  "files": 989,
+  "native_wpf": true,
+  "browser_runtime": false,
+  "databases_in_package": 0
+}

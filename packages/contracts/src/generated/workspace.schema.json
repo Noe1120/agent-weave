@@ -1,0 +1,464 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent-group-platform:workspace:0.1",
+  "title": "WorkspaceCommand",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/create_project"
+    },
+    {
+      "$ref": "#/$defs/add_member"
+    },
+    {
+      "$ref": "#/$defs/set_member_state"
+    },
+    {
+      "$ref": "#/$defs/send_message"
+    },
+    {
+      "$ref": "#/$defs/create_draft"
+    },
+    {
+      "$ref": "#/$defs/update_draft"
+    },
+    {
+      "$ref": "#/$defs/archive_draft"
+    },
+    {
+      "$ref": "#/$defs/update_member"
+    },
+    {
+      "$ref": "#/$defs/restore_draft"
+    }
+  ],
+  "$defs": {
+    "create_project": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "create_project"
+        },
+        "action_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 80,
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 4000,
+          "minLength": 0
+        }
+      },
+      "required": [
+        "kind",
+        "action_id",
+        "name",
+        "description"
+      ],
+      "additionalProperties": false
+    },
+    "add_member": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "add_member"
+        },
+        "action_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "project_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "client": {
+          "type": "string",
+          "enum": [
+            "codex",
+            "claude_desktop",
+            "deepseek_harness"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 60,
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "role": {
+          "type": "string",
+          "maxLength": 120,
+          "minLength": 0
+        }
+      },
+      "required": [
+        "kind",
+        "action_id",
+        "project_id",
+        "client",
+        "name",
+        "role"
+      ],
+      "additionalProperties": false
+    },
+    "set_member_state": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "set_member_state"
+        },
+        "action_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "project_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "member_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "expected_revision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "active",
+            "inactive"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "action_id",
+        "project_id",
+        "member_id",
+        "expected_revision",
+        "state"
+      ],
+      "additionalProperties": false
+    },
+    "send_message": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "send_message"
+        },
+        "action_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "project_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "body": {
+          "type": "string",
+          "maxLength": 8000,
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "audience": {
+          "type": "string",
+          "enum": [
+            "public",
+            "direct"
+          ]
+        },
+        "recipient_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "action_id",
+        "project_id",
+        "body",
+        "audience",
+        "recipient_id"
+      ],
+      "additionalProperties": false
+    },
+    "create_draft": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "create_draft"
+        },
+        "action_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "project_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 160,
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 4000,
+          "minLength": 0
+        },
+        "acceptance": {
+          "type": "string",
+          "maxLength": 2000,
+          "minLength": 0
+        },
+        "assignee_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "action_id",
+        "project_id",
+        "title",
+        "description",
+        "acceptance",
+        "assignee_id"
+      ],
+      "additionalProperties": false
+    },
+    "update_draft": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "update_draft"
+        },
+        "action_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "project_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "task_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "expected_revision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 160,
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 4000,
+          "minLength": 0
+        },
+        "acceptance": {
+          "type": "string",
+          "maxLength": 2000,
+          "minLength": 0
+        },
+        "assignee_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "action_id",
+        "project_id",
+        "task_id",
+        "expected_revision",
+        "title",
+        "description",
+        "acceptance",
+        "assignee_id"
+      ],
+      "additionalProperties": false
+    },
+    "archive_draft": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "archive_draft"
+        },
+        "action_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "project_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "task_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "expected_revision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        }
+      },
+      "required": [
+        "kind",
+        "action_id",
+        "project_id",
+        "task_id",
+        "expected_revision"
+      ],
+      "additionalProperties": false
+    },
+    "update_member": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "update_member"
+        },
+        "action_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "project_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "member_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "expected_revision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 60,
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "role": {
+          "type": "string",
+          "maxLength": 120,
+          "minLength": 0
+        }
+      },
+      "required": [
+        "kind",
+        "action_id",
+        "project_id",
+        "member_id",
+        "expected_revision",
+        "name",
+        "role"
+      ],
+      "additionalProperties": false
+    },
+    "restore_draft": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "restore_draft"
+        },
+        "action_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "project_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "task_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "expected_revision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        }
+      },
+      "required": [
+        "kind",
+        "action_id",
+        "project_id",
+        "task_id",
+        "expected_revision"
+      ],
+      "additionalProperties": false
+    },
+    "feed_request": {
+      "type": "object",
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "cursor": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 2048
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "project_id",
+        "cursor",
+        "limit"
+      ],
+      "additionalProperties": false
+    },
+    "pair_request": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{43}$"
+        }
+      },
+      "required": [
+        "code"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

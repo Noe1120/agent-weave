@@ -1,0 +1,247 @@
+# 12 运行协议闭环与验证材料
+
+版本：平台 v1.6；日期：2026-11-14。范围：补齐已批准的六项评审，不新增产品角色，不替换原客户端，不实现产品。本章的协议与附带样本是实施基线；运行测试全部 NOT_RUN。
+
+## 1. 规范层次与本次交付
+
+02 的身份/状态/权限与 07–10 的安全不变量继续有效；本章细化“多任务计划部分执行、等待事件交接、验证证据”。11 的管家只能调用这些服务规则，不创建第二套真相。若文字与 Schema 不一致，按缺陷阻止契约冻结，不能由开发者选择更宽松的一方。
+
+| 文件 | 职责 | 当前能证明什么 |
+| --- | --- | --- |
+| [contracts/core.schema.json](contracts/core.schema.json) | 最小平台消息结构、控制/等待/结果和错误；core/1.0 | 结构规范，不证明权限或运行状态正确 |
+| [contracts/wire-examples.json](contracts/wire-examples.json) | 正例、结构反例、结构合法但语义应拒绝的反例 | 离线格式与拒绝边界可复核 |
+| [validation/protocol-fixtures.json](validation/protocol-fixtures.json) | 固定基线、动作顺序、故障点、预期状态和禁止副作用 | 故障测试说明已具象化；尚无产品执行器 |
+| [validation/compatibility-matrix.json](validation/compatibility-matrix.json) | 三客户端及管家 API 的联合验证登记 | 真实版本/账号/部署证据均待填，不能推断兼容 |
+| [validation/coordinator-eval-corpus.json](validation/coordinator-eval-corpus.json) | 20 项合成协调任务、版本化资料及评分点 | 公开开发样本；人工答案审阅与模型运行未执行 |
+| [validation/collaboration-benchmarks.json](validation/collaboration-benchmarks.json) | 四类协作负载、指标、采样及默认观察门槛 | 测量规则；没有性能结论 |
+| [tools/verify_design.py](tools/verify_design.py) | 本地设计文件/Schema/样本/映射/导出/包校验 | 仅文档质量工具，不启动 Agent、不发网络请求 |
+| [P0-PROBE-PLAN.md](P0-PROBE-PLAN.md) | P0 探针准备、授权、证据与阶段编排 | 只读准备已定义，不是实际启动授权 |
+| [validation/p0-probe-manifest.json](validation/p0-probe-manifest.json) | 16 项探针的步骤、依赖、判据和停止条件；覆盖 33 个原客户端 COMP 子项 | 声明式清单，产品运行仍 NOT_RUN |
+| [tools/test_p0_readiness.py](tools/test_p0_readiness.py) | 三处口径修订及探针清单的离线回归 | 文档回归，不替代服务语义或客户端/隔离实测 |
+
+维护源为分章、Schema 和验证材料；合订版是派生阅读文件。管家专项直接读11，不再维护重复导出；ZIP仅在需要分享时生成，不是实施依赖。03/05 记录客户端与阶段要求；12 记录运行协议细节，避免再复制三套规则。所有相对文件路径以设计目录为根。
+
+## 2. 原客户端与隔离的联合可行性门槛
+
+### 2.1 固定实际部署，而非填写“支持”
+
+compatibility-matrix 的每条资格绑定 fingerprint：产品名称与原客户端身份、版本/build/可执行摘要、OS/build、登录/计费类型、连接协议/版本、服务/Broker/controller/worker 身份、目录 ACL 摘要、网络/插件/shell profile、工具链、配置和测试集版本。未知字段填 null/UNKNOWN，不能填推测值；账号只留匿名引用，不能记录凭据。
+
+三目标客户端分别使用实际原产品；DeepSeek 项目具体仓库/发行标识待核实。管家 API 是第四条独立验证链，不能代替任何工作客户端。原生 UI 会话无法受执行 grant 约束时，不开放相应敏感数据或写入资格。
+
+### 2.2 必须在同一配置下连续通过的纵向切片
+
+1. 原客户端按实际身份启动、登录，限定项目输入可读。
+2. 服务派任务，取得可归属的 native session/run；未启动不能显示工作中。
+3. 受控 patch → Broker → journal → Markdown → Git checkpoint；从 shell/插件/子进程/重解析路径尝试绕过应失败。
+4. 工作中查询进度：没有新 prompt/steer/cancel、模型回合或文件改变。
+5. 同成员的私密 A 与公开 B：历史/搜索/附件/MCP/本地缓存都不串域。
+6. 在明确等待点回答绑定请求；不具备输入能力的客户端明确阻塞/人工继续，不能伪造可自动恢复。
+7. 注入失联/撤权/重启：旧写者仍能写则新写者拒绝；核对后才授新 epoch。
+8. 在同一配置完成前端或后端的真实文件产物与恢复。每次改身份、插件、客户端或工具链都重新计算 fingerprint 并复验相关链路。
+
+不能把宽权限配置下的“能写”与受限配置下的“不能越权”拼成一个 PASS。每项保存输入/环境、步骤、原始证据摘要、实际结果、执行者和时间；含秘密的证据本地加密保存并按权限导出。
+
+资格为 UNVERIFIED / QUALIFIED / LIMITED / BLOCKED / EXPIRED。QUALIFIED 针对具体能力与配置；任一强制边界未知或失败不得取得该边界资格。LIMITED 必须列出需要人工操作和禁用能力。目标需要原客户端自主代码协作而只达到只读或人工继续时，对完整目标 G0=BLOCKED；替代产品必须经需求变更。无 API、无登录、版本未选等状态保留 NOT_RUN，不虚构探针结果。
+
+## 3. 计划的部分执行与整体收束
+
+### 3.1 三种不同的“完成”
+
+- plan application：任务/依赖/账本/outbox 的数据库事务已提交，不等于外部成员已启动。
+- coordinator workflow：管家本次分析/派工流程结束，不等于工作任务完成。
+- plan execution：服务跟踪整个交付范围；只有按本节收束，才可报告该范围已结束及其结果。
+
+增加逻辑对象 plan_executions：id、root_workflow_id、current_plan_ref、scope_revision、task_scope、failure_policy、lifecycle、dispatch_gate、health、outcome、aggregate_revision、control_refs、budget_reconciliation_ref。它保存引用和控制事实，不复制 task/run 真相。
+
+同一任务在同一 root 只有一个当前执行归属。scope_revision 是不可变的任务/验收/依赖清单，含每项 obligation_id；后续计划修改按原项目计划 CAS 与当前执行版本共同校验，并保存前后范围、被替换成果和影响。删除任务不等于满足原目标；取消验收义务、改变目标仍走需求批准。跨 root 的共享求助不能因本计划停止而自动取消其他用户/工作流的任务。
+
+### 3.2 分轴状态，禁止一个 completed 隐藏所有含义
+
+| 轴 | 值 | 计算/变化规则 |
+| --- | --- | --- |
+| lifecycle | active / stopping / closed | stopping 必须先关派工并发出受控停止；closed 要满足收束证据 |
+| dispatch_gate | open / paused / closed | paused 可显式恢复；closed 用于停止，不被迟到事件重新打开 |
+| health | healthy / partial_failure / blocked / unknown | 服务按当前范围计算；unknown 优先；无可推进且尚有义务时 blocked；可继续的分支与失败并存为 partial_failure |
+| outcome | null / succeeded / partial / failed / cancelled | active/stopping 必为 null；closed 必有结果 |
+
+允许的 lifecycle 转换：active→stopping→closed；正常全部完成可 active→closed。closed 不重开；后续返工建关联执行/修订并继承 root 账本，不清空成本和历史。
+
+closed 前必须：全部范围内任务有真实终态或批准的范围处置；无未核对的执行/写能力/投递结果；所有已产生成果已登记并保留；预算预留已释放或有可核查结算，未知费用没有冒充零；所有 outbox 有终局处置。未知费用可记录人工确认的上界/保留金额和结算责任，不能直接销账。保留金额是用户批准的风险处理，不是 provider 实际收费上限保证；未结费用对应预留不得重新消费，后续账单仍入同 root，超额时冻结后续支出并通知，不自动重开已结束任务。若账单长期未知且无人批准有证据的处置，保持停止且待结算，UI 不把它说成 Agent 仍在工作。
+
+结果判定：全部当前批准义务验收通过为 succeeded；停止/失败后仅一部分义务已验收为 partial；无已验收义务且用户明确终止为 cancelled；无已验收义务且执行失败终止为 failed。产出了一些文件但未验收不算 partial 成功；这些文件仍保留。改变义务要展示前后范围，不能靠删除未完成任务报告“原计划全部成功”。
+
+### 3.3 默认失败隔离策略
+
+failure_policy=dependency_isolation：服务按当前 DAG、变更集消费者、接口/环境和共享资源影响闭包阻塞受影响分支。依赖无效的活动消费者在下一写入/合并前被拦截，必要时按授权撤写，不能等它自然提交旧版成果。
+
+无关分支只在目标/验收/依赖/权限/原委派/预算仍有效且资源安全时继续；这不是失败后自动扩大授权。安全或隐私事故按实际影响范围立即隔离，范围无法确定则保守暂停整个项目派工并核对写入风险。暂停不自动证明旧写者停止。
+
+| 情形 | 相关分支 | 无关分支 | 后续动作 |
+| --- | --- | --- | --- |
+| B 确认未启动，A 已工作，C 依赖 B | B 投递受阻，C blocked | A 在原授权内继续 | 有界重试仅在能确认未执行且策略允许时；换人/扩大范围重新批准 |
+| B 启动结果未知 | B 对账，相关路径隔离，C blocked | 安全边界已知时继续，否则暂停 | 不因新 worktree、新 action_id 或超时绕过 |
+| B 已失败，A 依赖其 WIP | A 标 stale、拦后续写/合并 | 不消费该变更的分支可继续 | 对账、保留旧成果，批准后新修订重试 |
+| 部分成果验收通过，其余失败 | 不把已验收成果抹掉 | 允许范围内继续 | 管家给有证据的重规划建议，不自动降低验收 |
+| 策略/披露/数据访问撤销 | 立即阻断后续不合法发送/执行 | 仅合法范围继续 | 不能以本表覆盖撤权规则 |
+
+### 3.4 控制语义与竞态
+
+plan_control 必须绑定 action_id、plan_execution_id、expected_execution_revision、明确 mode 和用户可见影响范围。UI 不发送含义模糊的“取消”。
+
+| mode | 确定含义 | 不能暗含 |
+| --- | --- | --- |
+| pause_dispatch | 暂停此计划新增启动；在途任务按现有策略运行 | 取消在途任务、撤回已发数据 |
+| resume_dispatch | 当前授权/依赖/预算/版本重验后打开 paused | 复活已终止计划或自动重发未知命令 |
+| stop_plan | 禁止新增启动，并请求停止范围内在途任务；进入 stopping | 已经停止成功、自动回滚代码、取消跨 root 任务 |
+
+stop_plan 与派工必须在同一服务控制边界序列化：执行许可检查/许可签发记录与关闭 gate 在数据库内有先后顺序。关闭后不得新签许可；关闭前已经签发的视为在途，controller 开始前再检查控制状态。网络断开无法确认是否启动时留 unknown，最终必须核对真实进程。不能承诺撤销与远端启动跨系统原子发生。
+
+取消“管家本次分析”仍是 11 的工作流控制，不调用 stop_plan。撤销已有代码必须另建基于当前快照的 revert/修复任务，走单写者、影响分析和验收；不自动 reset、删除 worktree 或覆盖用户改动。
+
+重规划采用新的 plan revision/稳定 action_id，复用可接受成果并明确替换关系；active owner 变更仍须真实撤写/交接。费用按每任务区分未发送预留、已确认用量、未知用量；未知启动或计费不能释放成可重复消费的额度。
+
+## 4. 最小跨模块协议冻结
+
+### 4.1 边界与权威
+
+core/1.0 是本平台逻辑协议，不是某厂商 API，也不是宣称 MCP 自带这些功能。JSON Schema 格式采用 2020-12；复用定义/引用依据 [E33]，但权限、事务和竞态是本项目自行规定。
+
+Schema 冻结：apply_plan、control_plan、register_wait、consume_wait、read_wait、continuation_reply、read_action、get_plan_progress，以及 service_result、service_error、visible_event 的最小结构。它不替代所有既有平台 API；W03 在 P0 扩展其余领域并生成实际 OpenAPI/客户端类型，不能平行另定义同一字段。路由/认证传输实现由 P0 固定；真实调用目前不存在。
+
+共同要求：ID 用 UUID；revision/epoch 用十进制字符串；时间用 UTC；project_plan token 和可见 feed cursor 是服务签发的不透明值，不能暴露内部全局计数。无权对象统一 NOT_FOUND_OR_DENIED；禁止在错误中泄漏私密标题、受众数量或内部版本。
+
+外部请求不得自报 trusted actor/grant、权限、状态成功或安全域。身份取认证通道，字段中 run_id/epoch 只是绑定断言，服务必须与认证 grant 核对。人类通过 owner 控制会话调用，服务控制器使用专用服务身份；Agent 必须有执行 grant。不能给人类强塞模型 connector，也不能把 human/agent 的认证上下文混用。
+
+core get_plan_progress 必须拥有整个执行范围的读取权，否则拒绝完整聚合；使用既有逐任务接口显示授权子集且注明范围受限，不能暴露隐藏任务数量或状态。apply_plan.plan_ref 解引用后仍必须具备02/11规定的完整 payload_digest/read_set/write_set/input_snapshot 和授权引用；expected_resource_versions 使用同一服务字段。continuation_reply.input_request_id 是原生等待请求绑定，answer_ref 来自同受众的不可变回答对象；wire request_id 只追踪本次调用。
+
+所有对象 additionalProperties=false，未知 core 版本拒绝；不可控 provider 原始参数放在独立连接器协议，不塞进万能 extra 字段。枚举拒绝未知值，不静默降级。结构验证通过仅表明可解析，服务还须做权限、存在性、前置状态、CAS、撤销、预算和内容外发检查。
+
+### 4.2 操作前置与失败处置
+
+| 操作 | 服务端前置 | 提交点 | 失败处理 |
+| --- | --- | --- | --- |
+| apply_plan | 稳定 action、计划/读写集合 CAS、授权/披露/预算/验收 | 任务、依赖、执行范围、账本、outbox 同一事务 | 一项不成立整批拒绝；已提交重试读原回执并重新鉴权 |
+| control_plan | 有效 control policy、影响范围和 execution revision | gate/control receipt 与相关无效投递记录 | 旧 revision 返回冲突；外部停止未证实保持 stopping |
+| register_wait | 绑定当前 run/epoch、授权目标、白名单谓词 | wait + 当前条件检查 + 内部事件切点/通知 outbox | 重试同 ID/同参数返回原记录；异参数冲突 |
+| consume_wait | 当前合法执行/线程 lease、resolution、当前谓词/版本仍有效 | wait consumed + 唯一 continuation_inbox | 图恢复可重入，业务副作用仍 action 幂等；失效拒绝 |
+| continuation_reply | 活动 input_request、同 run/epoch、回答者及回答权限 | 回答对象与投递记录 | 失效不转新任务；不作为审批；原生支持单独探针 |
+| read_action/read_wait/get_plan_progress | 当前身份/执行范围/ACL | 只读授权投影 | 无 prompt/取消/续租/模型调用；过期 grant 拒绝 |
+
+错误至少区分：UNSUPPORTED_CONTRACT、INVALID_REQUEST、NOT_FOUND_OR_DENIED、GRANT_REVOKED、PLAN_STALE、PLAN_CONFLICT、ACTION_PAYLOAD_CONFLICT、WAIT_CONFLICT、WAIT_STALE、CURSOR_EXPIRED、INPUT_REQUEST_STALE、EXECUTION_UNKNOWN、DISCLOSURE_APPROVAL_REQUIRED、BUDGET_UNAVAILABLE。retry_class 为 never / after_refresh / after_reconcile，不直接表达“安全重发”；重试仍用原 action_id。错误不返回原始私密 payload。
+
+## 5. 等待、事件与恢复的闭环协议
+
+### 5.1 等待对象
+
+复用原有 coordinator wait，新增细化的 workflow_waits 与 continuation_inbox 逻辑记录：wait_id、workflow/run/epoch、registration_grant_ref/security_domain、step_key、target_ref、predicate、minimum_target_revision、deadline、registration_cursor（内部）、state、resolution_id/ref、revision、delivery/consume receipt。服务对账和投递必须按该等待绑定的执行授权及当前撤销/ACL校验，不使用服务自身的全局读取权替调用者放行；新 run/grant 不能仅凭相同 member 自动继承等待。
+
+同一 workflow/run/epoch/step_key 至多一个有效等待；后续等待新 step_key/wait_id，不改旧谓词。
+
+state=registered→resolved→consumed；registered 可到 expired/cancelled/invalidated；resolved 可到 cancelled/invalidated/expired。所有终态不可重开。resolved 只表示有待处理的条件满足证据，不表示已向模型提交。初版仅支持 task_terminal、task_review_ready；任意表达式/脚本谓词拒绝。谓词引用当前 task 状态与版本，不依赖模型生成事件。
+
+解析条件同时要求 target.revision ≥ minimum_target_revision、deadline 未到且授权有效。task_review_ready 表示当前候选已提交且可定位，task 为 in_review/ready_to_merge/completed 之一，候选的输入/需求/依赖仍有效；后两种状态仅防止快速前进造成漏检，不把已否决/被替换的旧候选当作结果。resolution 固定目标 revision、候选/输入/验收引用，消费时若目标 revision 或这些引用变化则保守 WAIT_STALE，由新等待读取当前事实。目标取消时未满足的 review 等待立即 invalidated 并产生授权内 wait_state_changed，不必等 deadline；撤权不向无权执行返回原因。登记时期限已过返回 WAIT_STALE，不创建能被迟到事件复活的等待。
+
+### 5.2 注册和事件到达的唯一规则
+
+1. Graph Runner 在派工前/后均可使用稳定 wait_id，但目标必须已经存在；尚未提交任务不能登记虚假目标。
+2. 服务在同一数据库写事务中验证身份/目标，读当前目标状态与 revision，保存 wait 与内部 committed cursor。若条件已成立，直接保存 resolved 和 resolution_ref，并写通知 outbox；否则 registered。
+3. 目标状态变化与事件在同一业务事务提交。事件消费者按 entity/ref 找 registered waits，再读当前权威状态与权限；满足则 CAS resolved 并写通知。不能仅按事件 payload 的旧状态判断。
+4. 因此事件先于注册时由第 2 步发现；事件晚于注册时由第 3 步发现。崩溃/丢失通知由确定性服务扫描 registered/resolved waits 并核对目标修复，不调用模型轮询。
+5. task_terminal 仅指平台任务的 completed/cancelled；取消结果可供报告，但不满足依赖成功条件。run.failed 要先映射到任务 blocked/取消处置，不能捏造 task.failed 枚举。
+6. 内部事件 coordinator_wait_resolved 在 core 可见面映射为 wait_resolved；plan_applied/计划控制归一为 plan_state_changed/control_outcome_changed。原始事件 global cursor 只在服务内部使用；可见事件按当前 execution grant 过滤，使用独立不透明 cursor，不能公开私密事件的编号缺口。
+
+### 5.3 通知、消费和恢复不能混为一件事
+
+- 传输 ACK 只表示收到了通知，不表示图已推进。客户端可重复接收同 event_id/resolution_id。
+- consume_wait 在事务内重新验证 run/epoch、撤销、目标当前谓词/依赖和等待 revision，把 resolved 改为 consumed，同时写唯一 continuation_inbox（workflow_id + wait_id + resolution_id）。成功回执丢失时，当前有权调用者重试取同一回执。
+- Runner 从持久化 inbox 取得推进 lease，用稳定 continuation_id 驱动图。checkpoint 保存成功后才确认该 continuation 处理完成；进程崩溃可重放，所有业务动作复用已有 action_id。只能保证本地恢复意图不重复创建，不能宣称图节点/外部 API exactly-once。
+- 目标在 resolved 后被取消/返工/失效、与已保存的 resolution 证据不再一致，消费时返回 WAIT_STALE 并 invalidated，不能按旧“完成”通知派新任务。仍合法的后续等待由新修订登记，不自动续命。
+- 当前 run 被撤销或取消时，等待及未消费推进意图失效。新 run 必须重新授权并读取允许的业务事实，不能复制旧私密图。平台主动撤写/阻断发送不依赖模型收到通知。
+- 事件保留期到期/cursor 失效时返回 CURSOR_EXPIRED，引导通过授权 read_wait + 当前快照重新同步；不得从头重放所有历史副作用。登记未结束的等待及其必要证据必须保留引用/pin。
+- 定期对账是服务 I/O 工作，建议 5 秒起点并加退避；不是模型循环。期限、最大积压、清理策略由 P0 固定。过期等待不会自动转为新目标，迟到事件只审计。
+- 若最终需要向原客户端发送输入，仍按 continuation_reply 独立能力/幂等/结果核对处理；缺少查询或幂等能力而结果未知时阻塞，不能把图层去重当作原生发送成功证明。
+
+### 5.4 故障注入边界
+
+FP-01 计划事务提交前；FP-02 提交后/外部启动前；FP-03 启动调用后/回执前；FP-04 目标完成后/等待登记前；FP-05 等待 resolved 后/通知前；FP-06 consume 事务后/图 checkpoint 前；FP-07 stop gate 关闭前后；FP-08 费用未知/收束前；FP-09 ACL 撤销/通知消费前；FP-10 scope/验收替换/旧结果到达。样本逐项规定预期 DB、事件、文件和禁止动作，见 protocol-fixtures，不以文字数量代替实际故障注入。
+
+protocol-fixtures 的 suite revision 为 protocol/1.1；PF-04 revision=2 将 plan.lifecycle 固定为 core 合法枚举 stopping，另以 temporal_assertions 要求在在途许可、进程/旧句柄、真实撤写、journal/文件全部对账前持续 stopping，并禁止 closed 或交接新写者。四项成立后仍须完成其他计划/费用收束义务；时序条件不是新增 DB 状态。其他 PF 与全部 NOT_RUN 状态保留。
+
+## 6. 协作效率与锁调度
+
+单写者是硬要求，不能因性能差放宽。项目级未知输出锁与 CAS 是不同机制：CAS 是短事务冲突检查，不能说所有 Agent 因 CAS 串行；性能需要实测锁持有/等待、重规划及集成成本。
+
+锁请求先提交完整规范化集合，原子获锁，禁止持有一部分再等待另一部分。发现新增写路径时先停止该候选写入，安全核对/释放或重新申请完整集合；不能边持有旧锁边无限升级为项目锁。无法安全停止时保留隔离，公平性不能强抢旧写者。
+
+调度采用服务登记的 ticket + aging：正常让最早且当前可安全满足的请求前进；项目独占请求进入等待后，暂停发放会阻挡它的新写许可，使现有写者在安全点排空。请求者自身的旧锁也必须按相同规则处理。被依赖阻塞的请求不占获锁资格；被取消/撤权请求在核对后退出。超时只能报警/请求停止，不自动授锁给下一个人。运行器不得在锁等待期间周期调用模型“再试一次”。
+
+benchmark 的四类负载：独立模块、公共契约热点、未知输出生成器、部分失败与人工接管。每类固定逻辑工作、输入版本、Agent/工具/环境 fingerprint、资源上限、随机种子与根预算，重复三次并报告全部结果；与同一多 Agent 工作集合的串行调度基线比较，不把它变成“单 Agent 替代产品”论证。
+
+指标：p50/p95 锁等待与持锁时长；ready-to-write 等待占比；项目独占次数/时长；实际工作并发度；验收交付耗时；重规划/重试/集成返工时长；每已验收义务的成本及未知用量；等待期模型调用数。多任务等待时长可重叠，不能相加冒充项目墙钟时长。
+
+默认观察线是待测设计值：独立模块中 ready-to-write 等待占比 >20%，或任一可获锁请求等待 >120 秒，必须定位并形成处置，不承诺所有机器都可满足；安全违规、永久饥饿/死锁、等待模型轮询立即阻断相应阶段。热点场景不承诺线性加速，应能解释瓶颈。P0 锁定工作量和资源后，P2 报结果并确认阈值；不得失败后删样本。可优化输出 manifest、短写阶段、只读缓存、热点 owner 和批处理，不能绕过路径锁。
+
+## 7. 管家质量评测，不只验证接口成功
+
+### 7.1 交付的 20 项公开合成样本
+
+coordinator-eval-corpus 内含固定资料/版本、输入、允许工具动作、必须发现项、禁止结论、评分权重与关联 AT/CA；不含用户真实私信、源码或密钥。资料覆盖需求与体验、接口/依赖、部分失败、人工改动、过期历史、RAG 无依据/污染/撤权、预算与原客户端能力。
+
+每个样本同时评估：证据事实是否正确；关键约束/用户目标是否漏掉；任务/依赖/影响范围是否合理；建议是否可执行；是否明确未知；是否不越权。可接受多种合理计划，不以与参考句子字面一致为标准。只给引用但引用不支持结论也扣分；模型自评或多个成员赞同不能替代人工审定。
+
+当前 oracle_status=DRAFT_REVIEW_REQUIRED。QA/需求负责人必须在运行前确认必要点、禁止点和权重，记录签名/版本并冻结；当前作者提供的答案不是已经通过独立审查的金标准。
+
+### 7.2 评测流程与门槛
+
+1. 先跑确定性格式/权限/故障测试，再经用户批准费用与外发范围使用实际 API；不得在编写方案时自动调用模型。
+2. 每样本至少三次独立运行；保存所有结果、配置/提示/图/检索版本、耗时、成本/unknown、工具轨迹和人工评分。三次仅为初始最小样本，不宣称统计稳定性。
+3. 样本必需安全约束与禁止副作用要求零违规；明确标为 critical 的需求遗漏/虚构关键事实也不能用平均分抵消。建议初始质量线：总加权得分 ≥90%，每类 ≥80%，关键检查每次通过；均为待 P0 预登记的设计阈值，不是实测成绩。
+4. 模型、工具说明、提示、RAG 或图版本变化时重跑同样本，比较质量、无关修改、成本、人工介入；升级结果不达预登记门槛时不启用新配置。
+5. 公开样本只能做开发回归。发布前由独立验收者再创建至少 5 项受控留出题及答案，冻结摘要并限制开发/模型访问；当前包未提供“隐藏题”，不能假装公开 JSON 是盲测。暴露后转回归集并补新题。留出题也不得含未授权外发数据。
+6. 答案争议记录为 oracle 缺陷；先审核并发布新 suite_revision，再同时重跑基线与候选，不能只修改失败样本分数。
+
+## 8. 四条面向普通用户的异常流程
+
+状态卡由确定性服务给事实和可用动作，管家仅补充解释/建议；API 离线时仍可完成安全控制。每张卡至少包含：发生了什么、已经保存什么、哪些部分能继续、平台正在做什么、需要用户做什么、费用/数据/成果影响、更新时间及证据入口。只显示调用者有权看的范围，不能公开私信标题或私密阻塞原因。
+
+### UX-01 失联，但尚不能确认已停止
+
+展示：“后端成员连接中断。最近已保存检查点 X；之后的修改正在核对。相关文件暂不交给其他成员，其他模块可继续。”未确认的 dirty 修改不谎称已保存。后台显示核对阶段而非假倒计时。
+
+动作：查看已保存成果；继续等待核对；请求停止并核对；安全边界确已恢复后才显示恢复/换人。没有“忽略风险强制解锁”。owner 提出停止不等于能直接解除隔离；服务验证停止/撤写与 journal 证据才可解锁。若只有重启隔离环境能完成核对，说明会影响哪些任务及最后保存点，按控制授权执行；重启本身仍非证据替代。
+
+### UX-02 一部分任务已开始，另一部分启动失败
+
+展示已开始/未开始/被依赖阻塞/已保存成果四组事实。默认按 dependency_isolation 继续安全无关分支，不需要用户逐项批准已授权细节。
+
+动作：“暂停新任务”“停止本计划并保留成果”“查看恢复建议”；恢复建议说明重试是否确认未执行、换成员/范围是否需批准、预算余量和未知费用。单击停止后显示“正在停止/核对”，不是立即“已取消全部”。最后展示原目标与实际已验收子集，不用一个百分比掩盖未完成范围。
+
+### UX-03 用户人工修改后恢复协作
+
+展示范围冻结→检查点→可人工编辑→实际 diff 已核对→受影响成员待同步/重验→可继续。实际修改超出批准范围时先隔离/请求扩展，不能把管家摘要当作放行。
+
+动作：查看真实变更；确认需求/验收变化（如有）；恢复相关任务。不受影响成员不被打断。不能仅因“通知已读”显示同步完成。由服务检验 materialized snapshot 和检查证据决定是否可恢复。
+
+### UX-04 私密要求阻止公开任务继续
+
+仅向有权用户说明缺少哪个必要约束的合法共享方式；其他成员只见不泄漏私密来源的“待授权输入”。默认不把私密原话、摘要、附件或标题放进公开卡片。
+
+动作：查看并批准精确共享载荷/接收者/用途及服务方；修改后重新批准；保持私密并暂停相关任务。内容披露与执行授权分别核对。必须约束不可共享时不得删掉它继续；用户修改目标属于独立需求决定。
+
+### 体验验收
+
+P0 用可点击草图或纸面流程验证四条路径；P1/P2 在实际服务状态上复验。至少安排三位不参与实现的目标用户/代表，记录能否辨认已保存/未知、是否知道下一步、是否理解费用/披露影响，以及是否需开发者解释内部术语。安全相关误解零容忍；建议每条关键流程无需解释完成，失败先改交互。没有参与者时保留 NOT_RUN，不用作者自检冒充用户验证。
+
+## 9. 实施冻结与退出证据
+
+| 门槛 | 新增必须交付 | 不通过时 |
+| --- | --- | --- |
+| P0 / C0 | 三客户端联合配置登记；Schema 正反例；状态/等待/控制协议签字冻结；行为 oracle 审阅；低成本异常交互验证 | 不承诺完整接入；契约冲突阻止依赖模块平行实施 |
+| P1 / C1 | 单成员真实安全闭环；部分启动/停止竞态与 FP 故障测试；等待恢复；预算/成果对账 | 不开放真实多 Agent 写入 |
+| P2 / C3 | 三成员协作；实际质量样本、效率基准、四异常服务流程；分阶段集成验收 | 报告瓶颈/受限能力，不用热闹聊天或平均分替代目标 |
+| P3–P4 / C4 | 留出题、升级回归、真实用户流程、安装/恢复与全部发布证据 | 未验证项保持 NOT_RUN，不能发布成已通过 |
+
+签字冻结清单：contract_digest、状态转换/错误表、authority/授权绑定、fault suite digest、oracle/suite revision、compatibility fingerprint、性能/质量阈值与预算、各模块负责人和验收人。后续改契约必须做影响分析、增加反例、重新生成类型/导出并按受影响范围复验。冻结是版本治理，不是声称设计永远正确。
+
+本次新增 AT-173–AT-190 与 CA-53–CA-60，复用既有 33 项 FR，不增加业务范围。当前共 190 AT + 60 CA = 250 项产品验收定义，全部 NOT_RUN。文档/Schema 检查通过不代表这些产品案例通过。

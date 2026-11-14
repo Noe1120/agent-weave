@@ -1,0 +1,965 @@
+{
+  "revision": "p0-probes/1.0",
+  "maintenance_revision": "p0-preparation-1",
+  "design_version": "1.6",
+  "kind": "declarative_probe_plan_not_executor",
+  "status": "NOT_RUN",
+  "contract_freeze_status": "NOT_FROZEN",
+  "execution_policy": {
+    "automatic_execution": false,
+    "agent_launch_authorized": false,
+    "model_calls_authorized": false,
+    "system_changes_authorized": false,
+    "data_egress_authorized": false,
+    "authorization_ref": null,
+    "budget_limit": null,
+    "unknown_cost_is_zero": false
+  },
+  "targets": [
+    {
+      "id": "COMP-1",
+      "product": "Codex",
+      "runtime_qualification": "UNVERIFIED",
+      "production_version_selected": false
+    },
+    {
+      "id": "COMP-2",
+      "product": "Claude Desktop",
+      "runtime_qualification": "UNVERIFIED",
+      "production_version_selected": false
+    },
+    {
+      "id": "COMP-3",
+      "product": "DeepSeek Harness",
+      "runtime_qualification": "UNVERIFIED",
+      "production_version_selected": false
+    },
+    {
+      "id": "COMP-4",
+      "product": "Built-in Coordinator API",
+      "runtime_qualification": "UNVERIFIED",
+      "production_version_selected": false
+    }
+  ],
+  "same_fingerprint_required": true,
+  "fingerprint_fields": [
+    "client_version",
+    "build_or_commit",
+    "executable_sha256",
+    "repository_identity",
+    "os_build",
+    "auth_type",
+    "account_reference",
+    "protocol_version",
+    "service_identity",
+    "broker_identity",
+    "controller_identity",
+    "worker_identity",
+    "acl_manifest_digest",
+    "network_profile",
+    "plugin_profile",
+    "shell_profile",
+    "toolchain_manifest",
+    "model_profile_revision",
+    "entrypoint_chain_sha256",
+    "suite_revision",
+    "core_contract_digest",
+    "authorization_revision",
+    "dataset_digest"
+  ],
+  "execution_authorization_fields": [
+    "entrypoint",
+    "account_reference",
+    "session_scope",
+    "synthetic_dataset_digest",
+    "allowed_tools",
+    "egress_destinations",
+    "budget_limit",
+    "timeout",
+    "stop_conditions",
+    "approver",
+    "expires_at"
+  ],
+  "common_evidence_fields": [
+    "probe_id",
+    "compatibility_ref",
+    "fingerprint_before",
+    "fingerprint_after",
+    "authorization_ref",
+    "executor",
+    "executed_at",
+    "actual_steps",
+    "actual_result",
+    "artifact_digests",
+    "cost_ledger",
+    "defects",
+    "oracle_reviewer",
+    "cleanup_and_revocation"
+  ],
+  "synthetic_input": {
+    "baseline_ref": "validation/protocol-fixtures.json#baseline",
+    "private_marker": "SYNTHETIC_PRIVATE_ALPHA_NO_REAL_SECRET",
+    "real_project_data_allowed": false,
+    "usable_credentials_in_artifacts_allowed": false
+  },
+  "prerequisites": [
+    {
+      "description": "单独批准入口/账号会话范围/合成数据/工具/外发/费用/时限/停止条件；本轮确认不包含启动权限。",
+      "id": "AUTH-NATIVE"
+    },
+    {
+      "description": "指定可恢复测试位置和独立身份/ACL/IPC/网络方案；系统变更获准，禁止日常账户/真实秘密攻击。",
+      "id": "ENV-ISOLATED"
+    },
+    {
+      "description": "实际服务、Broker、适配器或 API/图测试器存在且经审阅；没有产品实现则保持 NOT_RUN。",
+      "id": "EXECUTOR-READY"
+    },
+    {
+      "description": "版本化候选 core/Schema/wire/PF 与认证/传输/错误/事务及责任映射齐全。",
+      "id": "CONTRACT-CANDIDATE"
+    },
+    {
+      "description": "对应最小接口经 W03 评审冻结，生成类型和真实接口一致；修正文档不等于冻结。",
+      "id": "CONTRACT-FROZEN"
+    },
+    {
+      "description": "仅 baseline-1 合成仓库及假秘密标记；记录数据摘要和隔离目录，不复制真实凭据/聊天。",
+      "id": "DATA-SYNTHETIC"
+    },
+    {
+      "description": "用户批准 provider/model、输入、目的地、单次/总预算、重试/超时；Embedding 单独批准。",
+      "id": "AUTH-API"
+    },
+    {
+      "description": "独立验收角色到位，公开 CQ 和阈值在任何模型评分前审阅，留出题责任明确。",
+      "id": "ORACLE-REVIEW"
+    },
+    {
+      "description": "真实目标用户同意参与，草图标明非运行结果，保留原始反馈。",
+      "id": "USER-STUDY"
+    }
+  ],
+  "probes": [
+    {
+      "id": "P0-01",
+      "name": "原客户端身份、入口与会话范围",
+      "stage": "P0 minimal joint probe; P1 safety-loop revalidation",
+      "targets": [
+        "COMP-1",
+        "COMP-2",
+        "COMP-3"
+      ],
+      "compatibility_refs": [
+        "COMP-1-P1",
+        "COMP-2-P1",
+        "COMP-3-P1"
+      ],
+      "depends_on": [
+        "P0-12"
+      ],
+      "prerequisite_ids": [
+        "AUTH-NATIVE",
+        "ENV-ISOLATED",
+        "EXECUTOR-READY",
+        "CONTRACT-FROZEN",
+        "DATA-SYNTHETIC"
+      ],
+      "acceptance_refs": [
+        "AT-173",
+        "AT-174"
+      ],
+      "steps": [
+        "核对获批入口链、主程序摘要、账号类型和匿名账号引用；DeepSeek 启动器与直启分别登记，不能擅自互换。",
+        "仅在获批隔离环境打开该原客户端，建立项目专属会话；不接管现有私人聊天，不提取登录凭据。",
+        "比对实际进程/应用包、native session 与受限工作目录；为同一配置登记 fingerprint，未确认项保持 UNKNOWN。"
+      ],
+      "pass_criteria": [
+        "原客户端、入口链、进程/原生会话和执行主体可核对；没有替代产品。",
+        "配置指纹覆盖版本、身份、ACL、网络、插件、shell、工具链与会话范围；启动不等于已取得执行资格。"
+      ],
+      "fail_or_stop_conditions": [
+        "入口/实际产品不匹配、需要访问原私人会话、授权过期或出现未授权费用/外发时停止新增动作。"
+      ],
+      "evidence_required": [
+        "入口链及文件摘要",
+        "匿名认证/计费类型",
+        "进程实例与原生会话绑定",
+        "配置指纹原文的脱敏副本"
+      ],
+      "status": "NOT_RUN",
+      "actual": null,
+      "evidence_refs": []
+    },
+    {
+      "id": "P0-02",
+      "name": "任务派发与服务签发的执行绑定",
+      "stage": "P0 minimal joint probe; P1 safety-loop revalidation",
+      "targets": [
+        "COMP-1",
+        "COMP-2",
+        "COMP-3"
+      ],
+      "compatibility_refs": [
+        "COMP-1-P2",
+        "COMP-2-P2",
+        "COMP-3-P2"
+      ],
+      "depends_on": [
+        "P0-01"
+      ],
+      "prerequisite_ids": [
+        "AUTH-NATIVE",
+        "ENV-ISOLATED",
+        "EXECUTOR-READY",
+        "CONTRACT-FROZEN",
+        "DATA-SYNTHETIC"
+      ],
+      "acceptance_refs": [
+        "AT-173",
+        "AT-174",
+        "AT-179"
+      ],
+      "steps": [
+        "建立合成群与单一任务，服务签发绑定 member/run/epoch/资源范围的 grant。",
+        "只投递一次授权任务；记录原生请求及服务动作 ID，再重放同 ID 同参数与同 ID 异参数请求。",
+        "使用另一执行的凭据及自报 member/session/run 字段调用，核对越权拒绝和重复动作回执。"
+      ],
+      "pass_criteria": [
+        "原生输出归属明确，未启动不显示运行中；同动作不重复派工，异参数冲突。",
+        "伪造身份及跨执行绑定拒绝；未授权对象不泄漏存在性。"
+      ],
+      "fail_or_stop_conditions": [
+        "只凭正文身份授权、重复启动或无法关联 native run 时不授予资格。"
+      ],
+      "evidence_required": [
+        "grant/原生绑定摘要",
+        "动作账本与 outbox 投影",
+        "正反例请求及脱敏错误",
+        "执行次数"
+      ],
+      "status": "NOT_RUN",
+      "actual": null,
+      "evidence_refs": []
+    },
+    {
+      "id": "P0-03",
+      "name": "受控产物与跨 worktree 逻辑单写者",
+      "stage": "P0 minimal joint probe; P1 safety-loop revalidation",
+      "targets": [
+        "COMP-1",
+        "COMP-2",
+        "COMP-3"
+      ],
+      "compatibility_refs": [
+        "COMP-1-P3",
+        "COMP-2-P3",
+        "COMP-3-P3"
+      ],
+      "depends_on": [
+        "P0-02"
+      ],
+      "prerequisite_ids": [
+        "AUTH-NATIVE",
+        "ENV-ISOLATED",
+        "EXECUTOR-READY",
+        "CONTRACT-FROZEN",
+        "DATA-SYNTHETIC"
+      ],
+      "acceptance_refs": [
+        "AT-79",
+        "AT-85",
+        "AT-109",
+        "AT-173"
+      ],
+      "steps": [
+        "使用 protocol-fixtures 的合成仓库基线；领取 backend/api.ts 的完整实际写集合，提交一个可核对的小改动。",
+        "核对 Broker patch、journal、变更 Markdown、Git 检查点与实际文件摘要；在第二 worktree 请求同一逻辑路径写权。",
+        "让生成器声明未知写集合，再尝试输出到候选目录及其他项目路径；只有项目独占许可及完整产物核对后才能交付。"
+      ],
+      "pass_criteria": [
+        "文件 diff、journal、Markdown、checkpoint 和 changeset 一致；未声明写入被拒。",
+        "同一路径跨所有 worktree/候选输出仅一个有效写者；未提交用户成果不被覆盖。"
+      ],
+      "fail_or_stop_conditions": [
+        "能绕过 Broker 写入、同路径双写、未知写集合先运行或检查点与文件不一致时停止。"
+      ],
+      "evidence_required": [
+        "初始/最终文件摘要和真实 diff",
+        "逻辑路径规范化/锁事件",
+        "journal/Markdown/checkpoint 关联",
+        "第二 worktree 拒绝证据"
+      ],
+      "status": "NOT_RUN",
+      "actual": null,
+      "evidence_refs": []
+    },
+    {
+      "id": "P0-04",
+      "name": "shell、插件、生成器与路径旁路",
+      "stage": "P0 minimal joint probe; P1 safety-loop revalidation",
+      "targets": [
+        "COMP-1",
+        "COMP-2",
+        "COMP-3"
+      ],
+      "compatibility_refs": [
+        "COMP-1-P4",
+        "COMP-2-P4",
+        "COMP-3-P4"
+      ],
+      "depends_on": [
+        "P0-03"
+      ],
+      "prerequisite_ids": [
+        "AUTH-NATIVE",
+        "ENV-ISOLATED",
+        "EXECUTOR-READY",
+        "CONTRACT-FROZEN",
+        "DATA-SYNTHETIC"
+      ],
+      "acceptance_refs": [
+        "AT-84",
+        "AT-85",
+        "AT-86"
+      ],
+      "steps": [
+        "在独立可恢复环境准备假凭据、测试 DB/快照和第二 worktree；固定 Worker 实际身份与授权路径。",
+        "分别从 shell、插件、子进程及生成器直接读写未授权 worktree、DB、快照、假凭据和 .git；测试路径穿越、junction、hard link。",
+        "若配置存在 WSL 或其他执行域，为其单独记录主体/映射并测试；未配置的域不得临时开启或默认为已通过。"
+      ],
+      "pass_criteria": [
+        "OS/受控网关实际拒绝越界读写，正常授权路径仍可工作。",
+        "旁路反例与成功产物使用同一配置，不能用换权限得到的两份结果拼接。"
+      ],
+      "fail_or_stop_conditions": [
+        "越界成功、ACL/主体无法核对或测试需触及真实秘密时立即停止该资格链。"
+      ],
+      "evidence_required": [
+        "SID/ACL/IPC 与网络配置摘要",
+        "每种旁路路径和拒绝事件",
+        "受保护文件前后摘要",
+        "环境恢复记录"
+      ],
+      "status": "NOT_RUN",
+      "actual": null,
+      "evidence_refs": []
+    },
+    {
+      "id": "P0-05",
+      "name": "同成员私密 A 与公开 B 的执行隔离",
+      "stage": "P0 minimal joint probe; P1 safety-loop revalidation",
+      "targets": [
+        "COMP-1",
+        "COMP-2",
+        "COMP-3"
+      ],
+      "compatibility_refs": [
+        "COMP-1-P5",
+        "COMP-2-P5",
+        "COMP-3-P5"
+      ],
+      "depends_on": [
+        "P0-02"
+      ],
+      "prerequisite_ids": [
+        "AUTH-NATIVE",
+        "ENV-ISOLATED",
+        "EXECUTOR-READY",
+        "CONTRACT-FROZEN",
+        "DATA-SYNTHETIC"
+      ],
+      "acceptance_refs": [
+        "AT-81",
+        "AT-82",
+        "AT-83",
+        "AT-105",
+        "AT-106"
+      ],
+      "steps": [
+        "在私密执行 A 放入合成标记 SYNTHETIC_PRIVATE_ALPHA_NO_REAL_SECRET，建立同成员公开执行 B。",
+        "B 分别通过历史、搜索、摘要、附件、MCP、原生记忆/插件缓存、旧 cursor、下载引用、恢复和导出尝试取得 A 内容。",
+        "撤销 A grant 或收紧策略，再测试长连接事件、缓存命中、重放及新快照；同时检查未读/占位/序号是否泄漏私密活动。"
+      ],
+      "pass_criteria": [
+        "公开 B 及其他成员不能得到私密内容或活动元数据；旧引用和原生缓存不能绕过。",
+        "每次调用按当前成员策略、执行 grant、资源 ACL、撤销状态重新求交集。"
+      ],
+      "fail_or_stop_conditions": [
+        "任一跨域泄漏或原生应用级记忆不能隔离时禁止该私密/公开组合，不以新聊天代替证明。"
+      ],
+      "evidence_required": [
+        "A/B 执行及原生上下文绑定",
+        "各读取通道正反例矩阵",
+        "撤销前后事件/缓存证据",
+        "标记未泄漏检查"
+      ],
+      "status": "NOT_RUN",
+      "actual": null,
+      "evidence_refs": []
+    },
+    {
+      "id": "P0-06",
+      "name": "进度查询零模型调用与普通输入排队",
+      "stage": "P0 minimal joint probe; P1 safety-loop revalidation",
+      "targets": [
+        "COMP-1",
+        "COMP-2",
+        "COMP-3"
+      ],
+      "compatibility_refs": [
+        "COMP-1-P6",
+        "COMP-2-P6",
+        "COMP-3-P6"
+      ],
+      "depends_on": [
+        "P0-03"
+      ],
+      "prerequisite_ids": [
+        "AUTH-NATIVE",
+        "ENV-ISOLATED",
+        "EXECUTOR-READY",
+        "CONTRACT-FROZEN",
+        "DATA-SYNTHETIC"
+      ],
+      "acceptance_refs": [
+        "AT-54",
+        "AT-55",
+        "AT-56",
+        "AT-57",
+        "AT-58",
+        "AT-162",
+        "AT-173",
+        "CA-04",
+        "CA-05"
+      ],
+      "steps": [
+        "在单一授权任务运行期间记录模型回合/输入/控制调用计数、工作 run/epoch 和文件摘要。",
+        "发出三次 progress_query，仅读取状态投影；记录观测时间和已保存检查点，重复比对计数和副作用。 正常任务写入可以继续；按事件因果区分查询副作用，不要求工作区总文件变化为零。",
+        "再提交一条普通问题，确认只登记队列及排队回执；断开管家模型连接后重复只读查询。"
+      ],
+      "pass_criteria": [
+        "三次查询新增模型回合、prompt/steer/cancel、抢占及查询导致写入均为零。",
+        "普通问题等待当前任务自然结束，基础状态查询不依赖管家模型。"
+      ],
+      "fail_or_stop_conditions": [
+        "查询向工作 turn 投递输入、调用任一模型或显示无法证实的实时状态时失败。"
+      ],
+      "evidence_required": [
+        "查询前后调用计数",
+        "状态投影与来源时间",
+        "工作执行连续性",
+        "队列/回执及文件证据"
+      ],
+      "status": "NOT_RUN",
+      "actual": null,
+      "evidence_refs": []
+    },
+    {
+      "id": "P0-07",
+      "name": "等待请求、定向回答与恢复能力分项",
+      "stage": "P0 minimal joint probe; P1 safety-loop revalidation",
+      "targets": [
+        "COMP-1",
+        "COMP-2",
+        "COMP-3"
+      ],
+      "compatibility_refs": [
+        "COMP-1-P7",
+        "COMP-2-P7",
+        "COMP-3-P7"
+      ],
+      "depends_on": [
+        "P0-02"
+      ],
+      "prerequisite_ids": [
+        "AUTH-NATIVE",
+        "ENV-ISOLATED",
+        "EXECUTOR-READY",
+        "CONTRACT-FROZEN",
+        "DATA-SYNTHETIC"
+      ],
+      "acceptance_refs": [
+        "AT-100",
+        "AT-101",
+        "AT-102",
+        "AT-103",
+        "AT-104",
+        "AT-108",
+        "AT-180",
+        "AT-181",
+        "AT-182",
+        "AT-190"
+      ],
+      "steps": [
+        "使授权任务到达一个明确的用户输入等待点，登记原生 request_id 与服务 input_request/run/epoch/audience。",
+        "发送匹配 continuation_reply，再重发相同答复、迟到答复、另一 run/epoch 答复及私密答复到公开等待；与权限审批分开测试。",
+        "在注册前已满足、通知丢失、消费提交后图未存三处注入可恢复故障，核对唯一 continuation 意图及外部动作账本。"
+      ],
+      "pass_criteria": [
+        "can_request_input、can_accept_input_reply、can_resume_waiting_operation 分别由证据判定，不能按方法同名推断。",
+        "合法答复恢复绑定等待，不排到任务结束后；非法答复拒绝且不转新任务，不重复真实副作用。"
+      ],
+      "fail_or_stop_conditions": [
+        "绑定无法建立、审批混成答复、重复执行或公开执行接收未披露私密答案时停止。"
+      ],
+      "evidence_required": [
+        "三项能力各自原生事件",
+        "等待/消费/continuation 账本",
+        "重复/过期/跨域反例",
+        "故障点前后证据"
+      ],
+      "status": "NOT_RUN",
+      "actual": null,
+      "evidence_refs": []
+    },
+    {
+      "id": "P0-08",
+      "name": "撤权后的真实写能力与旧句柄",
+      "stage": "P0 minimal joint probe; P1 safety-loop revalidation",
+      "targets": [
+        "COMP-1",
+        "COMP-2",
+        "COMP-3"
+      ],
+      "compatibility_refs": [
+        "COMP-1-P8",
+        "COMP-2-P8",
+        "COMP-3-P8"
+      ],
+      "depends_on": [
+        "P0-03"
+      ],
+      "prerequisite_ids": [
+        "AUTH-NATIVE",
+        "ENV-ISOLATED",
+        "EXECUTOR-READY",
+        "CONTRACT-FROZEN",
+        "DATA-SYNTHETIC"
+      ],
+      "acceptance_refs": [
+        "AT-79",
+        "AT-80",
+        "AT-84",
+        "AT-106"
+      ],
+      "steps": [
+        "仅在合成测试目录让受测 Worker 保持子进程和预打开文件句柄；记录进程创建时间和资源归属。",
+        "撤销执行 grant 并请求取消，随后尝试从旧句柄/子进程继续写，同时在另一 worktree 请求同路径新 epoch。",
+        "执行获批撤写措施，核对进程树、句柄、journal 和文件；仅在旧写能力已失效且对账完成后测试重新分配。"
+      ],
+      "pass_criteria": [
+        "撤 token/cancel/超时本身不产生安全交接；旧写能力未知时拒绝新写者。",
+        "撤写证据、进程核对与文件/journal 对账全部成立后才允许新 epoch。"
+      ],
+      "fail_or_stop_conditions": [
+        "有旧写能力却交锁，或测试需要终止用户日常进程时立即停止新增动作。"
+      ],
+      "evidence_required": [
+        "旧句柄/子进程实例证据",
+        "撤权及写入尝试轨迹",
+        "新写者拒绝/获准时序",
+        "完整对账和新 epoch"
+      ],
+      "status": "NOT_RUN",
+      "actual": null,
+      "evidence_refs": []
+    },
+    {
+      "id": "P0-09",
+      "name": "失联、停止与重启对账",
+      "stage": "P0 minimal joint probe; P1 safety-loop revalidation",
+      "targets": [
+        "COMP-1",
+        "COMP-2",
+        "COMP-3"
+      ],
+      "compatibility_refs": [
+        "COMP-1-P9",
+        "COMP-2-P9",
+        "COMP-3-P9"
+      ],
+      "depends_on": [
+        "P0-08"
+      ],
+      "prerequisite_ids": [
+        "AUTH-NATIVE",
+        "ENV-ISOLATED",
+        "EXECUTOR-READY",
+        "CONTRACT-FROZEN",
+        "DATA-SYNTHETIC"
+      ],
+      "acceptance_refs": [
+        "AT-175",
+        "AT-176",
+        "AT-177",
+        "AT-178",
+        "AT-190"
+      ],
+      "steps": [
+        "按 PF-04 建 A 已签许可但启动未知、B 未签许可的场景，关闭派工 gate，并在 A 回执处断网。",
+        "尝试 B 签许可、重复 stop_plan、迟到启动/完成事件；确认 lifecycle 保持 stopping，并保存已提交和 dirty 成果。",
+        "恢复服务通信后核对许可、进程/句柄、撤写、journal/文件以及费用 unknown；完成全部计划义务后才允许闭合。"
+      ],
+      "pass_criteria": [
+        "在途许可纳入核对，新许可拒绝；stopping 时序断言成立，迟到事件不复活计划。",
+        "不自动 reset/删除，不把未知成本计零；stop_plan 整个执行范围的派工 gate 保持关闭，不借无关分支继续签新许可。"
+      ],
+      "fail_or_stop_conditions": [
+        "超时即显示已停止、提前交锁/清账、丢成果或自动重发未知启动时失败。"
+      ],
+      "evidence_required": [
+        "PF-04 修订号和故障时刻",
+        "control receipt/许可/事件账本",
+        "temporal_assertions 各门槛证据",
+        "成果及费用对账"
+      ],
+      "status": "NOT_RUN",
+      "actual": null,
+      "evidence_refs": []
+    },
+    {
+      "id": "P0-10",
+      "name": "首次模型输入及工具外发边界",
+      "stage": "P0 minimal joint probe; P1 safety-loop revalidation",
+      "targets": [
+        "COMP-1",
+        "COMP-2",
+        "COMP-3"
+      ],
+      "compatibility_refs": [
+        "COMP-1-P10",
+        "COMP-2-P10",
+        "COMP-3-P10"
+      ],
+      "depends_on": [
+        "P0-02"
+      ],
+      "prerequisite_ids": [
+        "AUTH-NATIVE",
+        "ENV-ISOLATED",
+        "EXECUTOR-READY",
+        "CONTRACT-FROZEN",
+        "DATA-SYNTHETIC"
+      ],
+      "acceptance_refs": [
+        "AT-173",
+        "AT-156",
+        "AT-157",
+        "AT-158",
+        "AT-159",
+        "AT-160"
+      ],
+      "steps": [
+        "在任何发送前固定获批合成输入、目的地、用途和额度；阅读/联网权限不能充当数据发送权限。",
+        "分别尝试获批合成输入、未获批目的地、合成私密标记、工具上传和发布动作；对真正发出的每项记录脱敏摘要。",
+        "撤销外发授权后从原生模型输入、插件、工具和恢复路径再次尝试；无法观测/阻断原生外发时记录边界不成立。",
+        "对获批目的地的重定向/解析地址改变、DNS/query 携带标记及工具用途变化重新验证；不得以域名允许放行任意载荷。"
+      ],
+      "pass_criteria": [
+        "只有精确获批数据流可离机；未授权输入/工具上传/发布在传输前阻断。",
+        "计费按真实预留/确认/unknown 记录，模型服务方不被静默替换。"
+      ],
+      "fail_or_stop_conditions": [
+        "真实敏感数据进入探针、目的地不可核对、额度未设或发生未授权发送时停止。"
+      ],
+      "evidence_required": [
+        "发送前决策及授权引用",
+        "目的地/载荷摘要",
+        "原生和工具出口拒绝证据",
+        "费用账本与撤销后结果"
+      ],
+      "status": "NOT_RUN",
+      "actual": null,
+      "evidence_refs": []
+    },
+    {
+      "id": "P0-11",
+      "name": "完整检查点与原仓库不可用时恢复",
+      "stage": "P0 minimal joint probe; P1 safety-loop revalidation",
+      "targets": [
+        "COMP-1",
+        "COMP-2",
+        "COMP-3"
+      ],
+      "compatibility_refs": [
+        "COMP-1-P11",
+        "COMP-2-P11",
+        "COMP-3-P11"
+      ],
+      "depends_on": [
+        "P0-09"
+      ],
+      "prerequisite_ids": [
+        "AUTH-NATIVE",
+        "ENV-ISOLATED",
+        "EXECUTOR-READY",
+        "CONTRACT-FROZEN",
+        "DATA-SYNTHETIC"
+      ],
+      "acceptance_refs": [
+        "AT-109",
+        "AT-107",
+        "AT-173"
+      ],
+      "steps": [
+        "P0 的同配置链先证明最小真实产物与恢复；P1 使用完整闭包执行下列全量恢复，不以本清单代替 G1。",
+        "在合成环境备份 DB/对象/ACL、必要 Git 对象/refs/checkpoint、index/dirty/允许保留的未跟踪成果；不打包可用凭据。",
+        "在另一个干净测试位置且原仓库不可用、无原对象缓存/远端依赖时恢复；撤销旧 grants/leases，核对产物、权限、费用与运行状态。"
+      ],
+      "pass_criteria": [
+        "原仓库不可用时仍能恢复完整成果和关联，历史授权/任务不自动重放。",
+        "G1 还需 AT-109 的人工介入、环境清单、root 预算、受保护验收；不能以单个备份文件替代。"
+      ],
+      "fail_or_stop_conditions": [
+        "只恢复 DB/提交哈希、依赖原对象库、执行仓库 hook/安装脚本或发现凭据入包时停止。"
+      ],
+      "evidence_required": [
+        "备份闭包/对象摘要",
+        "干净目标和原源不可用证据",
+        "恢复前后 diff/ACL/引用对照",
+        "旧授权失效及人工恢复调度记录"
+      ],
+      "status": "NOT_RUN",
+      "actual": null,
+      "evidence_refs": []
+    },
+    {
+      "id": "P0-12",
+      "name": "core 契约冻结与服务语义故障清单",
+      "stage": "P0 freeze; P1 fault-suite revalidation",
+      "targets": [
+        "PLATFORM"
+      ],
+      "compatibility_refs": [],
+      "depends_on": [],
+      "prerequisite_ids": [
+        "CONTRACT-CANDIDATE",
+        "EXECUTOR-READY",
+        "DATA-SYNTHETIC"
+      ],
+      "acceptance_refs": [
+        "AT-179",
+        "AT-180",
+        "AT-181",
+        "AT-182",
+        "AT-190",
+        "CA-53",
+        "CA-54"
+      ],
+      "steps": [
+        "以 core/1.0、26 个 wire 样例和 protocol/1.1 的 16 个 PF 为候选，登记字段/状态/错误、认证身份来源、接口/传输与责任人。",
+        "由实际服务适配器逐个执行结构合法但语义应拒绝的越权/旧版本/幂等冲突请求；对 plan control、等待注册/消费等事务切点注入 PF 故障。",
+        "核对 DB/事件/文件/时序断言、生成类型/OpenAPI 与真实接口；审核人签署摘要和冻结记录，未完成时保持 NOT_FROZEN。"
+      ],
+      "pass_criteria": [
+        "严格未知字段规则及合法 lifecycle 与实际服务一致；结构通过不冒充服务语义成功。",
+        "冻结记录含实际契约摘要、责任人与评审证据，未实现的接口不得写为已冻结。"
+      ],
+      "fail_or_stop_conditions": [
+        "未有实际接口/适配器、字段分叉、未闭合故障语义或将离线检查标成产品通过时停止冻结。"
+      ],
+      "evidence_required": [
+        "契约/样例摘要与审阅记录",
+        "OpenAPI/类型/传输认证映射",
+        "各 wire/PF 运行输出",
+        "冻结或阻止冻结的精确结论"
+      ],
+      "status": "NOT_RUN",
+      "actual": null,
+      "evidence_refs": []
+    },
+    {
+      "id": "P0-13",
+      "name": "用户 API 管家的最小合成能力与成本",
+      "stage": "P0 coordinator C0",
+      "targets": [
+        "COMP-4"
+      ],
+      "compatibility_refs": [],
+      "depends_on": [],
+      "prerequisite_ids": [
+        "AUTH-API",
+        "DATA-SYNTHETIC",
+        "EXECUTOR-READY"
+      ],
+      "acceptance_refs": [
+        "AT-161",
+        "CA-01",
+        "CA-02",
+        "CA-03",
+        "CA-04"
+      ],
+      "steps": [
+        "固定获批 provider/model、服务地址、合成输入、单次/累计额度及 timeout；密钥由安全配置注入，不进入提示/图/日志。",
+        "以小合成任务分别验证文本、tool call、结构化输出和拒绝；对截断、限流、超时及缺失 usage 记录实际行为。",
+        "禁用模型连接后验证状态查询/取消/人工入口仍可用；Embedding 仅在其独立授权存在时另建探针运行。"
+      ],
+      "pass_criteria": [
+        "按实测能力开放只读或受限工具，未知能力不标支持；失败/未知成本不按零处理。",
+        "不上传项目数据，不用管家 API 取代三个指定工作客户端。"
+      ],
+      "fail_or_stop_conditions": [
+        "预算/数据去向未确认、密钥进入记录、静默切 provider 或自动补发未知费用请求时停止。"
+      ],
+      "evidence_required": [
+        "脱敏模型能力矩阵",
+        "请求/回复/截断/错误摘要",
+        "费用与重试记录",
+        "模型离线基础控制证据"
+      ],
+      "status": "NOT_RUN",
+      "actual": null,
+      "evidence_refs": []
+    },
+    {
+      "id": "P0-14",
+      "name": "管家委派、披露、并发与 RAG 恢复",
+      "stage": "P0 design review; C1/C2 and P1/P2 execution",
+      "targets": [
+        "COMP-4",
+        "PLATFORM"
+      ],
+      "compatibility_refs": [],
+      "depends_on": [
+        "P0-12",
+        "P0-13"
+      ],
+      "prerequisite_ids": [
+        "AUTH-API",
+        "CONTRACT-FROZEN",
+        "DATA-SYNTHETIC",
+        "EXECUTOR-READY"
+      ],
+      "acceptance_refs": [
+        "AT-163",
+        "AT-164",
+        "AT-165",
+        "AT-166",
+        "AT-167",
+        "AT-168",
+        "AT-170",
+        "CA-12",
+        "CA-15",
+        "CA-16",
+        "CA-56",
+        "CA-57"
+      ],
+      "steps": [
+        "使用合成公开/私密资料运行 propose_only；分别批准计划版本与精确 disclosure_revision，再尝试扩大接收者或替换载荷。",
+        "让两个图/人工编辑同时修改同一计划头，重放相同 action_id 及异参数请求；在业务提交后图 checkpoint 前断开。",
+        "收紧来源 ACL 后恢复旧图/摘要/检索缓存，核对当前授权、来源版本、唯一动作回执和 unknown 外部结果的对账。",
+        "将管家图置于登记等待，在目标先完成、通知丢失、消费后图未存、目标返工/撤权/超时四类切点恢复；核对当前谓词与 continuation/action 去重，不重放旧副作用。",
+        "在思考、应用和派送前分别撤销审批；改变披露接收者/provider/用途后旧批准失效。对 RAG 的固定约束、索引滞后/无依据/恶意资料单独检查；Embedding 变更仅用已授权或离线合成索引。"
+      ],
+      "pass_criteria": [
+        "无批准不派工，批准计划不自动披露；版本 CAS 与动作幂等无重复副作用。",
+        "恢复前重新授权；来源过期/撤销不能被旧 checkpoint 或索引绕过。"
+      ],
+      "fail_or_stop_conditions": [
+        "模型直接改业务表/权限、越权检索、重复派工或恢复旧审批时停止。"
+      ],
+      "evidence_required": [
+        "图/服务版本与动作账本",
+        "披露载荷摘要及独立批准",
+        "并发/崩溃切点结果",
+        "RAG 来源 ACL/版本和拒绝"
+      ],
+      "status": "NOT_RUN",
+      "actual": null,
+      "evidence_refs": []
+    },
+    {
+      "id": "P0-15",
+      "name": "质量 oracle、留出题与效率阈值预登记",
+      "stage": "P0 preregistration; P2 actual quality/efficiency evaluation",
+      "targets": [
+        "QA",
+        "PRODUCT"
+      ],
+      "compatibility_refs": [],
+      "depends_on": [],
+      "prerequisite_ids": [
+        "ORACLE-REVIEW",
+        "DATA-SYNTHETIC"
+      ],
+      "acceptance_refs": [
+        "AT-184",
+        "AT-185",
+        "AT-186",
+        "AT-187",
+        "CA-58",
+        "CA-59"
+      ],
+      "steps": [
+        "独立审核 20 项公开 CQ 的依据/遗漏/权限/依赖和禁止结论；争议修改 oracle revision，不能作者自评冒充独立验收。",
+        "冻结评分规则、关键错误否决、重复次数、费用和外发上限；安排独立留出题，公开题明确只作开发回归。",
+        "预登记四类协作负载的同工作集合串行基线、锁指标/集成返工/成本与停止扩展条件；不执行模型或声称获得性能结果。"
+      ],
+      "pass_criteria": [
+        "参考答案/阈值/重复次数/责任和数据范围可复核，关键失败不能被平均分抵消。",
+        "质量/效率真实运行另存证据，P2 之前的预登记不当作实测合格。"
+      ],
+      "fail_or_stop_conditions": [
+        "没有独立审核、阈值在看结果后修改、公开题冒充盲测或把模拟性能当实测时不得放行。"
+      ],
+      "evidence_required": [
+        "审核人与版本化 oracle",
+        "冻结阈值/次数/预算",
+        "留出责任记录而非公开答案",
+        "四负载采样与串行对照规则"
+      ],
+      "status": "NOT_RUN",
+      "actual": null,
+      "evidence_refs": []
+    },
+    {
+      "id": "P0-16",
+      "name": "四异常用户流程低成本理解验证",
+      "stage": "P0 low-cost UX; P2/P3 real user acceptance",
+      "targets": [
+        "PRODUCT",
+        "QA"
+      ],
+      "compatibility_refs": [],
+      "depends_on": [],
+      "prerequisite_ids": [
+        "USER-STUDY",
+        "DATA-SYNTHETIC"
+      ],
+      "acceptance_refs": [
+        "AT-188",
+        "AT-189",
+        "CA-60"
+      ],
+      "steps": [
+        "从 12 章 UX-01 至 UX-04 制作标明合成/非运行结果的状态卡：失联、部分执行/停止、人工修改、私密约束披露。",
+        "让已同意参与的目标用户分别说明已保存内容、未知状态、可继续范围及下一步；不先提示正确答案，也不代填用户反馈。",
+        "记录误解和所选动作，修订文案后重测；停止核对不能显示假完成，披露必须预览精确载荷与服务方。"
+      ],
+      "pass_criteria": [
+        "真实参与者可辨认保存点/未知/安全下一步；无强制解锁、私密泄漏或以通知冒充同步。",
+        "草图验证与完整产品体验验收分开保存，不声称 UI 已实现。"
+      ],
+      "fail_or_stop_conditions": [
+        "未有参与者、用作者猜测填反馈或界面引导绕过隔离/披露时不标通过。"
+      ],
+      "evidence_required": [
+        "草图版本与合成范围标注",
+        "参与同意和匿名角色",
+        "原始反馈/选择",
+        "修订与复测记录"
+      ],
+      "status": "NOT_RUN",
+      "actual": null,
+      "evidence_refs": []
+    }
+  ],
+  "global_stop_conditions": [
+    "越权/跨域/未授权发送/实际写边界失效时停止新增动作并保全证据，不通过超时强制解锁。",
+    "未知执行保持隔离和对账，不能把断联等同停止、重试清零或用新 worktree 逃避。",
+    "配置指纹变化使关联资格待复验；不静默更换客户端、入口、服务方或放宽验收。",
+    "费用或输入范围未获批时不做真实调用；故障清理仅作用于获批测试资源。"
+  ],
+  "result_policy": "Copy templates into a separate restricted run-evidence directory; never overwrite design NOT_RUN templates. Record negative/unknown outcomes honestly; no G0/G1 qualification follows from document checks."
+}

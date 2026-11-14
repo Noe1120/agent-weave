@@ -1,0 +1,11 @@
+CREATE TABLE policies (id TEXT PRIMARY KEY, project_id TEXT NOT NULL, data TEXT NOT NULL CHECK(json_valid(data)));
+CREATE TABLE runs (id TEXT PRIMARY KEY, project_id TEXT NOT NULL, data TEXT NOT NULL CHECK(json_valid(data)));
+CREATE TABLE grants (id TEXT PRIMARY KEY, project_id TEXT NOT NULL, token_hash TEXT NOT NULL UNIQUE, data TEXT NOT NULL CHECK(json_valid(data)));
+CREATE TABLE resources (id TEXT PRIMARY KEY, project_id TEXT NOT NULL, kind TEXT NOT NULL, revision TEXT NOT NULL, domain TEXT NOT NULL, acl TEXT NOT NULL CHECK(json_valid(acl)), dependencies TEXT NOT NULL CHECK(json_valid(dependencies)), data TEXT NOT NULL CHECK(json_valid(data)));
+CREATE INDEX resources_project ON resources(project_id,kind);
+CREATE TABLE project_heads (project_id TEXT PRIMARY KEY, token TEXT NOT NULL);
+CREATE TABLE actions (action_id TEXT PRIMARY KEY, project_id TEXT NOT NULL, grant_id TEXT NOT NULL, operation TEXT NOT NULL, fingerprint TEXT NOT NULL, request TEXT NOT NULL CHECK(json_valid(request)), receipt TEXT NOT NULL CHECK(json_valid(receipt)), resource_ids TEXT NOT NULL CHECK(json_valid(resource_ids)));
+CREATE TABLE waits (wait_id TEXT PRIMARY KEY, project_id TEXT NOT NULL, grant_id TEXT NOT NULL, workflow_id TEXT NOT NULL, run_id TEXT NOT NULL, run_epoch TEXT NOT NULL, step_key TEXT NOT NULL, target_task_id TEXT NOT NULL, state TEXT NOT NULL CHECK(state IN ('registered','resolved','consumed','cancelled','expired','invalidated')), data TEXT NOT NULL CHECK(json_valid(data)));
+CREATE UNIQUE INDEX active_wait ON waits(workflow_id,run_id,run_epoch,step_key) WHERE state IN ('registered','resolved');
+CREATE TABLE outbox (id TEXT PRIMARY KEY, project_id TEXT NOT NULL, grant_id TEXT NOT NULL, kind TEXT NOT NULL, aggregate_id TEXT NOT NULL, payload TEXT NOT NULL CHECK(json_valid(payload)), state TEXT NOT NULL DEFAULT 'pending' CHECK(state='pending'));
+CREATE TABLE continuation_inbox (id TEXT PRIMARY KEY, project_id TEXT NOT NULL, grant_id TEXT NOT NULL, workflow_id TEXT NOT NULL, source_id TEXT NOT NULL, resolution_id TEXT NOT NULL, payload TEXT NOT NULL CHECK(json_valid(payload)), state TEXT NOT NULL DEFAULT 'pending' CHECK(state='pending'), UNIQUE(workflow_id,source_id,resolution_id));

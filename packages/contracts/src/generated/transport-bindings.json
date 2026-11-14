@@ -1,0 +1,89 @@
+{
+  "revision": "core-http/0.1",
+  "host": "127.0.0.1",
+  "core": [
+    {
+      "operation": "apply_plan",
+      "method": "POST",
+      "path": "/v1/core/apply_plan"
+    },
+    {
+      "operation": "control_plan",
+      "method": "POST",
+      "path": "/v1/core/control_plan"
+    },
+    {
+      "operation": "register_wait",
+      "method": "POST",
+      "path": "/v1/core/register_wait"
+    },
+    {
+      "operation": "consume_wait",
+      "method": "POST",
+      "path": "/v1/core/consume_wait"
+    },
+    {
+      "operation": "read_wait",
+      "method": "POST",
+      "path": "/v1/core/read_wait"
+    },
+    {
+      "operation": "continuation_reply",
+      "method": "POST",
+      "path": "/v1/core/continuation_reply"
+    },
+    {
+      "operation": "read_action",
+      "method": "POST",
+      "path": "/v1/core/read_action"
+    },
+    {
+      "operation": "get_plan_progress",
+      "method": "POST",
+      "path": "/v1/core/get_plan_progress"
+    }
+  ],
+  "resources": [
+    {
+      "resource_type": "grant",
+      "method": "GET",
+      "path": "/v1/projects/{project_id}/grant/{id}"
+    },
+    {
+      "resource_type": "input_request",
+      "method": "GET",
+      "path": "/v1/projects/{project_id}/input_request/{id}"
+    },
+    {
+      "resource_type": "changeset",
+      "method": "GET",
+      "path": "/v1/projects/{project_id}/changeset/{id}"
+    },
+    {
+      "resource_type": "root",
+      "method": "GET",
+      "path": "/v1/projects/{project_id}/root/{id}"
+    },
+    {
+      "resource_type": "environment",
+      "method": "GET",
+      "path": "/v1/projects/{project_id}/environment/{id}"
+    },
+    {
+      "resource_type": "acceptance",
+      "method": "GET",
+      "path": "/v1/projects/{project_id}/acceptance/{id}"
+    }
+  ],
+  "transport_errors": {
+    "400": "BAD_REQUEST",
+    "401": "UNAUTHENTICATED",
+    "403": "UNTRUSTED_ORIGIN_OR_HOST",
+    "404": "NOT_FOUND_OR_DENIED",
+    "405": "METHOD_NOT_ALLOWED",
+    "413": "BODY_TOO_LARGE",
+    "415": "UNSUPPORTED_MEDIA_TYPE",
+    "500": "INTERNAL_ERROR"
+  },
+  "qualification": "REFERENCE_BASELINE_NOT_FULL_DOMAIN_API"
+}

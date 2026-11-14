@@ -1,0 +1,668 @@
+{
+  "suite_revision": "wire/1.0",
+  "platform_design_version": "1.6",
+  "schema": "core.schema.json",
+  "runtime_status": "NOT_RUN",
+  "examples": [
+    {
+      "id": "WIRE-01",
+      "expected_schema_valid": true,
+      "expected_service_behavior": "NOT_EXECUTED",
+      "reason": "结构有效；真实服务仍须检查授权/版本/预算",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "apply_plan",
+        "request_id": "00000000-0000-4000-8000-000000000002",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "action_id": "00000000-0000-4000-8000-000000000003",
+        "plan_ref": {
+          "id": "00000000-0000-4000-8000-000000000004",
+          "revision": "1"
+        },
+        "expected_plan_token": "opaque-example-plan-token-001",
+        "approval_refs": [
+          {
+            "id": "00000000-0000-4000-8000-000000000006",
+            "revision": "1"
+          }
+        ],
+        "disclosure_refs": [],
+        "delegation_ref": null,
+        "expected_resource_versions": [
+          {
+            "entity_type": "task",
+            "ref": {
+              "id": "00000000-0000-4000-8000-000000000005",
+              "revision": "1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "WIRE-02",
+      "expected_schema_valid": true,
+      "expected_service_behavior": "NOT_EXECUTED",
+      "reason": "停止不是代码回滚",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "control_plan",
+        "request_id": "00000000-0000-4000-8000-000000000007",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "action_id": "00000000-0000-4000-8000-000000000008",
+        "plan_execution_id": "00000000-0000-4000-8000-000000000009",
+        "expected_execution_revision": "2",
+        "mode": "stop_plan",
+        "impact_scope_ref": {
+          "id": "00000000-0000-4000-8000-000000000010",
+          "revision": "1"
+        }
+      }
+    },
+    {
+      "id": "WIRE-03",
+      "expected_schema_valid": true,
+      "expected_service_behavior": "NOT_EXECUTED",
+      "reason": "服务事务内检查当前目标条件",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "register_wait",
+        "request_id": "00000000-0000-4000-8000-000000000011",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "wait_id": "00000000-0000-4000-8000-000000000012",
+        "workflow_id": "00000000-0000-4000-8000-000000000013",
+        "step_key": "00000000-0000-4000-8000-000000000014",
+        "run_id": "00000000-0000-4000-8000-000000000015",
+        "run_epoch": "1",
+        "target_task_id": "00000000-0000-4000-8000-000000000005",
+        "minimum_target_revision": "1",
+        "predicate": "task_terminal",
+        "deadline": "2026-11-14T12:00:00Z"
+      }
+    },
+    {
+      "id": "WIRE-04",
+      "expected_schema_valid": true,
+      "expected_service_behavior": "NOT_EXECUTED",
+      "reason": "消费意图原子落库，不保证外部 exactly-once",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "consume_wait",
+        "request_id": "00000000-0000-4000-8000-000000000016",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "action_id": "00000000-0000-4000-8000-000000000017",
+        "wait_id": "00000000-0000-4000-8000-000000000012",
+        "workflow_id": "00000000-0000-4000-8000-000000000013",
+        "run_id": "00000000-0000-4000-8000-000000000015",
+        "run_epoch": "1",
+        "resolution_id": "00000000-0000-4000-8000-000000000018",
+        "expected_wait_revision": "2"
+      }
+    },
+    {
+      "id": "WIRE-05",
+      "expected_schema_valid": true,
+      "expected_service_behavior": "NOT_EXECUTED",
+      "reason": "当前授权内只读",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "read_wait",
+        "request_id": "00000000-0000-4000-8000-000000000019",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "wait_id": "00000000-0000-4000-8000-000000000012"
+      }
+    },
+    {
+      "id": "WIRE-06",
+      "expected_schema_valid": true,
+      "expected_service_behavior": "NOT_EXECUTED",
+      "reason": "answer_ref 是同受众不可变回答对象，不是审批",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "continuation_reply",
+        "request_id": "00000000-0000-4000-8000-000000000020",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "action_id": "00000000-0000-4000-8000-000000000021",
+        "input_request_id": "00000000-0000-4000-8000-000000000022",
+        "run_id": "00000000-0000-4000-8000-000000000015",
+        "run_epoch": "1",
+        "expected_input_revision": "1",
+        "answer_ref": {
+          "id": "00000000-0000-4000-8000-000000000023",
+          "revision": "1"
+        }
+      }
+    },
+    {
+      "id": "WIRE-07",
+      "expected_schema_valid": true,
+      "expected_service_behavior": "NOT_EXECUTED",
+      "reason": "跨 attempt 仍按当前权限读原回执",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "read_action",
+        "request_id": "00000000-0000-4000-8000-000000000024",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "action_id": "00000000-0000-4000-8000-000000000003"
+      }
+    },
+    {
+      "id": "WIRE-08",
+      "expected_schema_valid": true,
+      "expected_service_behavior": "NOT_EXECUTED",
+      "reason": "完整范围权限不足拒绝，不能泄漏隐藏任务计数",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "get_plan_progress",
+        "request_id": "00000000-0000-4000-8000-000000000025",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "plan_execution_id": "00000000-0000-4000-8000-000000000009"
+      }
+    },
+    {
+      "id": "WIRE-09",
+      "expected_schema_valid": true,
+      "expected_service_behavior": "NOT_EXECUTED",
+      "reason": "业务已提交不代表成员已启动",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "service_result",
+        "request_id": "00000000-0000-4000-8000-000000000002",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "operation": "apply_plan",
+        "data": {
+          "action_id": "00000000-0000-4000-8000-000000000003",
+          "receipt_ref": {
+            "id": "00000000-0000-4000-8000-000000000026",
+            "revision": "1"
+          },
+          "effect_state": "committed",
+          "observed_at": "2026-11-14T10:00:00Z"
+        }
+      }
+    },
+    {
+      "id": "WIRE-10",
+      "expected_schema_valid": true,
+      "expected_service_behavior": "NOT_EXECUTED",
+      "reason": "目标先完成时直接 resolved",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "service_result",
+        "request_id": "00000000-0000-4000-8000-000000000011",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "operation": "register_wait",
+        "data": {
+          "wait_id": "00000000-0000-4000-8000-000000000012",
+          "workflow_id": "00000000-0000-4000-8000-000000000013",
+          "run_id": "00000000-0000-4000-8000-000000000015",
+          "run_epoch": "1",
+          "target_task_id": "00000000-0000-4000-8000-000000000005",
+          "revision": "2",
+          "state": "resolved",
+          "resolution_id": "00000000-0000-4000-8000-000000000018",
+          "result_ref": {
+            "id": "00000000-0000-4000-8000-000000000027",
+            "revision": "1"
+          },
+          "deadline": "2026-11-14T12:00:00Z"
+        }
+      }
+    },
+    {
+      "id": "WIRE-11",
+      "expected_schema_valid": true,
+      "expected_service_behavior": "NOT_EXECUTED",
+      "reason": "部分失败不报整体成功",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "service_result",
+        "request_id": "00000000-0000-4000-8000-000000000025",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "operation": "get_plan_progress",
+        "data": {
+          "plan_execution_id": "00000000-0000-4000-8000-000000000009",
+          "revision": "3",
+          "scope_ref": {
+            "id": "00000000-0000-4000-8000-000000000010",
+            "revision": "1"
+          },
+          "view_scope": "full_authorized_scope",
+          "lifecycle": "active",
+          "dispatch_gate": "open",
+          "health": "partial_failure",
+          "outcome": null,
+          "task_refs": [
+            {
+              "id": "00000000-0000-4000-8000-000000000005",
+              "revision": "1"
+            }
+          ],
+          "evidence_refs": [
+            {
+              "id": "00000000-0000-4000-8000-000000000027",
+              "revision": "1"
+            }
+          ],
+          "budget_state": "reconciling",
+          "observed_at": "2026-11-14T10:00:00Z"
+        }
+      }
+    },
+    {
+      "id": "WIRE-12",
+      "expected_schema_valid": true,
+      "expected_service_behavior": "NOT_EXECUTED",
+      "reason": "不返回内部全局计划计数或私密标题",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "service_error",
+        "request_id": "00000000-0000-4000-8000-000000000002",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "operation": "apply_plan",
+        "code": "PLAN_STALE",
+        "retry_class": "after_refresh",
+        "safe_message_key": "plan.refresh_required",
+        "evidence_ref": null
+      }
+    },
+    {
+      "id": "WIRE-13",
+      "expected_schema_valid": true,
+      "expected_service_behavior": "NOT_EXECUTED",
+      "reason": "仅有可见流不透明 cursor",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "visible_event",
+        "event_id": "00000000-0000-4000-8000-000000000028",
+        "event_type": "wait_resolved",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "entity_ref": {
+          "id": "00000000-0000-4000-8000-000000000012",
+          "revision": "2"
+        },
+        "stream_cursor": "opaque-grant-bound-cursor-001",
+        "resolution_id": "00000000-0000-4000-8000-000000000018",
+        "occurred_at": "2026-11-14T10:00:00Z"
+      }
+    },
+    {
+      "id": "WIRE-14",
+      "expected_schema_valid": false,
+      "expected_service_behavior": "NOT_EXECUTED",
+      "reason": "epoch 不能是 JSON number",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "register_wait",
+        "request_id": "00000000-0000-4000-8000-000000000011",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "wait_id": "00000000-0000-4000-8000-000000000012",
+        "workflow_id": "00000000-0000-4000-8000-000000000013",
+        "step_key": "00000000-0000-4000-8000-000000000014",
+        "run_id": "00000000-0000-4000-8000-000000000015",
+        "run_epoch": 1,
+        "target_task_id": "00000000-0000-4000-8000-000000000005",
+        "minimum_target_revision": "1",
+        "predicate": "task_terminal",
+        "deadline": "2026-11-14T12:00:00Z"
+      }
+    },
+    {
+      "id": "WIRE-15",
+      "expected_schema_valid": false,
+      "expected_service_behavior": "NOT_EXECUTED",
+      "reason": "禁止客户端自报授权上下文",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "apply_plan",
+        "request_id": "00000000-0000-4000-8000-000000000002",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "action_id": "00000000-0000-4000-8000-000000000003",
+        "plan_ref": {
+          "id": "00000000-0000-4000-8000-000000000004",
+          "revision": "1"
+        },
+        "expected_plan_token": "opaque-example-plan-token-001",
+        "approval_refs": [
+          {
+            "id": "00000000-0000-4000-8000-000000000006",
+            "revision": "1"
+          }
+        ],
+        "disclosure_refs": [],
+        "delegation_ref": null,
+        "trusted_grant_id": "00000000-0000-4000-8000-000000000029",
+        "expected_resource_versions": [
+          {
+            "entity_type": "task",
+            "ref": {
+              "id": "00000000-0000-4000-8000-000000000005",
+              "revision": "1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "WIRE-16",
+      "expected_schema_valid": false,
+      "expected_service_behavior": "NOT_EXECUTED",
+      "reason": "任意代码谓词禁止",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "register_wait",
+        "request_id": "00000000-0000-4000-8000-000000000011",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "wait_id": "00000000-0000-4000-8000-000000000012",
+        "workflow_id": "00000000-0000-4000-8000-000000000013",
+        "step_key": "00000000-0000-4000-8000-000000000014",
+        "run_id": "00000000-0000-4000-8000-000000000015",
+        "run_epoch": "1",
+        "target_task_id": "00000000-0000-4000-8000-000000000005",
+        "minimum_target_revision": "1",
+        "predicate": "eval(js)",
+        "deadline": "2026-11-14T12:00:00Z"
+      }
+    },
+    {
+      "id": "WIRE-17",
+      "expected_schema_valid": false,
+      "expected_service_behavior": "NOT_EXECUTED",
+      "reason": "未知契约版本拒绝",
+      "payload": {
+        "contract_version": "core/9.0",
+        "kind": "apply_plan",
+        "request_id": "00000000-0000-4000-8000-000000000002",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "action_id": "00000000-0000-4000-8000-000000000003",
+        "plan_ref": {
+          "id": "00000000-0000-4000-8000-000000000004",
+          "revision": "1"
+        },
+        "expected_plan_token": "opaque-example-plan-token-001",
+        "approval_refs": [
+          {
+            "id": "00000000-0000-4000-8000-000000000006",
+            "revision": "1"
+          }
+        ],
+        "disclosure_refs": [],
+        "delegation_ref": null,
+        "expected_resource_versions": [
+          {
+            "entity_type": "task",
+            "ref": {
+              "id": "00000000-0000-4000-8000-000000000005",
+              "revision": "1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "WIRE-18",
+      "expected_schema_valid": false,
+      "expected_service_behavior": "NOT_EXECUTED",
+      "reason": "active 不能有终局结果",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "service_result",
+        "request_id": "00000000-0000-4000-8000-000000000025",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "operation": "get_plan_progress",
+        "data": {
+          "plan_execution_id": "00000000-0000-4000-8000-000000000009",
+          "revision": "3",
+          "scope_ref": {
+            "id": "00000000-0000-4000-8000-000000000010",
+            "revision": "1"
+          },
+          "view_scope": "full_authorized_scope",
+          "lifecycle": "active",
+          "dispatch_gate": "open",
+          "health": "partial_failure",
+          "outcome": "succeeded",
+          "task_refs": [
+            {
+              "id": "00000000-0000-4000-8000-000000000005",
+              "revision": "1"
+            }
+          ],
+          "evidence_refs": [
+            {
+              "id": "00000000-0000-4000-8000-000000000027",
+              "revision": "1"
+            }
+          ],
+          "budget_state": "reconciling",
+          "observed_at": "2026-11-14T10:00:00Z"
+        }
+      }
+    },
+    {
+      "id": "WIRE-19",
+      "expected_schema_valid": false,
+      "expected_service_behavior": "NOT_EXECUTED",
+      "reason": "resolved 必须有 resolution",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "service_result",
+        "request_id": "00000000-0000-4000-8000-000000000011",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "operation": "register_wait",
+        "data": {
+          "wait_id": "00000000-0000-4000-8000-000000000012",
+          "workflow_id": "00000000-0000-4000-8000-000000000013",
+          "run_id": "00000000-0000-4000-8000-000000000015",
+          "run_epoch": "1",
+          "target_task_id": "00000000-0000-4000-8000-000000000005",
+          "revision": "2",
+          "state": "resolved",
+          "resolution_id": null,
+          "result_ref": {
+            "id": "00000000-0000-4000-8000-000000000027",
+            "revision": "1"
+          },
+          "deadline": "2026-11-14T12:00:00Z"
+        }
+      }
+    },
+    {
+      "id": "WIRE-20",
+      "expected_schema_valid": false,
+      "expected_service_behavior": "NOT_EXECUTED",
+      "reason": "不向可见流暴露内部全局游标",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "visible_event",
+        "event_id": "00000000-0000-4000-8000-000000000028",
+        "event_type": "wait_resolved",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "entity_ref": {
+          "id": "00000000-0000-4000-8000-000000000012",
+          "revision": "2"
+        },
+        "stream_cursor": "opaque-grant-bound-cursor-001",
+        "resolution_id": "00000000-0000-4000-8000-000000000018",
+        "occurred_at": "2026-11-14T10:00:00Z",
+        "committed_cursor": "412"
+      }
+    },
+    {
+      "id": "WIRE-21",
+      "expected_schema_valid": false,
+      "expected_service_behavior": "NOT_EXECUTED",
+      "reason": "wire 时间统一 UTC Z",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "register_wait",
+        "request_id": "00000000-0000-4000-8000-000000000011",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "wait_id": "00000000-0000-4000-8000-000000000012",
+        "workflow_id": "00000000-0000-4000-8000-000000000013",
+        "step_key": "00000000-0000-4000-8000-000000000014",
+        "run_id": "00000000-0000-4000-8000-000000000015",
+        "run_epoch": "1",
+        "target_task_id": "00000000-0000-4000-8000-000000000005",
+        "minimum_target_revision": "1",
+        "predicate": "task_terminal",
+        "deadline": "2026-11-14T12:00:00+09:00"
+      }
+    },
+    {
+      "id": "WIRE-22",
+      "expected_schema_valid": false,
+      "expected_service_behavior": "NOT_EXECUTED",
+      "reason": "未知执行不能终局收束",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "service_result",
+        "request_id": "00000000-0000-4000-8000-000000000025",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "operation": "get_plan_progress",
+        "data": {
+          "plan_execution_id": "00000000-0000-4000-8000-000000000009",
+          "revision": "3",
+          "scope_ref": {
+            "id": "00000000-0000-4000-8000-000000000010",
+            "revision": "1"
+          },
+          "view_scope": "full_authorized_scope",
+          "lifecycle": "closed",
+          "dispatch_gate": "closed",
+          "health": "unknown",
+          "outcome": "partial",
+          "task_refs": [
+            {
+              "id": "00000000-0000-4000-8000-000000000005",
+              "revision": "1"
+            }
+          ],
+          "evidence_refs": [
+            {
+              "id": "00000000-0000-4000-8000-000000000027",
+              "revision": "1"
+            }
+          ],
+          "budget_state": "reconciling",
+          "observed_at": "2026-11-14T10:00:00Z"
+        }
+      }
+    },
+    {
+      "id": "WIRE-23",
+      "expected_schema_valid": true,
+      "expected_service_behavior": "REJECT_NOT_FOUND_OR_DENIED",
+      "reason": "格式正确但 run 与认证 grant 不同",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "register_wait",
+        "request_id": "00000000-0000-4000-8000-000000000011",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "wait_id": "00000000-0000-4000-8000-000000000012",
+        "workflow_id": "00000000-0000-4000-8000-000000000013",
+        "step_key": "00000000-0000-4000-8000-000000000014",
+        "run_id": "00000000-0000-4000-8000-000000000999",
+        "run_epoch": "1",
+        "target_task_id": "00000000-0000-4000-8000-000000000005",
+        "minimum_target_revision": "1",
+        "predicate": "task_terminal",
+        "deadline": "2026-11-14T12:00:00Z"
+      }
+    },
+    {
+      "id": "WIRE-24",
+      "expected_schema_valid": true,
+      "expected_service_behavior": "REJECT_PLAN_STALE",
+      "reason": "格式正确但服务版本检查失败",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "apply_plan",
+        "request_id": "00000000-0000-4000-8000-000000000002",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "action_id": "00000000-0000-4000-8000-000000000003",
+        "plan_ref": {
+          "id": "00000000-0000-4000-8000-000000000004",
+          "revision": "1"
+        },
+        "expected_plan_token": "opaque-valid-but-stale-token",
+        "approval_refs": [
+          {
+            "id": "00000000-0000-4000-8000-000000000006",
+            "revision": "1"
+          }
+        ],
+        "disclosure_refs": [],
+        "delegation_ref": null,
+        "expected_resource_versions": [
+          {
+            "entity_type": "task",
+            "ref": {
+              "id": "00000000-0000-4000-8000-000000000005",
+              "revision": "1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "WIRE-25",
+      "expected_schema_valid": true,
+      "expected_service_behavior": "REJECT_WAIT_STALE",
+      "reason": "目标在 resolved 后已返工，必须查当前状态",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "consume_wait",
+        "request_id": "00000000-0000-4000-8000-000000000016",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "action_id": "00000000-0000-4000-8000-000000000017",
+        "wait_id": "00000000-0000-4000-8000-000000000012",
+        "workflow_id": "00000000-0000-4000-8000-000000000013",
+        "run_id": "00000000-0000-4000-8000-000000000015",
+        "run_epoch": "1",
+        "resolution_id": "00000000-0000-4000-8000-000000000018",
+        "expected_wait_revision": "2"
+      }
+    },
+    {
+      "id": "WIRE-26",
+      "expected_schema_valid": true,
+      "expected_service_behavior": "NOT_EXECUTED",
+      "reason": "终态结构有效；必须再证明成果/进程/费用收束",
+      "payload": {
+        "contract_version": "core/1.0",
+        "kind": "service_result",
+        "request_id": "00000000-0000-4000-8000-000000000025",
+        "project_id": "00000000-0000-4000-8000-000000000001",
+        "operation": "get_plan_progress",
+        "data": {
+          "plan_execution_id": "00000000-0000-4000-8000-000000000009",
+          "revision": "3",
+          "scope_ref": {
+            "id": "00000000-0000-4000-8000-000000000010",
+            "revision": "1"
+          },
+          "view_scope": "full_authorized_scope",
+          "lifecycle": "closed",
+          "dispatch_gate": "closed",
+          "health": "healthy",
+          "outcome": "partial",
+          "task_refs": [
+            {
+              "id": "00000000-0000-4000-8000-000000000005",
+              "revision": "1"
+            }
+          ],
+          "evidence_refs": [
+            {
+              "id": "00000000-0000-4000-8000-000000000027",
+              "revision": "1"
+            }
+          ],
+          "budget_state": "settled",
+          "observed_at": "2026-11-14T10:00:00Z"
+        }
+      }
+    }
+  ]
+}

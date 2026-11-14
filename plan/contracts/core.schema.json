@@ -1,0 +1,1209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent-group-platform:core:1.0",
+  "title": "群聊 Agent 平台最小核心逻辑契约 core/1.0",
+  "description": "Design contract only. Authentication context is supplied by the trusted channel, not these payloads. Schema validation does not establish semantic authorization or runtime correctness.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/apply_plan"
+    },
+    {
+      "$ref": "#/$defs/control_plan"
+    },
+    {
+      "$ref": "#/$defs/consume_wait"
+    },
+    {
+      "$ref": "#/$defs/continuation_reply"
+    },
+    {
+      "$ref": "#/$defs/read_action"
+    },
+    {
+      "$ref": "#/$defs/register_wait"
+    },
+    {
+      "$ref": "#/$defs/read_wait"
+    },
+    {
+      "$ref": "#/$defs/get_plan_progress"
+    },
+    {
+      "$ref": "#/$defs/service_result"
+    },
+    {
+      "$ref": "#/$defs/service_error"
+    },
+    {
+      "$ref": "#/$defs/visible_event"
+    }
+  ],
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "revision": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$"
+    },
+    "epoch": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "opaque": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 2048
+    },
+    "ref": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        }
+      },
+      "required": [
+        "id",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "versionAssertion": {
+      "type": "object",
+      "properties": {
+        "entity_type": {
+          "type": "string",
+          "enum": [
+            "task",
+            "acceptance",
+            "requirements",
+            "capability",
+            "policy",
+            "changeset",
+            "environment",
+            "plan_execution"
+          ]
+        },
+        "ref": {
+          "$ref": "#/$defs/ref"
+        }
+      },
+      "required": [
+        "entity_type",
+        "ref"
+      ],
+      "additionalProperties": false
+    },
+    "apply_plan": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "core/1.0"
+        },
+        "kind": {
+          "const": "apply_plan"
+        },
+        "request_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "project_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "action_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "plan_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "expected_plan_token": {
+          "$ref": "#/$defs/opaque"
+        },
+        "approval_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ref"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "disclosure_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ref"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "delegation_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ref"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expected_resource_versions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/versionAssertion"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "contract_version",
+        "kind",
+        "request_id",
+        "project_id",
+        "action_id",
+        "plan_ref",
+        "expected_plan_token",
+        "expected_resource_versions",
+        "approval_refs",
+        "disclosure_refs",
+        "delegation_ref"
+      ],
+      "additionalProperties": false
+    },
+    "control_plan": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "core/1.0"
+        },
+        "kind": {
+          "const": "control_plan"
+        },
+        "request_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "project_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "action_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "plan_execution_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "expected_execution_revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "pause_dispatch",
+            "resume_dispatch",
+            "stop_plan"
+          ]
+        },
+        "impact_scope_ref": {
+          "$ref": "#/$defs/ref"
+        }
+      },
+      "required": [
+        "contract_version",
+        "kind",
+        "request_id",
+        "project_id",
+        "action_id",
+        "plan_execution_id",
+        "expected_execution_revision",
+        "mode",
+        "impact_scope_ref"
+      ],
+      "additionalProperties": false
+    },
+    "register_wait": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "core/1.0"
+        },
+        "kind": {
+          "const": "register_wait"
+        },
+        "request_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "project_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "wait_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "workflow_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "step_key": {
+          "$ref": "#/$defs/uuid"
+        },
+        "run_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "run_epoch": {
+          "$ref": "#/$defs/epoch"
+        },
+        "target_task_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "minimum_target_revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "predicate": {
+          "type": "string",
+          "enum": [
+            "task_terminal",
+            "task_review_ready"
+          ]
+        },
+        "deadline": {
+          "$ref": "#/$defs/timestamp"
+        }
+      },
+      "required": [
+        "contract_version",
+        "kind",
+        "request_id",
+        "project_id",
+        "wait_id",
+        "workflow_id",
+        "step_key",
+        "run_id",
+        "run_epoch",
+        "target_task_id",
+        "minimum_target_revision",
+        "predicate",
+        "deadline"
+      ],
+      "additionalProperties": false
+    },
+    "consume_wait": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "core/1.0"
+        },
+        "kind": {
+          "const": "consume_wait"
+        },
+        "request_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "project_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "action_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "wait_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "workflow_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "run_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "run_epoch": {
+          "$ref": "#/$defs/epoch"
+        },
+        "resolution_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "expected_wait_revision": {
+          "$ref": "#/$defs/revision"
+        }
+      },
+      "required": [
+        "contract_version",
+        "kind",
+        "request_id",
+        "project_id",
+        "action_id",
+        "wait_id",
+        "workflow_id",
+        "run_id",
+        "run_epoch",
+        "resolution_id",
+        "expected_wait_revision"
+      ],
+      "additionalProperties": false
+    },
+    "read_wait": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "core/1.0"
+        },
+        "kind": {
+          "const": "read_wait"
+        },
+        "request_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "project_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "wait_id": {
+          "$ref": "#/$defs/uuid"
+        }
+      },
+      "required": [
+        "contract_version",
+        "kind",
+        "request_id",
+        "project_id",
+        "wait_id"
+      ],
+      "additionalProperties": false
+    },
+    "continuation_reply": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "core/1.0"
+        },
+        "kind": {
+          "const": "continuation_reply"
+        },
+        "request_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "project_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "action_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "input_request_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "run_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "run_epoch": {
+          "$ref": "#/$defs/epoch"
+        },
+        "expected_input_revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "answer_ref": {
+          "$ref": "#/$defs/ref"
+        }
+      },
+      "required": [
+        "contract_version",
+        "kind",
+        "request_id",
+        "project_id",
+        "action_id",
+        "input_request_id",
+        "run_id",
+        "run_epoch",
+        "expected_input_revision",
+        "answer_ref"
+      ],
+      "additionalProperties": false
+    },
+    "read_action": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "core/1.0"
+        },
+        "kind": {
+          "const": "read_action"
+        },
+        "request_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "project_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "action_id": {
+          "$ref": "#/$defs/uuid"
+        }
+      },
+      "required": [
+        "contract_version",
+        "kind",
+        "request_id",
+        "project_id",
+        "action_id"
+      ],
+      "additionalProperties": false
+    },
+    "get_plan_progress": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "core/1.0"
+        },
+        "kind": {
+          "const": "get_plan_progress"
+        },
+        "request_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "project_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "plan_execution_id": {
+          "$ref": "#/$defs/uuid"
+        }
+      },
+      "required": [
+        "contract_version",
+        "kind",
+        "request_id",
+        "project_id",
+        "plan_execution_id"
+      ],
+      "additionalProperties": false
+    },
+    "receipt": {
+      "type": "object",
+      "properties": {
+        "action_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "receipt_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "effect_state": {
+          "type": "string",
+          "enum": [
+            "committed",
+            "pending_reconcile",
+            "rejected"
+          ]
+        },
+        "observed_at": {
+          "$ref": "#/$defs/timestamp"
+        }
+      },
+      "required": [
+        "action_id",
+        "receipt_ref",
+        "effect_state",
+        "observed_at"
+      ],
+      "additionalProperties": false
+    },
+    "wait_record": {
+      "type": "object",
+      "properties": {
+        "wait_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "workflow_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "run_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "run_epoch": {
+          "$ref": "#/$defs/epoch"
+        },
+        "target_task_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "registered",
+            "resolved",
+            "consumed",
+            "cancelled",
+            "expired",
+            "invalidated"
+          ]
+        },
+        "resolution_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "result_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ref"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "deadline": {
+          "$ref": "#/$defs/timestamp"
+        }
+      },
+      "required": [
+        "wait_id",
+        "workflow_id",
+        "run_id",
+        "run_epoch",
+        "target_task_id",
+        "revision",
+        "state",
+        "resolution_id",
+        "result_ref",
+        "deadline"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "enum": [
+                  "resolved",
+                  "consumed"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "resolution_id": {
+                "$ref": "#/$defs/uuid"
+              },
+              "result_ref": {
+                "$ref": "#/$defs/ref"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "registered"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "resolution_id": {
+                "type": "null"
+              },
+              "result_ref": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "plan_progress": {
+      "type": "object",
+      "properties": {
+        "plan_execution_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "scope_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "view_scope": {
+          "const": "full_authorized_scope"
+        },
+        "lifecycle": {
+          "type": "string",
+          "enum": [
+            "active",
+            "stopping",
+            "closed"
+          ]
+        },
+        "dispatch_gate": {
+          "type": "string",
+          "enum": [
+            "open",
+            "paused",
+            "closed"
+          ]
+        },
+        "health": {
+          "type": "string",
+          "enum": [
+            "healthy",
+            "partial_failure",
+            "blocked",
+            "unknown"
+          ]
+        },
+        "outcome": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "succeeded",
+                "partial",
+                "failed",
+                "cancelled"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "task_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ref"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ref"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "budget_state": {
+          "type": "string",
+          "enum": [
+            "reserved",
+            "reconciling",
+            "settled",
+            "bounded_pending_charge"
+          ]
+        },
+        "observed_at": {
+          "$ref": "#/$defs/timestamp"
+        }
+      },
+      "required": [
+        "plan_execution_id",
+        "revision",
+        "scope_ref",
+        "view_scope",
+        "lifecycle",
+        "dispatch_gate",
+        "health",
+        "outcome",
+        "task_refs",
+        "evidence_refs",
+        "budget_state",
+        "observed_at"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "lifecycle": {
+                "const": "closed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "enum": [
+                  "succeeded",
+                  "partial",
+                  "failed",
+                  "cancelled"
+                ]
+              },
+              "dispatch_gate": {
+                "const": "closed"
+              },
+              "health": {
+                "not": {
+                  "const": "unknown"
+                }
+              },
+              "budget_state": {
+                "enum": [
+                  "settled",
+                  "bounded_pending_charge"
+                ]
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "outcome": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "lifecycle": {
+                "const": "stopping"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "dispatch_gate": {
+                "const": "closed"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "service_result": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "contract_version": {
+              "const": "core/1.0"
+            },
+            "kind": {
+              "const": "service_result"
+            },
+            "request_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "project_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "operation": {
+              "const": "apply_plan"
+            },
+            "data": {
+              "$ref": "#/$defs/receipt"
+            }
+          },
+          "required": [
+            "contract_version",
+            "kind",
+            "request_id",
+            "project_id",
+            "operation",
+            "data"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "contract_version": {
+              "const": "core/1.0"
+            },
+            "kind": {
+              "const": "service_result"
+            },
+            "request_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "project_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "operation": {
+              "const": "control_plan"
+            },
+            "data": {
+              "$ref": "#/$defs/receipt"
+            }
+          },
+          "required": [
+            "contract_version",
+            "kind",
+            "request_id",
+            "project_id",
+            "operation",
+            "data"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "contract_version": {
+              "const": "core/1.0"
+            },
+            "kind": {
+              "const": "service_result"
+            },
+            "request_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "project_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "operation": {
+              "const": "consume_wait"
+            },
+            "data": {
+              "$ref": "#/$defs/receipt"
+            }
+          },
+          "required": [
+            "contract_version",
+            "kind",
+            "request_id",
+            "project_id",
+            "operation",
+            "data"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "contract_version": {
+              "const": "core/1.0"
+            },
+            "kind": {
+              "const": "service_result"
+            },
+            "request_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "project_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "operation": {
+              "const": "continuation_reply"
+            },
+            "data": {
+              "$ref": "#/$defs/receipt"
+            }
+          },
+          "required": [
+            "contract_version",
+            "kind",
+            "request_id",
+            "project_id",
+            "operation",
+            "data"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "contract_version": {
+              "const": "core/1.0"
+            },
+            "kind": {
+              "const": "service_result"
+            },
+            "request_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "project_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "operation": {
+              "const": "read_action"
+            },
+            "data": {
+              "$ref": "#/$defs/receipt"
+            }
+          },
+          "required": [
+            "contract_version",
+            "kind",
+            "request_id",
+            "project_id",
+            "operation",
+            "data"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "contract_version": {
+              "const": "core/1.0"
+            },
+            "kind": {
+              "const": "service_result"
+            },
+            "request_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "project_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "operation": {
+              "const": "register_wait"
+            },
+            "data": {
+              "$ref": "#/$defs/wait_record"
+            }
+          },
+          "required": [
+            "contract_version",
+            "kind",
+            "request_id",
+            "project_id",
+            "operation",
+            "data"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "contract_version": {
+              "const": "core/1.0"
+            },
+            "kind": {
+              "const": "service_result"
+            },
+            "request_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "project_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "operation": {
+              "const": "read_wait"
+            },
+            "data": {
+              "$ref": "#/$defs/wait_record"
+            }
+          },
+          "required": [
+            "contract_version",
+            "kind",
+            "request_id",
+            "project_id",
+            "operation",
+            "data"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "contract_version": {
+              "const": "core/1.0"
+            },
+            "kind": {
+              "const": "service_result"
+            },
+            "request_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "project_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "operation": {
+              "const": "get_plan_progress"
+            },
+            "data": {
+              "$ref": "#/$defs/plan_progress"
+            }
+          },
+          "required": [
+            "contract_version",
+            "kind",
+            "request_id",
+            "project_id",
+            "operation",
+            "data"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "service_error": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "core/1.0"
+        },
+        "kind": {
+          "const": "service_error"
+        },
+        "request_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "project_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "operation": {
+          "type": "string",
+          "enum": [
+            "apply_plan",
+            "control_plan",
+            "consume_wait",
+            "continuation_reply",
+            "read_action",
+            "register_wait",
+            "read_wait",
+            "get_plan_progress"
+          ]
+        },
+        "code": {
+          "type": "string",
+          "enum": [
+            "UNSUPPORTED_CONTRACT",
+            "INVALID_REQUEST",
+            "NOT_FOUND_OR_DENIED",
+            "GRANT_REVOKED",
+            "PLAN_STALE",
+            "PLAN_CONFLICT",
+            "ACTION_PAYLOAD_CONFLICT",
+            "WAIT_CONFLICT",
+            "WAIT_STALE",
+            "CURSOR_EXPIRED",
+            "INPUT_REQUEST_STALE",
+            "EXECUTION_UNKNOWN",
+            "DISCLOSURE_APPROVAL_REQUIRED",
+            "BUDGET_UNAVAILABLE",
+            "DISCLOSURE_STALE",
+            "DELEGATION_EXPIRED",
+            "REASSIGNMENT_REQUIRES_HANDOFF",
+            "MODEL_CAPABILITY_UNAVAILABLE",
+            "MODEL_OUTPUT_INVALID",
+            "RETRIEVAL_INCOMPLETE",
+            "INDEX_STALE"
+          ]
+        },
+        "retry_class": {
+          "type": "string",
+          "enum": [
+            "never",
+            "after_refresh",
+            "after_reconcile"
+          ]
+        },
+        "safe_message_key": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_.]{0,100}$"
+        },
+        "evidence_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ref"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "contract_version",
+        "kind",
+        "request_id",
+        "project_id",
+        "operation",
+        "code",
+        "retry_class",
+        "safe_message_key",
+        "evidence_ref"
+      ],
+      "additionalProperties": false
+    },
+    "visible_event": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "core/1.0"
+        },
+        "kind": {
+          "const": "visible_event"
+        },
+        "event_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "event_type": {
+          "type": "string",
+          "enum": [
+            "wait_resolved",
+            "task_state_changed",
+            "plan_state_changed",
+            "control_outcome_changed",
+            "wait_state_changed"
+          ]
+        },
+        "project_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "entity_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "stream_cursor": {
+          "$ref": "#/$defs/opaque"
+        },
+        "resolution_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "occurred_at": {
+          "$ref": "#/$defs/timestamp"
+        }
+      },
+      "required": [
+        "contract_version",
+        "kind",
+        "event_id",
+        "event_type",
+        "project_id",
+        "entity_ref",
+        "stream_cursor",
+        "resolution_id",
+        "occurred_at"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "event_type": {
+                "const": "wait_resolved"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "resolution_id": {
+                "$ref": "#/$defs/uuid"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

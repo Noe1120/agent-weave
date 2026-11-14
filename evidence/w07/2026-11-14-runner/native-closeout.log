@@ -1,0 +1,28 @@
+
+> agent-group-core-baseline@0.3.0 test:native
+> ".tools\dotnet\dotnet.exe" run --project tests/desktop/Team.Tests.csproj && node --test tests/native-shell.test.mjs
+
+PASS uncertain retry uses identical action id and immutable payload
+PASS a lost response remains uncertain across an expired session
+PASS failed project switch clears stale writable project but keeps its input
+PASS out of order project reads cannot change the latest selection
+PASS response project identity is checked
+PASS data path is explicit absolute and stable, instance key ignores case
+PASS native host authenticates, preserves workspace semantics and stops its child
+PASS abrupt native host death reclaims only its owned child and database lease
+PASS invalid database startup reports failure without replacing the existing file
+PASS reconnecting preserves every draft recipient and uncertain action
+PASS console session expiry exposes the real reconnectable contract code
+PASS startup failures retain bounded stderr diagnostics without exposing handshake output
+PASS desktop child receives only its required environment, not ambient secrets
+PASS server errors do not turn an unknown commit into a new action
+Native tests: 14/14 passed; model calls: 0
+✔ native shell uses WPF with accessible project, conversation and task controls (1.9209ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 73.1469

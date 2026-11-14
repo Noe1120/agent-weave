@@ -1,0 +1,289 @@
+
+> agent-group-core-baseline@0.3.0 verify
+> npm run generate:check && npm run format:check && npm run typecheck && npm run check:web && npm test && npm run build && npm run test:smoke
+
+
+> agent-group-core-baseline@0.3.0 generate:check
+> node scripts/generate-contracts.mjs --check
+
+Checked 9 contract artifacts.
+
+> agent-group-core-baseline@0.3.0 format:check
+> prettier --check "packages/service/src/*.ts" "packages/contracts/src/index.ts" "tests/**/*.ts" "tests/**/*.mjs" "scripts/*.mjs" package.json tsconfig.json tsconfig.build.json "packages/web/*"
+
+Checking formatting...
+All matched files use Prettier code style!
+
+> agent-group-core-baseline@0.3.0 typecheck
+> tsc --noEmit
+
+
+> agent-group-core-baseline@0.3.0 check:web
+> node --check packages/web/app.js
+
+
+> agent-group-core-baseline@0.3.0 pretest
+> npm run build:runner
+
+
+> agent-group-core-baseline@0.3.0 build:runner
+> powershell -NoProfile -File scripts/build-runner.ps1
+
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  RunnerHost -> D:\Users\1\Desktop\team\artifacts\runner-host\Team.RunnerHost.dll
+
+已成功生成。
+    0 个警告
+    0 个错误
+
+已用时间 00:00:00.88
+
+> agent-group-core-baseline@0.3.0 test
+> node --test tests/*.test.ts
+
+✔ generated artifacts match authoritative source without rewriting (729.9569ms)
+✔ OpenAPI has all eight request operations, six resource projections and full error mapping (1.3274ms)
+✔ every OpenAPI schema reference resolves and wire cases retain strict validity (225.3753ms)
+✔ workspace OpenAPI separates owner cookie/CSRF from execution feed Bearer (0.3277ms)
+(node:47684) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ broker migration upgrades genuine v2, preserves old heads and rejects altered v3 checksum (150.6944ms)
+✔ failed broker migration rolls back all new tables and leaves v2 readable (163.7675ms)
+(node:35912) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ broker resumes after real process exit at prepared without duplicate checkpoint (7521.1568ms)
+✔ broker resumes after real process exit at file_written without duplicate checkpoint (6355.3438ms)
+✔ broker resumes after real process exit at files_applied without duplicate checkpoint (5888.8075ms)
+✔ broker resumes after real process exit at ref_updated without duplicate checkpoint (6868.4578ms)
+✔ broker duplicate delivery between durable stages observes current phase instead of quarantining success (4831.5014ms)
+✔ broker refuses unrecorded human changes even when caller supplies matching filesystem digest (620.1739ms)
+✔ broker does not hand over a checkpoint with extra unrecorded files (5552.7157ms)
+✔ broker crash recovery refuses unknown content and retains quarantine locks (5162.0685ms)
+✔ broker refuses an externally moved Git head without resetting it or releasing locks (4958.9197ms)
+(node:10296) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ broker claims tasks with CAS, exact replay, and persistent scoped locks (850.2267ms)
+✔ broker excludes overlapping logical paths across directories, case and ancestors atomically (2085.0671ms)
+✔ broker rejects traversal, ADS, device names, aliases, protected metadata and ambiguous scopes (12542.2583ms)
+✔ broker authenticates both permissions and resource closure before exposing state or disk (467.476ms)
+✔ broker real writes link diff, markdown, journal, candidate and Git without accepting the task (5875.8492ms)
+✔ broker enforces before digests and preserves full cumulative changeset for updates/deletions (9313.1104ms)
+✔ broker unknown run, expired lease and revoked grant never prove stopped or free paths (3704.672ms)
+✔ broker rejects hardlinks and directory junctions without changing external files (2218.2002ms)
+✔ broker completed write and finish retries stay idempotent after handover (4740.6335ms)
+✔ broker read projection is side effect free and does not broaden audience (1405.3681ms)
+✔ broker rejects DOS short-name aliases before taking locks (524.249ms)
+✔ broker checkpoint audit timestamp comes from service clock rather than a fabricated date (5365.3567ms)
+✔ broker quarantine retains the exact actionable reason instead of hiding it behind a generic state (402.1739ms)
+✔ WIRE-01: schema only, never semantic PASS (8.8477ms)
+✔ WIRE-02: schema only, never semantic PASS (0.5434ms)
+✔ WIRE-03: schema only, never semantic PASS (0.819ms)
+✔ WIRE-04: schema only, never semantic PASS (0.462ms)
+✔ WIRE-05: schema only, never semantic PASS (0.3678ms)
+✔ WIRE-06: schema only, never semantic PASS (0.4489ms)
+✔ WIRE-07: schema only, never semantic PASS (0.3404ms)
+✔ WIRE-08: schema only, never semantic PASS (0.3701ms)
+✔ WIRE-09: schema only, never semantic PASS (3.4804ms)
+✔ WIRE-10: schema only, never semantic PASS (0.7302ms)
+✔ WIRE-11: schema only, never semantic PASS (0.3991ms)
+✔ WIRE-12: schema only, never semantic PASS (0.3438ms)
+✔ WIRE-13: schema only, never semantic PASS (0.3476ms)
+✔ WIRE-14: schema only, never semantic PASS (0.2502ms)
+✔ WIRE-15: schema only, never semantic PASS (0.2579ms)
+✔ WIRE-16: schema only, never semantic PASS (0.185ms)
+✔ WIRE-17: schema only, never semantic PASS (0.2542ms)
+✔ WIRE-18: schema only, never semantic PASS (0.3722ms)
+✔ WIRE-19: schema only, never semantic PASS (0.2641ms)
+✔ WIRE-20: schema only, never semantic PASS (0.2243ms)
+✔ WIRE-21: schema only, never semantic PASS (0.6583ms)
+✔ WIRE-22: schema only, never semantic PASS (0.2812ms)
+✔ WIRE-23: schema only, never semantic PASS (0.3956ms)
+✔ WIRE-24: schema only, never semantic PASS (0.5816ms)
+✔ WIRE-25: schema only, never semantic PASS (0.7324ms)
+✔ WIRE-26: schema only, never semantic PASS (0.4344ms)
+✔ strict request accepts only operations, not response or event envelopes (6.5902ms)
+✔ reject unknown fields, versions, enum, malformed time/uuid/revision (0.7053ms)
+✔ desktop does not open database before its private ownership handshake (933.4975ms)
+✔ desktop pairs privately and closes its loopback port on stop (548.6386ms)
+✔ desktop pairs privately and closes its loopback port on eof (933.1248ms)
+✔ desktop startup exposes safe root-cause metadata for a damaged database (422.4607ms)
+(node:46712) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ migration is idempotent and rejects checksum or unknown future migration (88.1555ms)
+✔ failed initial migration is rolled back including migration journal (25.3702ms)
+✔ credentials are hashed, not persisted in grant payload or DB columns (6.7605ms)
+✔ failure after mutations but before action receipt rolls back plan, task, budget, head and outbox (51.3421ms)
+✔ inbox failure atomically rolls back wait consumption and action ledger (16.7471ms)
+✔ outbox failure rolls back target update and wait resolution together (8.7408ms)
+✔ lost committed response + database reopen preserves exact receipt and single continuation (57.6115ms)
+✔ separate connections serialize the plan head; duplicate effects cannot reapply (61.7237ms)
+✔ isolated generation drift is rejected: types (1252.66ms)
+✔ isolated generation drift is rejected: openapi (1459.4028ms)
+✔ isolated generation drift is rejected: mapping-source (886.3749ms)
+(node:20044) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ HTTP applies strict core request, validates response and emits no-store (85.6112ms)
+✔ HTTP rejects missing bearer (10.8462ms)
+✔ HTTP rejects invalid bearer (6.4192ms)
+✔ HTTP rejects host (6.376ms)
+✔ HTTP rejects origin (9.2903ms)
+✔ HTTP rejects null origin (7.6512ms)
+✔ HTTP rejects content type (8.206ms)
+✔ HTTP rejects malformed JSON, unknown fields, version, route mismatch and oversize (19.9097ms)
+{"event":"http_internal_error","incident_id":"adad31cf-fd8e-45e6-b731-5f047fcb2853","error_type":"Error","error_code":"ERR_SQLITE_ERROR","stack_locations":["    at Store.saveWait (file:///D:/Users/1/Desktop/team/packages/service/src/store.ts:214:8)","    at registerWait (file:///D:/Users/1/Desktop/team/packages/service/src/waits.ts:143:5)","    at file:///D:/Users/1/Desktop/team/packages/service/src/service.ts:59:20","    at Store.transaction (file:///D:/Users/1/Desktop/team/packages/service/src/store.ts:69:22)"]}
+✔ HTTP core errors use explicit status/retry mapping, no raw failures (19.0797ms)
+✔ six resource reads are projections; denied/missing are indistinguishable (26.2062ms)
+(node:4692) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ plan cannot queue unverified acceptance/input closure: inputs (27.0293ms)
+✔ plan cannot queue unverified acceptance/input closure: acceptance-state (6.5656ms)
+✔ plan cannot queue unverified acceptance/input closure: acceptance-revision (8.447ms)
+✔ plan cannot queue unverified acceptance/input closure: missing-acceptance-version (5.9358ms)
+✔ plan approval is verified: expired (11.4424ms)
+✔ plan approval is verified: wrong-plan (6.6473ms)
+✔ plan approval is verified: wrong-scope (7.583ms)
+✔ plan approval is verified: denied (7.9774ms)
+✔ insufficient budget never becomes a zero-cost dispatch (14.8541ms)
+✔ pause and resume change dispatch gate without delivering native commands (38.5038ms)
+✔ scope evidence refs are retained and authorized in complete progress view (12.6792ms)
+(node:63692) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ two real processes race a plan CAS; only one commits budget/tasks/outbox (1975.1059ms)
+✔ abrupt process termination after COMMIT does not duplicate the committed action on restart (462.6951ms)
+(node:65648) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ runner migration upgrades genuine v3 without changing historical state and detects tampering (187.4671ms)
+✔ runner migration rolls back entirely on table conflict and preserves v3 (162.2149ms)
+✔ native host assigns the development worker to a Job before begin and proves its descendants exited (497.706ms)
+(node:47920) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ runner rejects drift and unauthorized starts without reserving work or acquiring claims (922.8853ms)
+✔ actual development process patches through Broker, creates a real checkpoint and only reaches in_review (6745.9604ms)
+✔ progress reads are side-effect free; stop revokes worker but leaves supervisor access and locks (2143.3967ms)
+✔ runner surfaces malformed, never succeeds and retains quarantined locks (1905.7249ms)
+✔ runner surfaces oversized, never succeeds and retains quarantined locks (1879.3423ms)
+✔ runner surfaces invalid_utf8, never succeeds and retains quarantined locks (1669.7202ms)
+✔ runner surfaces stderr, never succeeds and retains quarantined locks (1842.0825ms)
+✔ runner surfaces fake_exit, never succeeds and retains quarantined locks (823.1209ms)
+✔ runner surfaces out_of_order, never succeeds and retains quarantined locks (1826.8501ms)
+✔ runner surfaces nonzero, never succeeds and retains quarantined locks (1882.0763ms)
+✔ runner surfaces no_complete, never succeeds and retains quarantined locks (1185.5819ms)
+✔ runner surfaces conflict, never succeeds and retains quarantined locks (5888.5505ms)
+✔ runner surfaces flood, never succeeds and retains quarantined locks (976.5768ms)
+✔ identical patch replay receives the same receipt without repeating a Git checkpoint (6586.2024ms)
+✔ timeout, expired lease and revoked execution each stop the owned process without releasing locks (5211.0145ms)
+✔ observer permissions are rechecked for every derivative, and another scope cannot read this execution (1891.6831ms)
+✔ runner success and Broker release must share a transaction, not leave a released claim when recording success fails (5793.165ms)
+✔ runner unauthorized_patch cannot escape its scope or release before process exit (1791.5353ms)
+✔ runner complete_hold cannot escape its scope or release before process exit (2730.1882ms)
+(node:58420) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ host death is UNKNOWN without trusted Job-empty evidence, even if the worker also disappears (2164.4913ms)
+✔ actual controller process death closes its host input; restart quarantines without PID killing, restart or lock release (2292.8754ms)
+✔ startup persistence failure still tracks and reaps the newly spawned host (2498.6341ms)
+(node:5588) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ runner admission rejects original client identity, commands and unknown fields before execution (2.465ms)
+✔ runner frames are strict, bounded and cannot impersonate native exit evidence (1.302ms)
+(node:44376) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ referenced candidate ACL is rechecked even if omitted from explicit dependency array (35.1268ms)
+✔ resource projection cannot leak a referenced criterion outside current grant (5.8856ms)
+✔ private scope contents cannot be widened by reusing a scope revision (9.9414ms)
+✔ different project, missing grant, expired grant, narrowed grant and unknown run fail closed (23.399ms)
+(node:65652) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ apply commits one action, budget reservation, queued task and outbox, not native execution (38.4534ms)
+✔ action payload conflict and stale plan do not make new effects (11.3121ms)
+✔ apply rejects no approval atomically (4.6732ms)
+✔ apply rejects unknown budget atomically (8.0764ms)
+✔ apply rejects stale resource atomically (4.2565ms)
+✔ apply rejects delegation unsupported atomically (5.0618ms)
+✔ current revocation denies cached action and same-member new execution cannot inherit (8.3526ms)
+✔ policy, ACL, run epoch and native binding are checked on every retry (27.9039ms)
+✔ stop closes dispatch only; unknown execution is not stopped, closed or rolled back (12.5345ms)
+✔ progress is read-only and rejects incomplete visible scope without partial counts (18.2134ms)
+✔ reply binds clarification, native wait, responder, answer audience; queues once (6.1776ms)
+✔ reply rejects approval (4.3447ms)
+✔ reply rejects unverified (4.7947ms)
+✔ reply rejects responder (4.4052ms)
+✔ reply rejects audience (4.8394ms)
+✔ reply rejects expired (3.3619ms)
+✔ reply rejects other-run (4.1289ms)
+(node:48256) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ migration creates durable transaction tables, once (6.1191ms)
+(node:65428) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ register before completion resolves atomically with target mutation and unique consumption (40.6811ms)
+✔ register after completion resolves immediately; repeat registration stable; conflicting step rejected (8.1616ms)
+✔ elapsed deadline fails registration without creating rows (5.288ms)
+✔ consume rejects stale or inaccessible deadline (7.4429ms)
+✔ consume rejects stale or inaccessible target-revision (6.6602ms)
+✔ consume rejects stale or inaccessible acceptance-revision (5.7361ms)
+✔ consume rejects stale or inaccessible candidate-invalid (6.4437ms)
+✔ consume rejects stale or inaccessible run (5.4713ms)
+✔ consume rejects stale or inaccessible resolution (7.8659ms)
+✔ consume rejects stale or inaccessible grant (6.6216ms)
+✔ consume rejects stale or inaccessible acl (5.6459ms)
+✔ same member with different grant cannot read old wait even with all resource ACLs (6.3902ms)
+✔ review-ready predicate requires current valid candidate and acceptance/input closure (7.2454ms)
+✔ missed wakeup can be deterministically reconciled, never by progress read (8.005ms)
+(node:23960) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ owner pairing uses one-time expiring credential; session and csrf independent of execution grants (12.8157ms)
+✔ owner rejects expired pairing and expired session, limits brute force, permits fresh local pairing (5.4718ms)
+(node:8384) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ execution feed isolates same member private A/public B and never inherits pre-binding history (28.3807ms)
+✔ feed cursor is bound to grant/channel, stable paging has no hidden activity counts (10.6747ms)
+✔ every replay enforces current ACL, native binding, policy, grant and member revocation (28.6228ms)
+✔ delivery insert fault rolls back message, outbox and action together (4.9034ms)
+✔ feed rejects malformed envelopes and expired cursors independently of grant expiry (6.5312ms)
+✔ non-ASCII cursor signature rejects as invalid instead of crashing constant-time comparison (5.6879ms)
+(node:20528) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ browser serves a real local workspace shell without exposing credentials or granting access (68.199ms)
+✔ browser pairing uses HttpOnly Strict cookie and CSRF, logout revokes session (47.6064ms)
+✔ console mutation refuses missing Origin, malformed envelopes and query credential injection (9.6223ms)
+(node:55012) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ W04 upgrades genuine v1 database without replacing old ledger (85.5287ms)
+✔ W04 rejects altered second migration checksum and rolls back partial upgrade (108.5954ms)
+(node:38312) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ owner creates persistent project, offline members, public/direct ordinary messages and task drafts (24.6693ms)
+✔ all writes require owner session and csrf; payload actor fields are rejected (5.1364ms)
+✔ command retries are idempotent, different payload conflicts and DB fault rolls back all effects (6.5874ms)
+✔ cross-project recipients/tasks and disabled recipients fail closed, query is read only (7.5586ms)
+✔ draft edit is CAS protected, cannot pretend it ran or passed acceptance, archive does not destroy history (6.2864ms)
+✔ message history uses stable pages and search treats wildcard symbols literally (28.2594ms)
+✔ owner can correct member role and restore archived draft without inventing execution (7.1594ms)
+ℹ tests 177
+ℹ suites 0
+ℹ pass 177
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 54613.2227
+
+> agent-group-core-baseline@0.3.0 build
+> tsc -p tsconfig.build.json && node scripts/copy-assets.mjs
+
+
+> agent-group-core-baseline@0.3.0 test:smoke
+> node tests/build-smoke.mjs
+
+(node:50048) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+{
+  "compiled_process": "PASS",
+  "loopback_request": "PASS",
+  "migration": "PASS",
+  "native_clients_started": 0,
+  "model_calls": 0,
+  "port_closed": true,
+  "qualification": "LOCAL_SYNTHETIC_SMOKE"
+}

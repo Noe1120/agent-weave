@@ -1,0 +1,17 @@
+test_all_native_joint_probes_are_mapped_without_substitution (__main__.P0ReadinessTests) ... ok
+test_common_authorization_and_evidence_fields_are_defined (__main__.P0ReadinessTests) ... ok
+test_core_unknown_fields_are_explicitly_strict (__main__.P0ReadinessTests) ... ok
+test_fingerprint_contains_all_existing_security_dimensions (__main__.P0ReadinessTests) ... ok
+test_pf04_state_is_a_core_enum_value (__main__.P0ReadinessTests) ... ok
+test_pf04_temporal_barrier_preserves_stop_requirements (__main__.P0ReadinessTests) ... ok
+test_probe_acceptance_references_exist (__main__.P0ReadinessTests) ... ok
+test_probe_ids_and_dependencies_are_complete_and_acyclic (__main__.P0ReadinessTests) ... ok
+test_probe_manifest_is_non_executing_and_unauthorized (__main__.P0ReadinessTests) ... ok
+test_probe_steps_oracles_and_evidence_are_not_placeholders (__main__.P0ReadinessTests) ... ok
+test_readme_has_one_authoritative_reading_order (__main__.P0ReadinessTests) ... ok
+test_runbook_covers_every_probe_and_preserves_phase_gates (__main__.P0ReadinessTests) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.011s
+
+OK

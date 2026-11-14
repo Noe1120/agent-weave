@@ -1,0 +1,13 @@
+CREATE TABLE console_secrets (name TEXT PRIMARY KEY, value TEXT NOT NULL);
+INSERT INTO console_secrets VALUES('signing_key',lower(hex(randomblob(32))));
+CREATE TABLE console_pairings (hash TEXT PRIMARY KEY, expires_at INTEGER NOT NULL, used INTEGER NOT NULL DEFAULT 0 CHECK(used IN (0,1)));
+CREATE TABLE console_sessions (hash TEXT PRIMARY KEY, expires_at INTEGER NOT NULL);
+CREATE TABLE workspace_projects (id TEXT PRIMARY KEY, name TEXT NOT NULL, description TEXT NOT NULL, public_channel_id TEXT NOT NULL UNIQUE, revision TEXT NOT NULL, created_at TEXT NOT NULL);
+CREATE TABLE workspace_members (id TEXT PRIMARY KEY, project_id TEXT NOT NULL REFERENCES workspace_projects(id), client TEXT NOT NULL CHECK(client IN ('codex','claude_desktop','deepseek_harness')), name TEXT NOT NULL, role TEXT NOT NULL, state TEXT NOT NULL CHECK(state IN ('active','inactive')), revision TEXT NOT NULL, created_at TEXT NOT NULL, UNIQUE(project_id,name));
+CREATE TABLE workspace_messages (sequence INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT NOT NULL UNIQUE, project_id TEXT NOT NULL REFERENCES workspace_projects(id), channel_id TEXT NOT NULL, body TEXT NOT NULL, audience TEXT NOT NULL CHECK(audience IN ('public','direct')), recipient_id TEXT REFERENCES workspace_members(id), created_at TEXT NOT NULL, CHECK((audience='public' AND recipient_id IS NULL) OR (audience='direct' AND recipient_id IS NOT NULL)));
+CREATE INDEX workspace_messages_history ON workspace_messages(project_id,sequence);
+CREATE TABLE workspace_drafts (id TEXT PRIMARY KEY, project_id TEXT NOT NULL REFERENCES workspace_projects(id), title TEXT NOT NULL, description TEXT NOT NULL, acceptance TEXT NOT NULL, assignee_id TEXT REFERENCES workspace_members(id), state TEXT NOT NULL CHECK(state IN ('draft','archived')), revision TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+CREATE TABLE workspace_commands (action_id TEXT PRIMARY KEY, fingerprint TEXT NOT NULL, result TEXT NOT NULL CHECK(json_valid(result)));
+CREATE TABLE workspace_outbox (id TEXT PRIMARY KEY, project_id TEXT NOT NULL, kind TEXT NOT NULL, payload TEXT NOT NULL CHECK(json_valid(payload)), created_at TEXT NOT NULL, state TEXT NOT NULL DEFAULT 'stored' CHECK(state='stored'));
+CREATE TABLE feed_bindings (grant_id TEXT PRIMARY KEY, project_id TEXT NOT NULL REFERENCES workspace_projects(id), member_id TEXT NOT NULL REFERENCES workspace_members(id), channel_id TEXT NOT NULL, next_position INTEGER NOT NULL DEFAULT 0, state TEXT NOT NULL CHECK(state IN ('active','revoked')));
+CREATE TABLE message_deliveries (grant_id TEXT NOT NULL REFERENCES feed_bindings(grant_id), position INTEGER NOT NULL, message_id TEXT NOT NULL REFERENCES workspace_messages(id), PRIMARY KEY(grant_id,position), UNIQUE(grant_id,message_id));

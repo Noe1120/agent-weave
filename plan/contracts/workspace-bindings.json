@@ -1,0 +1,56 @@
+{
+  "contract_version": "workspace-http/0.1",
+  "endpoints": [
+    {
+      "path": "/v1/console/pair",
+      "method": "post",
+      "auth": "none",
+      "request": "workspace_pair_request"
+    },
+    {
+      "path": "/v1/console/session",
+      "method": "get",
+      "auth": "ownerSession"
+    },
+    {
+      "path": "/v1/console/logout",
+      "method": "post",
+      "auth": "ownerSession",
+      "request": "EmptyObject"
+    },
+    {
+      "path": "/v1/console/projects",
+      "method": "get",
+      "auth": "ownerSession"
+    },
+    {
+      "path": "/v1/console/projects/{project_id}",
+      "method": "get",
+      "auth": "ownerSession"
+    },
+    {
+      "path": "/v1/console/projects/{project_id}/messages",
+      "method": "get",
+      "auth": "ownerSession",
+      "query": "before"
+    },
+    {
+      "path": "/v1/console/projects/{project_id}/search",
+      "method": "get",
+      "auth": "ownerSession",
+      "query": "q"
+    },
+    {
+      "path": "/v1/console/commands",
+      "method": "post",
+      "auth": "ownerSession",
+      "request": "WorkspaceCommand"
+    },
+    {
+      "path": "/v1/feed",
+      "method": "post",
+      "auth": "bearerAuth",
+      "request": "workspace_feed_request"
+    }
+  ]
+}

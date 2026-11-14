@@ -1,0 +1,36 @@
+{
+  "execution_id": "73c95e98-c3c8-4eec-819d-80d04cdcf021",
+  "project_id": "0fcfc424-4a57-439a-bd03-9745b399a42f",
+  "grant_id": "3ef1b47b-afa6-4a43-b101-80fc3ff6b5d9",
+  "run_id": "f23c9064-e5bd-4e64-afdc-19621d8c21e7",
+  "scope_id": "8cbf1531-3eb8-4daa-98a5-1deedb66da26",
+  "claim_id": "71462249-fa82-4e8f-9c40-06f820db7781",
+  "task_id": "440a04ac-a0cb-425d-9866-f012ad7b5ce8",
+  "candidate_id": "36b8112f-dae6-464f-a93d-7a66ad2a9310",
+  "profile_digest": "0a2a740c7e7ceb565638664b0d59e8cbb61cfc7c056afbb0dfd48231facc3e85",
+  "binding_mode": "owned_process",
+  "adapter": "development_fixture",
+  "state": "stopped",
+  "reason": "USER_STOP",
+  "worker_pid": 47788,
+  "host_pid": 52020,
+  "seq": 1,
+  "complete": false,
+  "exit": {
+    "exit_code": 1,
+    "job_empty": true,
+    "reason": "CONTROLLER_STOP"
+  },
+  "started_at": 1794646800000,
+  "ended_at": 1794646800000,
+  "input_count": 2,
+  "stderr_bytes": 0,
+  "progress_source": "worker_reported",
+  "events": [
+    {
+      "seq": 1,
+      "kind": "progress",
+      "text": "{\"input_count\":1,\"env\":[\"SystemRoot\",\"TEMP\",\"TMP\"],\"cwd\":\"C:\\\\Users\\\\1\\\\AppData\\\\Local\\\\Temp\\\\team-w03-59Y1D7\\\\runner-ZYa9n6\"}"
+    }
+  ]
+}

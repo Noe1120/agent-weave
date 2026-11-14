@@ -1,0 +1,426 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent-group-platform:resource:0.1",
+  "title": "Authorized read-only resource projections (baseline)",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "resource/0.1"
+        },
+        "kind": {
+          "const": "resource_result"
+        },
+        "project_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "resource_type": {
+          "const": "grant"
+        },
+        "ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "data": {
+          "$ref": "#/$defs/grant"
+        }
+      },
+      "required": [
+        "contract_version",
+        "kind",
+        "project_id",
+        "resource_type",
+        "ref",
+        "data"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "resource/0.1"
+        },
+        "kind": {
+          "const": "resource_result"
+        },
+        "project_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "resource_type": {
+          "const": "input_request"
+        },
+        "ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "data": {
+          "$ref": "#/$defs/input_request"
+        }
+      },
+      "required": [
+        "contract_version",
+        "kind",
+        "project_id",
+        "resource_type",
+        "ref",
+        "data"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "resource/0.1"
+        },
+        "kind": {
+          "const": "resource_result"
+        },
+        "project_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "resource_type": {
+          "const": "changeset"
+        },
+        "ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "data": {
+          "$ref": "#/$defs/changeset"
+        }
+      },
+      "required": [
+        "contract_version",
+        "kind",
+        "project_id",
+        "resource_type",
+        "ref",
+        "data"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "resource/0.1"
+        },
+        "kind": {
+          "const": "resource_result"
+        },
+        "project_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "resource_type": {
+          "const": "root"
+        },
+        "ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "data": {
+          "$ref": "#/$defs/root"
+        }
+      },
+      "required": [
+        "contract_version",
+        "kind",
+        "project_id",
+        "resource_type",
+        "ref",
+        "data"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "resource/0.1"
+        },
+        "kind": {
+          "const": "resource_result"
+        },
+        "project_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "resource_type": {
+          "const": "environment"
+        },
+        "ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "data": {
+          "$ref": "#/$defs/environment"
+        }
+      },
+      "required": [
+        "contract_version",
+        "kind",
+        "project_id",
+        "resource_type",
+        "ref",
+        "data"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "resource/0.1"
+        },
+        "kind": {
+          "const": "resource_result"
+        },
+        "project_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "resource_type": {
+          "const": "acceptance"
+        },
+        "ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "data": {
+          "$ref": "#/$defs/acceptance"
+        }
+      },
+      "required": [
+        "contract_version",
+        "kind",
+        "project_id",
+        "resource_type",
+        "ref",
+        "data"
+      ],
+      "additionalProperties": false
+    }
+  ],
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "revision": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$"
+    },
+    "epoch": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "ref": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        }
+      },
+      "required": [
+        "id",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "grant": {
+      "type": "object",
+      "properties": {
+        "member_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "run_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "run_epoch": {
+          "$ref": "#/$defs/epoch"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "active",
+            "revoked"
+          ]
+        },
+        "expires_at": {
+          "$ref": "#/$defs/timestamp"
+        }
+      },
+      "required": [
+        "member_id",
+        "run_id",
+        "run_epoch",
+        "state",
+        "expires_at"
+      ],
+      "additionalProperties": false
+    },
+    "input_request": {
+      "type": "object",
+      "properties": {
+        "run_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "run_epoch": {
+          "$ref": "#/$defs/epoch"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "clarification",
+            "approval"
+          ]
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "answered",
+            "cancelled"
+          ]
+        },
+        "expires_at": {
+          "$ref": "#/$defs/timestamp"
+        }
+      },
+      "required": [
+        "run_id",
+        "run_epoch",
+        "kind",
+        "state",
+        "expires_at"
+      ],
+      "additionalProperties": false
+    },
+    "changeset": {
+      "type": "object",
+      "properties": {
+        "producer_run_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "base_commit": {
+          "type": "string"
+        },
+        "source_commit": {
+          "type": "string"
+        },
+        "tree_digest": {
+          "type": "string"
+        },
+        "readiness": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "ready"
+          ]
+        },
+        "review_state": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "approved",
+            "rejected"
+          ]
+        },
+        "validity": {
+          "type": "string",
+          "enum": [
+            "valid",
+            "invalidated"
+          ]
+        }
+      },
+      "required": [
+        "producer_run_id",
+        "base_commit",
+        "source_commit",
+        "tree_digest",
+        "readiness",
+        "review_state",
+        "validity"
+      ],
+      "additionalProperties": false
+    },
+    "root": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "active",
+            "suspected_stall",
+            "expansion_paused",
+            "draining",
+            "completed",
+            "cancelled"
+          ]
+        },
+        "budget_limit": {
+          "$ref": "#/$defs/revision"
+        },
+        "budget_reserved": {
+          "$ref": "#/$defs/revision"
+        }
+      },
+      "required": [
+        "state",
+        "budget_limit",
+        "budget_reserved"
+      ],
+      "additionalProperties": false
+    },
+    "environment": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "verified",
+            "invalidated"
+          ]
+        },
+        "digest": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "state",
+        "digest"
+      ],
+      "additionalProperties": false
+    },
+    "acceptance": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "confirmed",
+            "superseded"
+          ]
+        },
+        "criteria_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ref"
+          }
+        }
+      },
+      "required": [
+        "state",
+        "criteria_refs"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

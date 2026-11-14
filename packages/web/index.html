@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>群组工作台 · 本地协作空间</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+    <section id="login" class="login-page">
+      <div class="login-story">
+        <div class="brand">
+          <span class="brand-mark">群</span
+          ><span>群组工作台<small>LOCAL COLLABORATION</small></span>
+        </div>
+        <div class="eyebrow">让协作先有一个清晰的起点</div>
+        <h1>一个项目，<br />一个共同的工作空间。</h1>
+        <p>
+          整理目标、分配职责、记录讨论。<br />让每条消息和每份任务，都有明确的归属。
+        </p>
+        <div class="story-cards">
+          <div><b>01</b><span>建立项目群</span></div>
+          <div><b>02</b><span>登记成员职责</span></div>
+          <div><b>03</b><span>沉淀消息与草稿</span></div>
+        </div>
+        <div class="story-note">
+          <span class="dot"></span> 本地存储 · 无模型调用 · 原客户端未连接
+        </div>
+      </div>
+      <div class="login-panel">
+        <span class="pill">单机主人入口</span>
+        <h2>连接你的本地工作区</h2>
+        <p class="muted">
+          使用启动终端中的一次性配对码。配对不会启动任何 Agent。
+        </p>
+        <form id="pair-form">
+          <label for="pair-code">一次性配对码</label
+          ><input
+            id="pair-code"
+            name="code"
+            type="password"
+            autocomplete="off"
+            required
+            minlength="43"
+            maxlength="43"
+            spellcheck="false"
+            placeholder="从终端复制 43 位配对码"
+          />
+          <p id="pair-error" class="error" role="alert" hidden></p>
+          <button class="primary wide" type="submit">
+            进入工作台 <span aria-hidden="true">→</span>
+          </button>
+        </form>
+        <div class="help-card">
+          <strong>在哪里找到配对码？</strong>
+          <p>
+            在本机终端运行
+            <code>npm start</code
+            >，打开显示的地址并复制配对码。已使用或过期时，另开终端运行
+            <code>npm run pair</code>。
+          </p>
+          <small
+            >配对码 10 分钟内有效，一次使用；会话 8
+            小时有效。不要将配对码分享给他人。</small
+          >
+        </div>
+        <p class="fineprint">
+          这是本地协作基础版，不是已接通原客户端的完整平台。
+        </p>
+      </div>
+    </section>
+    <div id="workspace" class="workspace" hidden>
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="brand-mark">群</span
+          ><span>群组工作台<small>LOCAL WORKSPACE</small></span>
+        </div>
+        <div class="sidebar-heading">
+          <h2>项目群</h2>
+          <span id="project-count" class="count">0</span>
+        </div>
+        <button id="new-project" class="primary wide">＋ 新建项目群</button>
+        <nav id="project-list" aria-label="项目群列表"></nav>
+        <div class="sidebar-bottom">
+          <div class="local-label">
+            <span class="dot"></span>仅此设备 · 主人会话
+          </div>
+          <button id="logout" class="text-button">退出工作区</button>
+        </div>
+      </aside>
+      <main id="main" class="main">
+        <section id="project-load-state" class="welcome" role="status" hidden>
+          <h2 id="project-load-text">正在读取项目群…</h2>
+          <p>
+            已暂停显示项目操作，避免把旧群的内容提交到新群。未发送草稿仍保留。
+          </p>
+          <button id="retry-project" class="secondary" type="button">
+            重新读取项目群
+          </button>
+        </section>
+        <div id="welcome" class="welcome">
+          <span class="welcome-symbol">＋</span>
+          <div class="eyebrow">你的协作空间已就绪</div>
+          <h1>从第一个项目群开始</h1>
+          <p>
+            给项目一个名字，登记成员，写下第一条目标。<br />所有内容保存在本机，暂不发送给原客户端。
+          </p>
+          <button id="welcome-create" class="primary">创建项目群</button>
+          <div class="welcome-steps">
+            <span>创建项目</span><span>登记成员</span><span>记录协作</span>
+          </div>
+        </div>
+        <section id="project-view" class="project-view" hidden>
+          <header class="project-header">
+            <div>
+              <div class="eyebrow">项目工作空间</div>
+              <h1 id="project-title"></h1>
+              <p id="project-description" class="muted"></p>
+            </div>
+            <button id="refresh" class="secondary">↻ 刷新进度</button>
+          </header>
+          <div class="scope-banner">
+            <span class="status-light"></span
+            ><span
+              ><strong>原客户端未连接</strong> ·
+              消息仅保存在本地，不会自动发送；任务尚未派工。</span
+            >
+          </div>
+          <div id="progress" class="progress-strip"></div>
+          <div class="tabs" role="tablist" aria-label="工作区页面">
+            <button
+              id="tab-chat"
+              role="tab"
+              aria-selected="true"
+              aria-controls="chat-panel"
+            >
+              群消息</button
+            ><button
+              id="tab-tasks"
+              role="tab"
+              aria-selected="false"
+              aria-controls="tasks-panel"
+            >
+              任务草稿 <span id="draft-count" class="count">0</span></button
+            ><span class="tabs-note">主人视图 · 可查看自己创建的全部范围</span>
+          </div>
+          <div
+            id="chat-panel"
+            class="chat-panel"
+            role="tabpanel"
+            aria-labelledby="tab-chat"
+          >
+            <form id="search-form" class="search-bar">
+              <label class="sr-only" for="search-input">搜索本群消息</label
+              ><input
+                id="search-input"
+                type="search"
+                maxlength="200"
+                placeholder="搜索本群消息…"
+              /><button class="secondary" type="submit">搜索</button
+              ><button
+                id="clear-search"
+                class="text-button"
+                type="button"
+                hidden
+              >
+                返回消息
+              </button>
+            </form>
+            <div
+              id="search-status"
+              class="search-status"
+              aria-live="polite"
+              hidden
+            ></div>
+            <button id="older-messages" class="text-button older" hidden>
+              加载更早的消息
+            </button>
+            <div
+              id="message-list"
+              class="message-list"
+              aria-live="polite"
+            ></div>
+            <form id="compose-form" class="composer">
+              <div class="composer-top">
+                <label for="recipient">接收范围</label
+                ><select id="recipient">
+                  <option value="public">全体成员（公开）</option></select
+                ><span id="audience-hint" class="muted">只保存到本项目群</span>
+              </div>
+              <label for="message-body" class="sr-only">消息内容</label
+              ><textarea
+                id="message-body"
+                maxlength="8000"
+                rows="3"
+                required
+                placeholder="写下项目目标、讨论或普通指令…"
+              ></textarea>
+              <p id="compose-error" class="error" role="alert" hidden></p>
+              <div class="composer-bottom">
+                <small id="compose-hint"
+                  >Enter 换行 · Ctrl/⌘ + Enter 保存 · 不会触发模型</small
+                ><span id="char-count" class="muted">0 / 8000</span
+                ><button id="send-message" class="primary" type="submit">
+                  保存消息
+                </button>
+              </div>
+            </form>
+          </div>
+          <div
+            id="tasks-panel"
+            class="tasks-panel"
+            role="tabpanel"
+            aria-labelledby="tab-tasks"
+            hidden
+          >
+            <div class="section-heading">
+              <div>
+                <h2>把下一步写成任务</h2>
+                <p class="muted">
+                  这里只管理草稿；不代表任务已运行或通过验收。
+                </p>
+              </div>
+              <button id="new-task" class="primary">＋ 新建任务草稿</button>
+            </div>
+            <div id="task-list" class="task-list"></div>
+          </div>
+        </section>
+      </main>
+      <aside id="members-panel" class="members-panel" hidden>
+        <div class="section-heading">
+          <h2>项目成员</h2>
+          <span id="member-count" class="count">0</span>
+        </div>
+        <button id="add-member" class="secondary wide">＋ 登记成员</button>
+        <p class="member-caption">登记身份和职责，不会启动客户端。</p>
+        <div id="member-list"></div>
+        <div class="boundary-card">
+          <strong>明确边界，安心协作</strong>
+          <p>
+            私密消息按接收范围记录。原客户端接入与执行授权尚未开放；登记不等于已连接。
+          </p>
+          <p>停用撤销访问，重新启用不会恢复旧执行授权。</p>
+        </div>
+      </aside>
+    </div>
+    <dialog id="editor">
+      <form id="editor-form">
+        <header class="dialog-heading">
+          <h2 id="editor-title"></h2>
+          <button
+            id="editor-close"
+            class="icon-button"
+            type="button"
+            aria-label="关闭编辑窗口"
+          >
+            ×
+          </button>
+        </header>
+        <p id="editor-description" class="muted"></p>
+        <div id="editor-fields" class="editor-fields"></div>
+        <p id="editor-error" class="error" role="alert" hidden></p>
+        <footer class="dialog-actions">
+          <button id="editor-cancel" class="secondary" type="button">
+            取消</button
+          ><button class="primary" type="submit">保存</button>
+        </footer>
+      </form>
+    </dialog>
+  </body>
+</html>

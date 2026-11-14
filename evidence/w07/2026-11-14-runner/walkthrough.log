@@ -1,0 +1,72 @@
+
+> agent-group-core-baseline@0.3.0 test:runner:walkthrough
+> npm run build:runner && npm run build && node tests/runner-walkthrough.mjs
+
+
+> agent-group-core-baseline@0.3.0 build:runner
+> powershell -NoProfile -File scripts/build-runner.ps1
+
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  RunnerHost -> D:\Users\1\Desktop\team\artifacts\runner-host\Team.RunnerHost.dll
+
+已成功生成。
+    0 个警告
+    0 个错误
+
+已用时间 00:00:00.88
+
+> agent-group-core-baseline@0.3.0 build
+> tsc -p tsconfig.build.json && node scripts/copy-assets.mjs
+
+(node:30728) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+{
+  "result": "PASS",
+  "scope": "COMPILED_DEVELOPMENT_BACKEND_WALKTHROUGH",
+  "date": "2026-11-14",
+  "steps": [
+    "trusted task admission",
+    "fixed fixture launch",
+    "read-only progress",
+    "Broker edit",
+    "Git checkpoint",
+    "in_review",
+    "cancel and still observe",
+    "visible protocol failure"
+  ],
+  "results": [
+    {
+      "scenario": "success",
+      "state": "succeeded",
+      "reason": null,
+      "job_empty": true,
+      "task_status": "in_review",
+      "locks_retained": 0,
+      "events": 3
+    },
+    {
+      "scenario": "idle",
+      "state": "stopped",
+      "reason": "USER_STOP",
+      "job_empty": true,
+      "task_status": "running",
+      "locks_retained": 3,
+      "events": 1
+    },
+    {
+      "scenario": "malformed",
+      "state": "failed",
+      "reason": "PROTOCOL_JSON",
+      "job_empty": true,
+      "task_status": "running",
+      "locks_retained": 3,
+      "events": 0
+    }
+  ],
+  "original_clients_started": 0,
+  "model_calls": 0,
+  "native_ui_exercised": false,
+  "os_isolation": "UNVERIFIED",
+  "qualification": "Not a production or original-client acceptance test"
+}

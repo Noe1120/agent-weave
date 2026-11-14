@@ -1,0 +1,110 @@
+{
+  "revision": "core-http/0.1",
+  "errors": {
+    "UNSUPPORTED_CONTRACT": {
+      "http_status": 400,
+      "retry_class": "never",
+      "safe_message_key": "core.unsupported_contract"
+    },
+    "INVALID_REQUEST": {
+      "http_status": 400,
+      "retry_class": "never",
+      "safe_message_key": "core.invalid_request"
+    },
+    "NOT_FOUND_OR_DENIED": {
+      "http_status": 404,
+      "retry_class": "never",
+      "safe_message_key": "core.not_found_or_denied"
+    },
+    "GRANT_REVOKED": {
+      "http_status": 403,
+      "retry_class": "never",
+      "safe_message_key": "core.grant_revoked"
+    },
+    "PLAN_STALE": {
+      "http_status": 409,
+      "retry_class": "after_refresh",
+      "safe_message_key": "core.plan_stale"
+    },
+    "PLAN_CONFLICT": {
+      "http_status": 409,
+      "retry_class": "never",
+      "safe_message_key": "core.plan_conflict"
+    },
+    "ACTION_PAYLOAD_CONFLICT": {
+      "http_status": 409,
+      "retry_class": "never",
+      "safe_message_key": "core.action_payload_conflict"
+    },
+    "WAIT_CONFLICT": {
+      "http_status": 409,
+      "retry_class": "never",
+      "safe_message_key": "core.wait_conflict"
+    },
+    "WAIT_STALE": {
+      "http_status": 409,
+      "retry_class": "after_refresh",
+      "safe_message_key": "core.wait_stale"
+    },
+    "CURSOR_EXPIRED": {
+      "http_status": 409,
+      "retry_class": "after_refresh",
+      "safe_message_key": "core.cursor_expired"
+    },
+    "INPUT_REQUEST_STALE": {
+      "http_status": 409,
+      "retry_class": "after_refresh",
+      "safe_message_key": "core.input_request_stale"
+    },
+    "EXECUTION_UNKNOWN": {
+      "http_status": 409,
+      "retry_class": "after_reconcile",
+      "safe_message_key": "core.execution_unknown"
+    },
+    "DISCLOSURE_APPROVAL_REQUIRED": {
+      "http_status": 409,
+      "retry_class": "never",
+      "safe_message_key": "core.disclosure_approval_required"
+    },
+    "BUDGET_UNAVAILABLE": {
+      "http_status": 409,
+      "retry_class": "after_reconcile",
+      "safe_message_key": "core.budget_unavailable"
+    },
+    "DISCLOSURE_STALE": {
+      "http_status": 409,
+      "retry_class": "after_refresh",
+      "safe_message_key": "core.disclosure_stale"
+    },
+    "DELEGATION_EXPIRED": {
+      "http_status": 409,
+      "retry_class": "never",
+      "safe_message_key": "core.delegation_expired"
+    },
+    "REASSIGNMENT_REQUIRES_HANDOFF": {
+      "http_status": 409,
+      "retry_class": "after_reconcile",
+      "safe_message_key": "core.reassignment_requires_handoff"
+    },
+    "MODEL_CAPABILITY_UNAVAILABLE": {
+      "http_status": 503,
+      "retry_class": "never",
+      "safe_message_key": "core.model_capability_unavailable"
+    },
+    "MODEL_OUTPUT_INVALID": {
+      "http_status": 400,
+      "retry_class": "never",
+      "safe_message_key": "core.model_output_invalid"
+    },
+    "RETRIEVAL_INCOMPLETE": {
+      "http_status": 409,
+      "retry_class": "after_refresh",
+      "safe_message_key": "core.retrieval_incomplete"
+    },
+    "INDEX_STALE": {
+      "http_status": 409,
+      "retry_class": "after_refresh",
+      "safe_message_key": "core.index_stale"
+    }
+  }
+}

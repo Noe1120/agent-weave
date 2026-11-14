@@ -1,0 +1,304 @@
+{
+  "date": "2026-11-14",
+  "scope": "W07 source and documentation, including in-phase reference research; not an upload allowlist",
+  "baseline_manifest": "before-manifest.json",
+  "roots": [
+    "packages",
+    "scripts",
+    "tests",
+    "plan",
+    "generated"
+  ],
+  "top_level_files": [
+    ".gitignore",
+    "global.json",
+    "package-lock.json",
+    "package.json",
+    "Prompt.md",
+    "README.md",
+    "tsconfig.build.json",
+    "tsconfig.json"
+  ],
+  "excluded": [
+    "all evidence/ (including third-party reference checkout and nested .git)",
+    "node_modules",
+    ".tools",
+    "dist",
+    "artifacts",
+    "bin",
+    "obj",
+    "__pycache__",
+    ".git",
+    ".runtime"
+  ],
+  "counts": {
+    "baseline": 139,
+    "current": 157,
+    "modified": 19,
+    "added": 18,
+    "removed": 0,
+    "unchanged": 120
+  },
+  "files": [
+    {
+      "path": "README.md",
+      "status": "modified",
+      "before_sha256": "a87c847cee022abb1d006250ad0450a78aa15fedd3e582f6aea6d4534aa28f03",
+      "after_sha256": "bd08c8abbbcddf08d26405f2ff625018443adde7e58f189394534302cea52ecc",
+      "bytes": 9889
+    },
+    {
+      "path": "package.json",
+      "status": "modified",
+      "before_sha256": "78bd26f8360f5e15ff26d5606f8d13136e50344b6107e05120c22caea0f84ec4",
+      "after_sha256": "adc0d884b62effded2e0d01071b09a90cdce16729d68d94f55d8c31bd8380348",
+      "bytes": 2128
+    },
+    {
+      "path": "packages/desktop/Core/ProcessJob.cs",
+      "status": "modified",
+      "before_sha256": "bb9656117f0107decf2eb84326dc50f44d5f2d341efad31446ae4d7fc73a9ccd",
+      "after_sha256": "fa7bd686980f3241e2950c0c204e55c6072808f79f54dfeb266de0c05a20250a",
+      "bytes": 3133
+    },
+    {
+      "path": "packages/runner/Program.cs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "7d7da5ea77c64fd74ca12fac46a047af8879dedfff503fe7379fba0882bbf2b1",
+      "bytes": 6552
+    },
+    {
+      "path": "packages/runner/RunnerHost.csproj",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "d98a8a8c51a41fe3850911b0faf55329a9a9282c504e1de295af2daf333af0ca",
+      "bytes": 417
+    },
+    {
+      "path": "packages/service/migrations/004_runner.sql",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "2ea0575b491a2fed2a101fb15a0204aed84116bcae1883c28019dddd5d941236",
+      "bytes": 738
+    },
+    {
+      "path": "packages/service/src/broker.ts",
+      "status": "modified",
+      "before_sha256": "c121d11889edb3e9824e0eba5d0ad2f10cccb40add89c87b200333a6862df3b7",
+      "after_sha256": "9dd78ed44627d82ca0f9bbfb21cb6e4dc2e6bd599ecdd5713473a85593e8770c",
+      "bytes": 22841
+    },
+    {
+      "path": "packages/service/src/domain.ts",
+      "status": "modified",
+      "before_sha256": "0c448fa8b37135aa03c8d54cf19d59f8157164586696670d0258ed7f45619fe5",
+      "after_sha256": "9ae3573a5ddfe75e6a6061065d7357e1f00a2f5c73ff4c15c76220f3142ae0d3",
+      "bytes": 3720
+    },
+    {
+      "path": "packages/service/src/runner-host.ts",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "57041dcc378323eb584a40b49ab384dc8519ee7494dcd145f94e87ab46e24892",
+      "bytes": 6941
+    },
+    {
+      "path": "packages/service/src/runner-protocol.ts",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "7dd3e7cf17cf45d43849c9e0fce0ac7dce2d100f044345bc72d2556599e69876",
+      "bytes": 4576
+    },
+    {
+      "path": "packages/service/src/runner.ts",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "95328c4abf5441a2b61a7d1384825b65029efe5342d15b0696192aea6e557658",
+      "bytes": 14338
+    },
+    {
+      "path": "packages/service/src/store.ts",
+      "status": "modified",
+      "before_sha256": "aa8af83d9f721021157c3669ca7ad64a6e584f1c937349b0aa0c750e56d2d0dd",
+      "after_sha256": "98a86bdfc3beec7fb64dd677c070cc9b6e0b6bd75535f727c67cfc1fd1ddff18",
+      "bytes": 8616
+    },
+    {
+      "path": "plan/03-agent-integration.md",
+      "status": "modified",
+      "before_sha256": "becdcfcd9b2b9aaea758d8699ef3ed2f4d0556f7e5304eb38f0a5b326f7b0e34",
+      "after_sha256": "2dad2d732c2ef45a86a46064aa3e1b16fc62e02c5d99fab3317036a5741965a1",
+      "bytes": 20703
+    },
+    {
+      "path": "plan/04-reliability-security-operations.md",
+      "status": "modified",
+      "before_sha256": "825a8d1e4f4ed24efd425025586664bbf3dbcb3a99a9bfb9fd41ca81c311230a",
+      "after_sha256": "4f4474acdd8bf0d6f68251510dabe1926bd5cbdfd8f49bbe478e6e10cfa50ac9",
+      "bytes": 28980
+    },
+    {
+      "path": "plan/05-delivery-acceptance.md",
+      "status": "modified",
+      "before_sha256": "c435735a3583809a759c002d32fd48e82eed1beae4a1a951d5de372a18a9f3d2",
+      "after_sha256": "79853d1a39fbf40ecfb3c343f8acbbebba0e5dc0d38acf3ee998b1f2d4f5f532",
+      "bytes": 48303
+    },
+    {
+      "path": "plan/CHANGELOG.md",
+      "status": "modified",
+      "before_sha256": "8e26d2d6274dd343ade2fd424aa0a61aed04856459ab9aaa5a8c28ef2ceda2b1",
+      "after_sha256": "5a9c69bbe90940303f7fdfafadcdbcf87e0a593e088c7b7e4cb948969a8c8e66",
+      "bytes": 11148
+    },
+    {
+      "path": "plan/README.md",
+      "status": "modified",
+      "before_sha256": "bd7a7d0185ab09c41a9ca8e03bf6c7deaba42b47dc0e2db4cc6b244229baaa12",
+      "after_sha256": "0d3916fd07389064c72f332b3e4fbc52af2cc89b82d3ae05054f3d3a30d83119",
+      "bytes": 15931
+    },
+    {
+      "path": "plan/SHA256SUMS.txt",
+      "status": "modified",
+      "before_sha256": "12ce9f767350e0bc925283f9f18200b47bc5eb5fb6e5461a5e28c9e9d39853eb",
+      "after_sha256": "c35883dfcf20dd22b3ef872ec33aa22c700ab51ecf3cc42f47fb4ec676298046",
+      "bytes": 4066
+    },
+    {
+      "path": "plan/W07-DEVELOPMENT-RUNNER.md",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "868fe3dc6c572541e9476a4635563188fb0293fe529a61e224590e1927a246cd",
+      "bytes": 10524
+    },
+    {
+      "path": "plan/research/2026-11-14-agents-anywhere.md",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "cc1a1589246016e63afc680a3ad4c4fffcb0906f6934dc2dd10cbe61d5ecf991",
+      "bytes": 12878
+    },
+    {
+      "path": "plan/verification-report.json",
+      "status": "modified",
+      "before_sha256": "fff9e2620ebb9c7983655f4486f3068d08d5ce8671e81c7614309d43e925b4be",
+      "after_sha256": "2157ff668c7da67cd3d859b703b8bdea3387cdb69dd591ef9d5129026c7c46c1",
+      "bytes": 36275
+    },
+    {
+      "path": "plan/完整方案.md",
+      "status": "modified",
+      "before_sha256": "d4657ccb09afe3284bcbea0589614b6ff48dc42116309e92232daea8786dc081",
+      "after_sha256": "b04ab346ebd025f379ce643dfa79bbdb5b2a91774608f7246857f25039006744",
+      "bytes": 410293
+    },
+    {
+      "path": "plan/项目交接说明.md",
+      "status": "modified",
+      "before_sha256": "2adf5eab3930bf892f6a0157a864e908c9a68dc3972eee1cdfa48f69f656bf5d",
+      "after_sha256": "eb3af88fd555df587992ef5f0bb8fde7f78932d0bbe74bc4bb7e0c8ddb08c7fc",
+      "bytes": 35803
+    },
+    {
+      "path": "scripts/build-runner.ps1",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "06300e9ac00468a67d5ec7fcaa267d7ba2c889eaa137a2ea68661a8651d3dde1",
+      "bytes": 398
+    },
+    {
+      "path": "tests/broker-migration.test.ts",
+      "status": "modified",
+      "before_sha256": "9dde763c9568a8f2d14c3b6eac5e834ed60f0451c2855ce63e82ae45c95a23b3",
+      "after_sha256": "3042fccfe48f1d2f8cdabdb7c26554dba55570a0ca00a949318e222f1c9974d3",
+      "bytes": 2720
+    },
+    {
+      "path": "tests/build-smoke.mjs",
+      "status": "modified",
+      "before_sha256": "7696a2f5cb9370e11dd42ad30938983d0cbde51e36c0b7fcb69f935d2a3bebf6",
+      "after_sha256": "002ec2d8ce74afa5a34a361d2bf12c3da16b73ae8e3b6e76e9e1e69f9e688dd4",
+      "bytes": 2493
+    },
+    {
+      "path": "tests/durability.test.ts",
+      "status": "modified",
+      "before_sha256": "7954df09090cf5eb14433df3f40981410be2366b825f5524e62c10af4651ba6a",
+      "after_sha256": "2792df990ac673666c445d8a6b8c99cafebc7ec08ca21318a182845bcd66fbfc",
+      "bytes": 6995
+    },
+    {
+      "path": "tests/fixtures/runner-controller-crash.ts",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "02234dd332bb53edd51cdb5c44049616a03a9a1dbdb1c1d3ecb7b01c783063bc",
+      "bytes": 1663
+    },
+    {
+      "path": "tests/fixtures/runner-worker.mjs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "141c4e38e3580bf243a84db95f2d90a44967045043d31f302532739995f53696",
+      "bytes": 3077
+    },
+    {
+      "path": "tests/runner-helpers.ts",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "8a050fdcceac7dfb94f89433715d1ba107cd8ad2bd72e17d647d28a17c3af257",
+      "bytes": 2666
+    },
+    {
+      "path": "tests/runner-migration.test.ts",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "867446a47e88486bbd8560e8d13cc9359ab17f9579720ed9c788b07f125d41dc",
+      "bytes": 2513
+    },
+    {
+      "path": "tests/runner-native.test.ts",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "4e7668bf7d0eafc9f34af56f8f6a0621f4501c3f6fb2b2d2f0513f8af221cb67",
+      "bytes": 2258
+    },
+    {
+      "path": "tests/runner-process.test.ts",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "8e66964e73d43ecfc2d0cc1853fc35aea39824337a56bbac21803ebfa9407abb",
+      "bytes": 11167
+    },
+    {
+      "path": "tests/runner-recovery.test.ts",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "98862a6c2acd30f8d7353be8b7d0568e6313f90eb7ad60ba8d840d8b280da3ad",
+      "bytes": 6283
+    },
+    {
+      "path": "tests/runner-walkthrough.mjs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "6362cc34aa99c8781da2863c2eca8d3e3fb742fd17f771ff0e34a68fbea95264",
+      "bytes": 4567
+    },
+    {
+      "path": "tests/runner.test.ts",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "31914ac0f3e21e80adacd2db0124115358fcb83aa74e0119c5fb8e8148a7e6ea",
+      "bytes": 1827
+    },
+    {
+      "path": "tests/workspace-migration.test.ts",
+      "status": "modified",
+      "before_sha256": "2dbb408c42fa94bcce7ae569fbc8fee186da299dd5aa383871c7b0462753082e",
+      "after_sha256": "2f80d368e1d44a5c4f1f777c2ad6b8a586cbb421c96ea1aaaa9785ece1dd64a3",
+      "bytes": 3257
+    }
+  ],
+  "removed": []
+}

@@ -1,0 +1,51 @@
+(node:66988) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+{
+  "result": "PASS",
+  "scope": "COMPILED_DEVELOPMENT_BACKEND_WALKTHROUGH",
+  "date": "2026-11-14",
+  "steps": [
+    "trusted task admission",
+    "fixed fixture launch",
+    "read-only progress",
+    "Broker edit",
+    "Git checkpoint",
+    "in_review",
+    "cancel and still observe",
+    "visible protocol failure"
+  ],
+  "results": [
+    {
+      "scenario": "success",
+      "state": "succeeded",
+      "reason": null,
+      "job_empty": true,
+      "task_status": "in_review",
+      "locks_retained": 0,
+      "events": 3
+    },
+    {
+      "scenario": "idle",
+      "state": "stopped",
+      "reason": "USER_STOP",
+      "job_empty": true,
+      "task_status": "running",
+      "locks_retained": 3,
+      "events": 1
+    },
+    {
+      "scenario": "malformed",
+      "state": "failed",
+      "reason": "PROTOCOL_JSON",
+      "job_empty": true,
+      "task_status": "running",
+      "locks_retained": 3,
+      "events": 0
+    }
+  ],
+  "original_clients_started": 0,
+  "model_calls": 0,
+  "native_ui_exercised": false,
+  "os_isolation": "UNVERIFIED",
+  "qualification": "Not a production or original-client acceptance test"
+}

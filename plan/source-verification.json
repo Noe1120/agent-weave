@@ -1,0 +1,308 @@
+{
+  "checked_on": "2026-11-14",
+  "timezone": "Asia/Tokyo",
+  "method": "v1.3/v1.4: direct read-only retrieval as recorded; v1.5: approved Invoke-WebRequest of official E23-E32 pages after web.run returned no usable content.",
+  "scope": "Incremental v1.6 documentation-format verification only; previous entries retain their historical dates/status. No product runtime verification.",
+  "sources": [
+    {
+      "id": "E01",
+      "requested_url": "https://learn.chatgpt.com/docs/app-server.md",
+      "http_status": 200,
+      "content_sha256_utf8": "b9e75507755ba0be2ebc615ca1f4399a54a386125f3935f615405ea93efe77f2",
+      "content_characters": 106101,
+      "conclusion": "User input request is experimental; request resolution/cleanup requires native binding and versioned schema.",
+      "status": "DOCUMENT_READ_NOT_RUNTIME_TESTED"
+    },
+    {
+      "id": "E05",
+      "requested_url": "https://raw.githubusercontent.com/deepseek-ai/deepseek-harness/master/packages/acp/acp/README.md",
+      "http_status": 200,
+      "content_sha256_utf8": "f72402f208acd96fa65359cd8ea083e3944c7f30b0f835eb9fd2ce1705bf432b",
+      "content_characters": 13553,
+      "conclusion": "README lists elicitation among unsupported ACP bridge surfaces; master content is not a pinned release.",
+      "status": "DOCUMENT_READ_NOT_RUNTIME_TESTED"
+    },
+    {
+      "id": "E09",
+      "requested_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/security_best_practices",
+      "http_status": 200,
+      "content_sha256_utf8": "a3dee5158840cdb29e0a7f95032506c2176db1be120d4f7975166d86d766d99f",
+      "content_characters": 256040,
+      "conclusion": "Authorization must be checked on inbound requests; session identifiers are not authentication.",
+      "status": "DOCUMENT_READ_NOT_RUNTIME_TESTED"
+    },
+    {
+      "id": "E15",
+      "requested_url": "https://learn.microsoft.com/en-us/windows/win32/secauthz/appcontainer-isolation",
+      "http_status": 200,
+      "content_sha256_utf8": "fa0943a77124c78e0d7a91f77c15253a01c8a9db701fc1e70bea1c91a5c7d03c",
+      "content_characters": 50269,
+      "conclusion": "Describes AppContainer isolation; does not establish compatibility of target clients.",
+      "status": "DOCUMENT_READ_NOT_RUNTIME_TESTED"
+    },
+    {
+      "id": "E16",
+      "requested_url": "https://learn.microsoft.com/en-us/windows/win32/secauthz/how-dacls-control-access-to-an-object",
+      "http_status": 200,
+      "content_sha256_utf8": "42977a0fdd6d8303d991633c1936a9830c8bd1069dd2ef5cce0e75e8ad30106d",
+      "content_characters": 50573,
+      "conclusion": "DACLs and access tokens govern object access checks.",
+      "status": "DOCUMENT_READ_NOT_RUNTIME_TESTED"
+    },
+    {
+      "id": "E17",
+      "requested_url": "https://learn.microsoft.com/en-us/windows/win32/procthread/job-objects",
+      "http_status": 200,
+      "content_sha256_utf8": "d30aa6f15a4e8b8faf8f42ea103717f3d2cb09edfc0de9733564bb578ab86304",
+      "content_characters": 61689,
+      "conclusion": "Job Objects manage associated processes; documented child-process and breakaway exceptions matter.",
+      "status": "DOCUMENT_READ_NOT_RUNTIME_TESTED"
+    },
+    {
+      "id": "E18",
+      "requested_url": "https://learn.microsoft.com/en-us/windows/win32/fileio/file-security-and-access-rights",
+      "http_status": 200,
+      "content_sha256_utf8": "0cdffa37b0bacbe9e039ed78ddeca249d1d256e63e2b99d28a29f281ee72217a",
+      "content_characters": 61059,
+      "conclusion": "Windows file objects have access rights and security descriptors; deployment must verify actual boundaries.",
+      "status": "DOCUMENT_READ_NOT_RUNTIME_TESTED"
+    },
+    {
+      "id": "E19",
+      "requested_url": "https://git-scm.com/docs/git-bundle",
+      "http_status": 200,
+      "content_sha256_utf8": "9c97c26cdca8a49e0d4dfb0e7bf5d33d5a3b573c7096c68b63bb322deba9a029",
+      "content_characters": 51335,
+      "conclusion": "Bundles do not include complete index and working tree state.",
+      "status": "DOCUMENT_READ_NOT_RUNTIME_TESTED"
+    },
+    {
+      "id": "E20",
+      "requested_url": "https://platform.openai.com/docs/guides/evals",
+      "http_status": 200,
+      "checked_on": "2026-11-14",
+      "design_revision": "1.4",
+      "content_sha256_utf8": "5f6b512aaee13f7ecb2a9643d3028b5790018ba5df2bc8af5e93694b14b6eda0",
+      "content_characters": 814547,
+      "conclusion": "Define expected behavior, run evaluation inputs, analyze results and iterate prompts.",
+      "status": "DOCUMENT_READ_NOT_RUNTIME_TESTED"
+    },
+    {
+      "id": "E21",
+      "requested_url": "https://playwright.dev/docs/browser-contexts",
+      "http_status": 200,
+      "checked_on": "2026-11-14",
+      "design_revision": "1.4",
+      "content_sha256_utf8": "042ff9accf800b9a8b087042206992f7a9e6ddb2755585b0fc48cf7e4ae1890b",
+      "content_characters": 57659,
+      "conclusion": "Browser contexts isolate cookies and browser storage; backend and OS isolation remain separate.",
+      "status": "DOCUMENT_READ_NOT_RUNTIME_TESTED"
+    },
+    {
+      "id": "E22",
+      "requested_url": "https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html",
+      "http_status": 200,
+      "checked_on": "2026-11-14",
+      "design_revision": "1.4",
+      "content_sha256_utf8": "6d0b82f55ef090b50a591693e8b2147289b5dd8bbe4f19ee8e28bd3b99fcc492",
+      "content_characters": 117267,
+      "conclusion": "Destination/domain/IP validation and redirect/DNS bypass protections; not a complete data loss prevention system.",
+      "status": "DOCUMENT_READ_NOT_RUNTIME_TESTED"
+    },
+    {
+      "id": "E23",
+      "requested_url": "https://docs.langchain.com/oss/javascript/langgraph/overview",
+      "checked_on": "2026-11-14",
+      "design_revision": "1.5",
+      "method": "Approved read-only Invoke-WebRequest of official documentation; web.run returned no usable content",
+      "conclusion": "图式编排与持久化/人工介入基础；不替代本项目业务授权",
+      "status": "DOCUMENT_READ_NOT_RUNTIME_TESTED",
+      "content_sha256_utf8": "a33e271df5b60b1b07edf1846438200f4db8862180db7b4c22960972ddb3960b",
+      "retrieved_url": "https://docs.langchain.com/oss/javascript/langgraph/overview.md",
+      "final_url": "https://docs.langchain.com/oss/javascript/langgraph/overview.md",
+      "http_status": 200,
+      "content_characters": 6443
+    },
+    {
+      "id": "E24",
+      "requested_url": "https://docs.langchain.com/oss/javascript/langgraph/workflows-agents",
+      "checked_on": "2026-11-14",
+      "design_revision": "1.5",
+      "method": "Approved read-only Invoke-WebRequest of official documentation; web.run returned no usable content",
+      "conclusion": "预定义 workflow 与动态 agent 的分工，可组合受控流程",
+      "status": "DOCUMENT_READ_NOT_RUNTIME_TESTED",
+      "content_sha256_utf8": "5e493f08ea343dc6e19d049de1d148ea651b76b827ec3b5c900c8001b3bb7585",
+      "retrieved_url": "https://docs.langchain.com/oss/javascript/langgraph/workflows-agents.md",
+      "final_url": "https://docs.langchain.com/oss/javascript/langgraph/workflows-agents.md",
+      "http_status": 200,
+      "content_characters": 29630
+    },
+    {
+      "id": "E25",
+      "requested_url": "https://docs.langchain.com/oss/javascript/langgraph/fault-tolerance",
+      "checked_on": "2026-11-14",
+      "design_revision": "1.5",
+      "method": "Approved read-only Invoke-WebRequest of official documentation; web.run returned no usable content",
+      "conclusion": "持久化重放与副作用应幂等或去重；不提供外部操作天然 exactly-once",
+      "status": "DOCUMENT_READ_NOT_RUNTIME_TESTED",
+      "content_sha256_utf8": "7d9709fda2684615ae702e77085870c0cf0225ebcb0bb7d1a6726b11778b9fc8",
+      "historical_requested_url": "https://docs.langchain.com/oss/javascript/langgraph/durable-execution",
+      "redirect_observed": false,
+      "redirect_observation": {
+        "final": "https://docs.langchain.com/oss/javascript/langgraph/persistence.md",
+        "requested": "https://docs.langchain.com/oss/javascript/langgraph/durable-execution.md",
+        "content_sha256_utf8": "78414f6cadfd07b6bccd1165e3b9b6106c883edc2f17d4f280952f0616fe9725"
+      },
+      "retrieved_url": "https://docs.langchain.com/oss/javascript/langgraph/fault-tolerance.md",
+      "final_url": "https://docs.langchain.com/oss/javascript/langgraph/fault-tolerance.md",
+      "http_status": 200,
+      "content_characters": 34386
+    },
+    {
+      "id": "E26",
+      "requested_url": "https://docs.langchain.com/oss/javascript/langgraph/interrupts",
+      "checked_on": "2026-11-14",
+      "design_revision": "1.5",
+      "method": "Approved read-only Invoke-WebRequest of official documentation; web.run returned no usable content",
+      "conclusion": "等待可持久化，恢复会从节点开头重入；先前副作用需幂等",
+      "status": "DOCUMENT_READ_NOT_RUNTIME_TESTED",
+      "content_sha256_utf8": "8f18a6cfba139e54c5cab58dcbaa3ea3f338c9fe419db686393cc760050ed6f9",
+      "retrieved_url": "https://docs.langchain.com/oss/javascript/langgraph/interrupts.md",
+      "final_url": "https://docs.langchain.com/oss/javascript/langgraph/interrupts.md",
+      "http_status": 200,
+      "content_characters": 44604
+    },
+    {
+      "id": "E27",
+      "requested_url": "https://docs.langchain.com/oss/javascript/langgraph/persistence",
+      "checked_on": "2026-11-14",
+      "design_revision": "1.5",
+      "method": "Approved read-only Invoke-WebRequest of official documentation; web.run returned no usable content",
+      "conclusion": "thread checkpoint 与跨线程 store 分工，不构成本项目的访问控制",
+      "status": "DOCUMENT_READ_NOT_RUNTIME_TESTED",
+      "content_sha256_utf8": "78414f6cadfd07b6bccd1165e3b9b6106c883edc2f17d4f280952f0616fe9725",
+      "retrieved_url": "https://docs.langchain.com/oss/javascript/langgraph/persistence.md",
+      "final_url": "https://docs.langchain.com/oss/javascript/langgraph/persistence.md",
+      "http_status": 200,
+      "content_characters": 4822
+    },
+    {
+      "id": "E28",
+      "requested_url": "https://docs.langchain.com/oss/javascript/deepagents/retrieval",
+      "checked_on": "2026-11-14",
+      "design_revision": "1.5",
+      "method": "Approved read-only Invoke-WebRequest of official documentation; web.run returned no usable content",
+      "conclusion": "可检索现有数据库/文档/全文系统，不必先重建向量库",
+      "status": "DOCUMENT_READ_NOT_RUNTIME_TESTED",
+      "content_sha256_utf8": "0af92e8ab292bfb8ba8ddd58a8bc04ce94188319d0ed13c7e97f8086fddd3ba1",
+      "retrieved_url": "https://docs.langchain.com/oss/javascript/deepagents/retrieval.md",
+      "final_url": "https://docs.langchain.com/oss/javascript/deepagents/retrieval.md",
+      "http_status": 200,
+      "content_characters": 14422
+    },
+    {
+      "id": "E29",
+      "requested_url": "https://docs.langchain.com/oss/javascript/langchain/models",
+      "checked_on": "2026-11-14",
+      "design_revision": "1.5",
+      "method": "Approved read-only Invoke-WebRequest of official documentation; web.run returned no usable content",
+      "conclusion": "统一模型接口仍有工具/结构化/流式等不同能力，需逐配置验证",
+      "status": "DOCUMENT_READ_NOT_RUNTIME_TESTED",
+      "content_sha256_utf8": "804d1564e9e347eb90554a3f8091e01080761e87d25839970aa0c2b8ed9e9faa",
+      "retrieved_url": "https://docs.langchain.com/oss/javascript/langchain/models.md",
+      "final_url": "https://docs.langchain.com/oss/javascript/langchain/models.md",
+      "http_status": 200,
+      "content_characters": 59434
+    },
+    {
+      "id": "E30",
+      "requested_url": "https://docs.langchain.com/oss/javascript/integrations/embeddings",
+      "checked_on": "2026-11-14",
+      "design_revision": "1.5",
+      "method": "Approved read-only Invoke-WebRequest of official documentation; web.run returned no usable content",
+      "conclusion": "嵌入模型具有独立文档/查询向量接口，须另配能力与授权",
+      "status": "DOCUMENT_READ_NOT_RUNTIME_TESTED",
+      "content_sha256_utf8": "c7aabf635eb8337a31d959a26df9f00f3846fc286ef1afcd7b52bfd7c49f2a13",
+      "retrieved_url": "https://docs.langchain.com/oss/javascript/integrations/embeddings.md",
+      "final_url": "https://docs.langchain.com/oss/javascript/integrations/embeddings.md",
+      "http_status": 200,
+      "content_characters": 17866
+    },
+    {
+      "id": "E31",
+      "requested_url": "https://docs.langchain.com/oss/javascript/migrate/langgraph-v1",
+      "checked_on": "2026-11-14",
+      "design_revision": "1.5",
+      "method": "Approved read-only Invoke-WebRequest of official documentation; web.run returned no usable content",
+      "conclusion": "迁移页将 createReactAgent 标为弃用并指向 createAgent；按固定版本核对",
+      "status": "DOCUMENT_READ_NOT_RUNTIME_TESTED",
+      "content_sha256_utf8": "1fb81ff81f0d6a222f0115094ee59ac4ba9d2de6dce394f3e41c4d21d49ead63",
+      "retrieved_url": "https://docs.langchain.com/oss/javascript/migrate/langgraph-v1.md",
+      "final_url": "https://docs.langchain.com/oss/javascript/migrate/langgraph-v1.md",
+      "http_status": 200,
+      "content_characters": 6462
+    },
+    {
+      "id": "E32",
+      "requested_url": "https://genai.owasp.org/llmrisk/llm082025-vector-and-embedding-weaknesses/",
+      "checked_on": "2026-11-14",
+      "design_revision": "1.5",
+      "method": "Approved read-only Invoke-WebRequest of official documentation; web.run returned no usable content",
+      "conclusion": "RAG 中的访问控制缺陷、知识污染和泄漏风险，提示词不是隔离边界",
+      "status": "DOCUMENT_READ_NOT_RUNTIME_TESTED",
+      "content_sha256_utf8": "bd7f46a8eb52ae1191d4a348892b15ee99980042b3fab720c4d1de809da0ca6d",
+      "retrieved_url": "https://genai.owasp.org/llmrisk/llm082025-vector-and-embedding-weaknesses/",
+      "final_url": "https://genai.owasp.org/llmrisk/llm082025-vector-and-embedding-weaknesses/",
+      "http_status": 200,
+      "content_characters": 366145
+    },
+    {
+      "id": "E33",
+      "requested_url": "https://json-schema.org/draft/2020-12/json-schema-core",
+      "retrieved_url": "https://json-schema.org/draft/2020-12/json-schema-core",
+      "final_url": "https://json-schema.org/draft/2020-12/json-schema-core",
+      "checked_on": "2026-11-14",
+      "design_revision": "1.6",
+      "method": "Approved read-only Invoke-WebRequest after empty web output and sandbox authentication failure",
+      "conclusion": "JSON Schema 2020-12 Core defines schema dialect/reference mechanisms and reusable $defs. It does not establish application authorization, transaction semantics or exactly-once execution.",
+      "status": "DOCUMENT_READ_NOT_RUNTIME_TESTED",
+      "content_sha256_utf8": "c30b5f42847e8b819ce9bd50210bc895de55dd9c47c8ba79968de830904abeb5",
+      "http_status": 200,
+      "content_characters": 342091
+    },
+    {
+      "content_characters": 96668,
+      "requested_url": "https://learn.microsoft.com/en-us/dotnet/desktop/wpf/overview/",
+      "content_sha256_utf8": "5f95ddad99c537ea3f7bdcb379f823f64bbdad842e945b5291c4c3411af56829",
+      "id": "E34",
+      "conclusion": "WPF is a Windows desktop UI framework; actual packaged build and tests are separate evidence.",
+      "http_status": 200,
+      "checked_on": "2026-11-14",
+      "status": "DOCUMENT_READ_NOT_PRODUCT_QUALIFICATION"
+    },
+    {
+      "content_characters": 1204142,
+      "requested_url": "https://builds.dotnet.microsoft.com/dotnet/release-metadata/10.0/releases.json",
+      "content_sha256_utf8": "482b9d79e76b331ef4cd5bcab02af3188f874ce78fd7aae07cb6163650da87c0",
+      "id": "E35",
+      "conclusion": "SDK 10.0.404 / runtime 10.0.15 release-date 2026-11-10; SDK ZIP SHA512 is pinned in bootstrap-dotnet.ps1. No future-dated release selected.",
+      "http_status": 200,
+      "checked_on": "2026-11-14",
+      "status": "DOCUMENT_READ_NOT_PRODUCT_QUALIFICATION"
+    }
+  ],
+  "design_version": "1.6",
+  "latest_revision_sources": [
+    "E33"
+  ],
+  "raw_cache_policy": "No v1.6 raw page file persisted; official response digest/length and limited conclusion recorded. Earlier cache cleanup is historical.",
+  "native_ui_revision": {
+    "checked_on": "2026-11-14",
+    "method": "Read-only official HTTP retrieval after web.run returned no readable body.",
+    "scope": "Native UI framework and SDK selection only; not original Agent qualification.",
+    "source_ids": [
+      "E34",
+      "E35"
+    ]
+  }
+}

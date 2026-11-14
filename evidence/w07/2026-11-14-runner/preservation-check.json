@@ -1,0 +1,367 @@
+{
+  "date": "2026-11-14",
+  "result": "PASS",
+  "baseline_snapshot": {
+    "files": 139,
+    "hash_mismatches": [],
+    "verified": true
+  },
+  "source_removed": 0,
+  "protected_file_count": 47,
+  "groups": {
+    "historical_migrations": {
+      "result": "PASS",
+      "count": 3,
+      "files": [
+        {
+          "path": "packages/service/migrations/001_core.sql",
+          "before_sha256": "9bb5a4c1d968cb2d2540a6bf88099700bddaaa9c549618e9d8118b6ee168a18f",
+          "after_sha256": "9bb5a4c1d968cb2d2540a6bf88099700bddaaa9c549618e9d8118b6ee168a18f",
+          "unchanged": true
+        },
+        {
+          "path": "packages/service/migrations/002_workspace.sql",
+          "before_sha256": "258e3a959ec2ec13432e7c4a0471b4014b0e2cc60f7cfa3d0e5ea4fdf79ff25a",
+          "after_sha256": "258e3a959ec2ec13432e7c4a0471b4014b0e2cc60f7cfa3d0e5ea4fdf79ff25a",
+          "unchanged": true
+        },
+        {
+          "path": "packages/service/migrations/003_broker.sql",
+          "before_sha256": "380e8b5afd86f872ecd319518ac6a02ff930a50a9ab7bca844b5bba16942d556",
+          "after_sha256": "380e8b5afd86f872ecd319518ac6a02ff930a50a9ab7bca844b5bba16942d556",
+          "unchanged": true
+        }
+      ]
+    },
+    "contracts_and_generated": {
+      "result": "PASS",
+      "count": 17,
+      "files": [
+        {
+          "path": "generated/openapi.json",
+          "before_sha256": "79401d5bdfbc2b9301e00949050e48bd6db14a0ca66b68a99c90770ca51c7aaa",
+          "after_sha256": "79401d5bdfbc2b9301e00949050e48bd6db14a0ca66b68a99c90770ca51c7aaa",
+          "unchanged": true
+        },
+        {
+          "path": "packages/contracts/src/generated/core.schema.json",
+          "before_sha256": "4650318401fd8c9cb49cfd971aa11ab04a1e138f56c6d985beb160f55c72f498",
+          "after_sha256": "4650318401fd8c9cb49cfd971aa11ab04a1e138f56c6d985beb160f55c72f498",
+          "unchanged": true
+        },
+        {
+          "path": "packages/contracts/src/generated/core.ts",
+          "before_sha256": "e0d08381697d29026925f33bc719bb08a431706a4fda18f97dfa73892583e3ca",
+          "after_sha256": "e0d08381697d29026925f33bc719bb08a431706a4fda18f97dfa73892583e3ca",
+          "unchanged": true
+        },
+        {
+          "path": "packages/contracts/src/generated/error-mapping.json",
+          "before_sha256": "a5698e58f1eb371e4fea1a2f055b33d0e0b0348bb68a814a6e4483c01ea90355",
+          "after_sha256": "a5698e58f1eb371e4fea1a2f055b33d0e0b0348bb68a814a6e4483c01ea90355",
+          "unchanged": true
+        },
+        {
+          "path": "packages/contracts/src/generated/resources.schema.json",
+          "before_sha256": "e60970408af44a22fa8248795e0a98e58d32a5e12af039139cb4a3be47368d1c",
+          "after_sha256": "e60970408af44a22fa8248795e0a98e58d32a5e12af039139cb4a3be47368d1c",
+          "unchanged": true
+        },
+        {
+          "path": "packages/contracts/src/generated/resources.ts",
+          "before_sha256": "fee56085b9445f89f556e8942a64b7e2242171b0464f045eeaae98ede88dd99a",
+          "after_sha256": "fee56085b9445f89f556e8942a64b7e2242171b0464f045eeaae98ede88dd99a",
+          "unchanged": true
+        },
+        {
+          "path": "packages/contracts/src/generated/transport-bindings.json",
+          "before_sha256": "bd11c7498de80aaa258add8f9bc31fa2dbccbdaebaad27e716cf73204a8dd3de",
+          "after_sha256": "bd11c7498de80aaa258add8f9bc31fa2dbccbdaebaad27e716cf73204a8dd3de",
+          "unchanged": true
+        },
+        {
+          "path": "packages/contracts/src/generated/workspace.schema.json",
+          "before_sha256": "4656ab4a39be6175298d3197216df25edbc09ef4ff210f000d067377183daa40",
+          "after_sha256": "4656ab4a39be6175298d3197216df25edbc09ef4ff210f000d067377183daa40",
+          "unchanged": true
+        },
+        {
+          "path": "packages/contracts/src/generated/workspace.ts",
+          "before_sha256": "9cafb3a7b932fd10abfc70b701b87a9c2f8b012abc3a2b4bb0eb9f7d1a70b16a",
+          "after_sha256": "9cafb3a7b932fd10abfc70b701b87a9c2f8b012abc3a2b4bb0eb9f7d1a70b16a",
+          "unchanged": true
+        },
+        {
+          "path": "packages/contracts/src/index.ts",
+          "before_sha256": "8fc609a218481c2cd863a58b388153d8088f3928d17a4b53120c5669b4bfbf9c",
+          "after_sha256": "8fc609a218481c2cd863a58b388153d8088f3928d17a4b53120c5669b4bfbf9c",
+          "unchanged": true
+        },
+        {
+          "path": "plan/contracts/core.schema.json",
+          "before_sha256": "4650318401fd8c9cb49cfd971aa11ab04a1e138f56c6d985beb160f55c72f498",
+          "after_sha256": "4650318401fd8c9cb49cfd971aa11ab04a1e138f56c6d985beb160f55c72f498",
+          "unchanged": true
+        },
+        {
+          "path": "plan/contracts/error-mapping.json",
+          "before_sha256": "a5698e58f1eb371e4fea1a2f055b33d0e0b0348bb68a814a6e4483c01ea90355",
+          "after_sha256": "a5698e58f1eb371e4fea1a2f055b33d0e0b0348bb68a814a6e4483c01ea90355",
+          "unchanged": true
+        },
+        {
+          "path": "plan/contracts/resource.schema.json",
+          "before_sha256": "e60970408af44a22fa8248795e0a98e58d32a5e12af039139cb4a3be47368d1c",
+          "after_sha256": "e60970408af44a22fa8248795e0a98e58d32a5e12af039139cb4a3be47368d1c",
+          "unchanged": true
+        },
+        {
+          "path": "plan/contracts/transport-bindings.json",
+          "before_sha256": "bd11c7498de80aaa258add8f9bc31fa2dbccbdaebaad27e716cf73204a8dd3de",
+          "after_sha256": "bd11c7498de80aaa258add8f9bc31fa2dbccbdaebaad27e716cf73204a8dd3de",
+          "unchanged": true
+        },
+        {
+          "path": "plan/contracts/wire-examples.json",
+          "before_sha256": "7b59e436adeb32eb10f17ecbb456c27113b0496c36c4fe3d10b071ea447326db",
+          "after_sha256": "7b59e436adeb32eb10f17ecbb456c27113b0496c36c4fe3d10b071ea447326db",
+          "unchanged": true
+        },
+        {
+          "path": "plan/contracts/workspace-bindings.json",
+          "before_sha256": "d7f3540e55eef0db56738ffc767ec8e36bf8a5fc41ad11bec34be97b39c73277",
+          "after_sha256": "d7f3540e55eef0db56738ffc767ec8e36bf8a5fc41ad11bec34be97b39c73277",
+          "unchanged": true
+        },
+        {
+          "path": "plan/contracts/workspace.schema.json",
+          "before_sha256": "4656ab4a39be6175298d3197216df25edbc09ef4ff210f000d067377183daa40",
+          "after_sha256": "4656ab4a39be6175298d3197216df25edbc09ef4ff210f000d067377183daa40",
+          "unchanged": true
+        }
+      ]
+    },
+    "validation_inputs": {
+      "result": "PASS",
+      "count": 5,
+      "files": [
+        {
+          "path": "plan/validation/collaboration-benchmarks.json",
+          "before_sha256": "5c607c3943a65ce8256ea94e34b65a26b7bbedb76d47ee2e604411cd585d816b",
+          "after_sha256": "5c607c3943a65ce8256ea94e34b65a26b7bbedb76d47ee2e604411cd585d816b",
+          "unchanged": true
+        },
+        {
+          "path": "plan/validation/compatibility-matrix.json",
+          "before_sha256": "0ba2ba69b4ac73ca759b3a332fef137c7e17a5179be2b6377517fe22d21db05c",
+          "after_sha256": "0ba2ba69b4ac73ca759b3a332fef137c7e17a5179be2b6377517fe22d21db05c",
+          "unchanged": true
+        },
+        {
+          "path": "plan/validation/coordinator-eval-corpus.json",
+          "before_sha256": "7ca959e06a911c8eabc1c861f89c2aa74caca53c290047342abd4854e3cf51a5",
+          "after_sha256": "7ca959e06a911c8eabc1c861f89c2aa74caca53c290047342abd4854e3cf51a5",
+          "unchanged": true
+        },
+        {
+          "path": "plan/validation/p0-probe-manifest.json",
+          "before_sha256": "477d868a260d5ff557f6b6c19eb2055ee5b4aa91dc4737a7ab8423c8e59e85c7",
+          "after_sha256": "477d868a260d5ff557f6b6c19eb2055ee5b4aa91dc4737a7ab8423c8e59e85c7",
+          "unchanged": true
+        },
+        {
+          "path": "plan/validation/protocol-fixtures.json",
+          "before_sha256": "5dc3de651620076bff124d57f846b5796046751433c158ec8b40910219710584",
+          "after_sha256": "5dc3de651620076bff124d57f846b5796046751433c158ec8b40910219710584",
+          "unchanged": true
+        }
+      ]
+    },
+    "native_desktop_except_process_job": {
+      "result": "PASS",
+      "count": 15,
+      "files": [
+        {
+          "path": "packages/desktop/app.manifest",
+          "before_sha256": "9abcd04dfefe6942c096b04cfbf946dbe6681c9ec296fc1869be503f6f246f6d",
+          "after_sha256": "9abcd04dfefe6942c096b04cfbf946dbe6681c9ec296fc1869be503f6f246f6d",
+          "unchanged": true
+        },
+        {
+          "path": "packages/desktop/App.xaml",
+          "before_sha256": "11d1103db7f8750c236e2079b087c2a1797192376eaab83781ac5dcab4678f91",
+          "after_sha256": "11d1103db7f8750c236e2079b087c2a1797192376eaab83781ac5dcab4678f91",
+          "unchanged": true
+        },
+        {
+          "path": "packages/desktop/App.xaml.cs",
+          "before_sha256": "3a46491314d0afcb6dcb0aadc7a2997c09788d262225c8fe51628b2005b20ce5",
+          "after_sha256": "3a46491314d0afcb6dcb0aadc7a2997c09788d262225c8fe51628b2005b20ce5",
+          "unchanged": true
+        },
+        {
+          "path": "packages/desktop/Core/ApiClient.cs",
+          "before_sha256": "4ab24327b8ee75e1cb823bf8936a9656ee57e49f652d8c49dd003fd450c8bb03",
+          "after_sha256": "4ab24327b8ee75e1cb823bf8936a9656ee57e49f652d8c49dd003fd450c8bb03",
+          "unchanged": true
+        },
+        {
+          "path": "packages/desktop/Core/Models.cs",
+          "before_sha256": "36c9d641c4cd8a6cb119f4bd3991c3b532d1abbcece97b2f0c12053f30c9140d",
+          "after_sha256": "36c9d641c4cd8a6cb119f4bd3991c3b532d1abbcece97b2f0c12053f30c9140d",
+          "unchanged": true
+        },
+        {
+          "path": "packages/desktop/Core/ServiceHost.cs",
+          "before_sha256": "869d5b2f8b826d246d7cd064dab5988c8665bc9ae204fa27817cde7b3dc38f7c",
+          "after_sha256": "869d5b2f8b826d246d7cd064dab5988c8665bc9ae204fa27817cde7b3dc38f7c",
+          "unchanged": true
+        },
+        {
+          "path": "packages/desktop/Core/Team.Core.csproj",
+          "before_sha256": "53bda3bd427d731a8bfe88438be3a058bd1a0e8c813426659adf92a6ddc0585e",
+          "after_sha256": "53bda3bd427d731a8bfe88438be3a058bd1a0e8c813426659adf92a6ddc0585e",
+          "unchanged": true
+        },
+        {
+          "path": "packages/desktop/Core/WorkspaceController.cs",
+          "before_sha256": "8cc3b063186e53d8a1ead5e74a51da76a1455653715afc34a8f4e1a7f98a2600",
+          "after_sha256": "8cc3b063186e53d8a1ead5e74a51da76a1455653715afc34a8f4e1a7f98a2600",
+          "unchanged": true
+        },
+        {
+          "path": "packages/desktop/FormWindow.cs",
+          "before_sha256": "19d6775eaafac837bd20824d2e37e042f411ac87c6aa5830a59a441e694c862c",
+          "after_sha256": "19d6775eaafac837bd20824d2e37e042f411ac87c6aa5830a59a441e694c862c",
+          "unchanged": true
+        },
+        {
+          "path": "packages/desktop/MainWindow.xaml",
+          "before_sha256": "557cafff04843461c5bb95d3803e69b6a5be97b9953a90d7a424ebb021694fca",
+          "after_sha256": "557cafff04843461c5bb95d3803e69b6a5be97b9953a90d7a424ebb021694fca",
+          "unchanged": true
+        },
+        {
+          "path": "packages/desktop/MainWindow.xaml.cs",
+          "before_sha256": "2979dd9813add7478a163f0578d925a7146e1720e4426e1e06bffec09c84d235",
+          "after_sha256": "2979dd9813add7478a163f0578d925a7146e1720e4426e1e06bffec09c84d235",
+          "unchanged": true
+        },
+        {
+          "path": "packages/desktop/MembersWindow.xaml",
+          "before_sha256": "f3b8c49a661c198a7db4d1fa7ed2500339d343822b7c4d4da8b3c44113b33033",
+          "after_sha256": "f3b8c49a661c198a7db4d1fa7ed2500339d343822b7c4d4da8b3c44113b33033",
+          "unchanged": true
+        },
+        {
+          "path": "packages/desktop/MembersWindow.xaml.cs",
+          "before_sha256": "9f919f621df800514d9fffceb85c64597d2e880b59b45a2e0fe6ae620c00330b",
+          "after_sha256": "9f919f621df800514d9fffceb85c64597d2e880b59b45a2e0fe6ae620c00330b",
+          "unchanged": true
+        },
+        {
+          "path": "packages/desktop/README.md",
+          "before_sha256": "3fd7362e87c56281e1107145ee5364a1133ee33383f8892f6359d85dcab594ce",
+          "after_sha256": "3fd7362e87c56281e1107145ee5364a1133ee33383f8892f6359d85dcab594ce",
+          "unchanged": true
+        },
+        {
+          "path": "packages/desktop/Team.csproj",
+          "before_sha256": "a58ca0d5d5c73c82e70928aef60dcd290121a910e677bc429036d083bc4e842f",
+          "after_sha256": "a58ca0d5d5c73c82e70928aef60dcd290121a910e677bc429036d083bc4e842f",
+          "unchanged": true
+        }
+      ]
+    },
+    "native_tests": {
+      "result": "PASS",
+      "count": 2,
+      "files": [
+        {
+          "path": "tests/desktop/Program.cs",
+          "before_sha256": "703011b9c66df088fee04c91e83506c67e38ee9942479e7147256e8894430ab1",
+          "after_sha256": "703011b9c66df088fee04c91e83506c67e38ee9942479e7147256e8894430ab1",
+          "unchanged": true
+        },
+        {
+          "path": "tests/desktop/Team.Tests.csproj",
+          "before_sha256": "1130e9061f9d69e0d7336da39e97dbbbfcd1890702cab908720167c78ccdf206",
+          "after_sha256": "1130e9061f9d69e0d7336da39e97dbbbfcd1890702cab908720167c78ccdf206",
+          "unchanged": true
+        }
+      ]
+    },
+    "legacy_web": {
+      "result": "PASS",
+      "count": 3,
+      "files": [
+        {
+          "path": "packages/web/app.js",
+          "before_sha256": "58bec756bb71e910b24c946ec5bc3da65dbd40379623e638cacd95ca1b114fff",
+          "after_sha256": "58bec756bb71e910b24c946ec5bc3da65dbd40379623e638cacd95ca1b114fff",
+          "unchanged": true
+        },
+        {
+          "path": "packages/web/index.html",
+          "before_sha256": "8ac3a5b1337a56c29add5db3ab432146a969c9795dc79cfd148d218b5c16ff25",
+          "after_sha256": "8ac3a5b1337a56c29add5db3ab432146a969c9795dc79cfd148d218b5c16ff25",
+          "unchanged": true
+        },
+        {
+          "path": "packages/web/style.css",
+          "before_sha256": "41847a10c803adb21cc74775bd98446bdace8ead67b6f070bb014bfefcfec087",
+          "after_sha256": "41847a10c803adb21cc74775bd98446bdace8ead67b6f070bb014bfefcfec087",
+          "unchanged": true
+        }
+      ]
+    },
+    "dependency_and_sdk_pins": {
+      "result": "PASS",
+      "count": 2,
+      "files": [
+        {
+          "path": "global.json",
+          "before_sha256": "295a1bad42d55d4128e3d899cdae13293c2b8cee2d2a76ac28e5b44dfb9ac2cc",
+          "after_sha256": "295a1bad42d55d4128e3d899cdae13293c2b8cee2d2a76ac28e5b44dfb9ac2cc",
+          "unchanged": true
+        },
+        {
+          "path": "package-lock.json",
+          "before_sha256": "7cabf451cbcf1b6413ad09f8428fe8890c985101b730a58326c8ab55e4b73453",
+          "after_sha256": "7cabf451cbcf1b6413ad09f8428fe8890c985101b730a58326c8ab55e4b73453",
+          "unchanged": true
+        }
+      ]
+    }
+  },
+  "intentional_native_core_change": {
+    "path": "packages/desktop/Core/ProcessJob.cs",
+    "change": "Add Terminate, ActiveProcesses and Win32 accounting declarations only; existing Add/Dispose/lifetime API retained; no WPF layout changes",
+    "before_sha256": "bb9656117f0107decf2eb84326dc50f44d5f2d341efad31446ae4d7fc73a9ccd",
+    "after_sha256": "fa7bd686980f3241e2950c0c204e55c6072808f79f54dfeb266de0c05a20250a",
+    "regression_log": "native-closeout.log"
+  },
+  "portable_package": {
+    "package": "PASS",
+    "files": 989,
+    "native_wpf": true,
+    "browser_runtime": false,
+    "databases_in_package": 0,
+    "check": "Existing package manifest verified; package not rebuilt",
+    "log": "package-closeout.log",
+    "manifest_sha256": "20968202a4c578cd26d116212d66e971c5ec7149855dc3542c43c3ead7abf92c"
+  },
+  "schema": {
+    "source": 4,
+    "existing_portable": 2,
+    "user_databases_opened_or_migrated": false
+  },
+  "cleanup_denials": {
+    "action": "Preserved; no retry or tool bypass; excluded from source/package/upload inventory",
+    "paths": [
+      "qa-runtime/ (W04 evidence)",
+      "C:/Users/1/AppData/Local/Temp/team-w03-RQjouN",
+      "C:/Users/1/AppData/Local/Temp/team-w03-ZePDSS"
+    ]
+  }
+}

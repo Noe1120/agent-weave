@@ -1,0 +1,871 @@
+{
+  "suite_revision": "protocol/1.1",
+  "design_version": "1.6",
+  "status": "NOT_RUN",
+  "kind": "declarative_test_spec_not_product_executor",
+  "baseline": {
+    "id": "baseline-1",
+    "clock": "2026-11-14T10:00:00Z",
+    "project_id": "00000000-0000-4000-8000-000000000001",
+    "root_id": "00000000-0000-4000-8000-000000000040",
+    "aliases": {
+      "A": "00000000-0000-4000-8000-000000000041",
+      "B": "00000000-0000-4000-8000-000000000042",
+      "C": "00000000-0000-4000-8000-000000000043",
+      "D": "00000000-0000-4000-8000-000000000044"
+    },
+    "task_graph": {
+      "A": [],
+      "B": [],
+      "C": [
+        "B"
+      ],
+      "D": []
+    },
+    "failure_policy": "dependency_isolation",
+    "root_budget": {
+      "limit_units": 1000,
+      "reserved_units": 400,
+      "settled_units": 0,
+      "unknown_units": 0,
+      "unit": "synthetic_not_currency"
+    },
+    "file_contents": {
+      "backend/api.ts": "fixture backend baseline v1\n",
+      "frontend/view.ts": "fixture frontend baseline v1\n",
+      "tests/flow.spec.ts": "fixture protected acceptance v1\n",
+      "contracts/task.json": "{\"title\":\"required\",\"status\":[\"todo\",\"done\"]}\n"
+    },
+    "file_sha256": {
+      "backend/api.ts": "6db924439817a725c1e4953e555a6f368958ac135715ad54fd9d896b2a922f05",
+      "frontend/view.ts": "029653d1f84f9ad043c4baf26950b304ac3ce04dc48af2b3f01dd7c8617bca74",
+      "tests/flow.spec.ts": "cdb9447eda188a2336f4d11ea2bd08bf9991da39ed27424b73e0be9b7fd7d035",
+      "contracts/task.json": "e57501a926c05f0c0a69f06170e0b0736be4bfa12d9fdbe99d2bc445ea44e49c"
+    },
+    "acceptance_revision": "1",
+    "scope_revision": "1",
+    "configuration_fingerprint": "SYNTHETIC_FIXTURE_NOT_REAL_DEPLOYMENT"
+  },
+  "interpretation": "每例从独立基线启动后按 setup 覆盖；expected 为必须验证的局部精确断言，其余状态按不变量核对。temporal_assertions 单独描述跨时间的约束，不是 DB 枚举；until_all 的每项证据必须全部成立，after_all 仍不能免除其他收束义务。fixture 别名由测试适配层映射为给定 UUID。none 表示无崩溃注入。evidence 不得包含凭据或无权数据。",
+  "cases": [
+    {
+      "id": "PF-01",
+      "title": "计划应用前一项越权整批拒绝",
+      "acceptance_refs": [
+        "AT-179",
+        "AT-190",
+        "CA-53"
+      ],
+      "fixture_revision": "1",
+      "status": "NOT_RUN",
+      "baseline_ref": "baseline-1",
+      "setup": [
+        "恢复 baseline-1；尚未应用 proposal P2",
+        "P2 包含 A2/B2/C2；B2 超出授权"
+      ],
+      "steps": [
+        "提交 apply_plan action X 两次"
+      ],
+      "fault_point": "FP-01",
+      "expected": {
+        "db_assertions": {
+          "new_tasks": 0,
+          "new_outbox": 0,
+          "new_budget_reservations": 0,
+          "plan_head": "unchanged"
+        },
+        "event_assertions": [
+          "无可执行 dispatch 事件"
+        ],
+        "file_assertions": [
+          "全部 baseline 文件摘要不变"
+        ],
+        "forbidden_effects": [
+          "部分创建 A2",
+          "外部启动",
+          "收费模型调用"
+        ]
+      },
+      "evidence_required": [
+        "配置/输入快照摘要",
+        "故障注入位置与时间",
+        "前后授权脱敏 DB 投影",
+        "动作/事件/outbox/continuation 账本",
+        "实际进程/写入核对",
+        "文件摘要与检查点",
+        "费用预留/确认/unknown",
+        "执行者/实际结果/缺陷"
+      ],
+      "actual": null
+    },
+    {
+      "id": "PF-02",
+      "title": "B 确认未启动，不停无关 A/D",
+      "acceptance_refs": [
+        "AT-175",
+        "CA-53"
+      ],
+      "fixture_revision": "1",
+      "status": "NOT_RUN",
+      "baseline_ref": "baseline-1",
+      "setup": [
+        "A running；B pending_dispatch；C depends_on B；D ready",
+        "B 连接器报告明确未启动，投递按策略受阻"
+      ],
+      "steps": [
+        "处理 B 启动失败回执",
+        "重算依赖闭包和可派工集合"
+      ],
+      "fault_point": "FP-02",
+      "expected": {
+        "db_assertions": {
+          "B.dispatch": "dispatch_blocked",
+          "C.state": "blocked",
+          "A.run": "running",
+          "D.eligible": true,
+          "plan.health": "partial_failure",
+          "plan.outcome": null
+        },
+        "event_assertions": [
+          "一次受限范围状态变更",
+          "无 C 的启动许可"
+        ],
+        "file_assertions": [
+          "A 已登记产物保留"
+        ],
+        "forbidden_effects": [
+          "自动换人",
+          "取消无关 A",
+          "降低验收"
+        ]
+      },
+      "evidence_required": [
+        "配置/输入快照摘要",
+        "故障注入位置与时间",
+        "前后授权脱敏 DB 投影",
+        "动作/事件/outbox/continuation 账本",
+        "实际进程/写入核对",
+        "文件摘要与检查点",
+        "费用预留/确认/unknown",
+        "执行者/实际结果/缺陷"
+      ],
+      "actual": null
+    },
+    {
+      "id": "PF-03",
+      "title": "B 启动回执丢失，跨 worktree 拒绝新写者",
+      "acceptance_refs": [
+        "AT-175",
+        "AT-177",
+        "CA-53"
+      ],
+      "fixture_revision": "1",
+      "status": "NOT_RUN",
+      "baseline_ref": "baseline-1",
+      "setup": [
+        "B 调用已发出且进程仍可写 frontend/view.ts",
+        "C 依赖 B"
+      ],
+      "steps": [
+        "丢弃 B 启动回执",
+        "尝试新 worktree 领取同逻辑路径"
+      ],
+      "fault_point": "FP-03",
+      "expected": {
+        "db_assertions": {
+          "B.execution": "unknown",
+          "C.state": "blocked",
+          "path.frontend/view.ts": "quarantined",
+          "replacement_write_grants": 0,
+          "plan.health": "unknown",
+          "plan.lifecycle": "active"
+        },
+        "event_assertions": [
+          "对账任务已持久化"
+        ],
+        "file_assertions": [
+          "不覆盖 B 的候选输出"
+        ],
+        "forbidden_effects": [
+          "超时释放锁",
+          "自动重复启动",
+          "unknown 记成失败未执行"
+        ]
+      },
+      "evidence_required": [
+        "配置/输入快照摘要",
+        "故障注入位置与时间",
+        "前后授权脱敏 DB 投影",
+        "动作/事件/outbox/continuation 账本",
+        "实际进程/写入核对",
+        "文件摘要与检查点",
+        "费用预留/确认/unknown",
+        "执行者/实际结果/缺陷"
+      ],
+      "actual": null
+    },
+    {
+      "id": "PF-04",
+      "title": "stop 与在途许可竞态",
+      "acceptance_refs": [
+        "AT-176",
+        "AT-177",
+        "CA-54"
+      ],
+      "fixture_revision": "2",
+      "status": "NOT_RUN",
+      "baseline_ref": "baseline-1",
+      "setup": [
+        "A 许可已签发未确认启动；B 尚无许可"
+      ],
+      "steps": [
+        "提交 stop_plan",
+        "controller 尝试启动 A；令回执断网",
+        "B 尝试取得许可",
+        "恢复连接并核对 A 真实进程"
+      ],
+      "fault_point": "FP-07",
+      "expected": {
+        "db_assertions": {
+          "plan.dispatch_gate": "closed",
+          "plan.lifecycle": "stopping",
+          "new_permits_after_gate": 0,
+          "B.started": false,
+          "A.state_before_reconcile": "unknown"
+        },
+        "temporal_assertions": [
+          {
+            "subject": "plan.lifecycle",
+            "must_remain": "stopping",
+            "until_all": [
+              "inflight_permits_reconciled",
+              "process_tree_and_open_handles_reconciled",
+              "write_capabilities_revoked",
+              "journal_and_files_reconciled"
+            ],
+            "forbidden_before_all": [
+              "closed",
+              "new_writer_epoch"
+            ],
+            "after_all": "closure_requires_all_plan_obligations_reconciled"
+          }
+        ],
+        "event_assertions": [
+          "control receipt 唯一",
+          "所有在途许可纳入核对"
+        ],
+        "file_assertions": [
+          "所有已有检查点保留"
+        ],
+        "forbidden_effects": [
+          "立即显示全部停止",
+          "新签 B 许可",
+          "借取消重置 Git"
+        ]
+      },
+      "evidence_required": [
+        "配置/输入快照摘要",
+        "故障注入位置与时间",
+        "前后授权脱敏 DB 投影",
+        "动作/事件/outbox/continuation 账本",
+        "实际进程/写入核对",
+        "文件摘要与检查点",
+        "费用预留/确认/unknown",
+        "执行者/实际结果/缺陷"
+      ],
+      "actual": null
+    },
+    {
+      "id": "PF-05",
+      "title": "暂停派工不打断在途任务",
+      "acceptance_refs": [
+        "AT-176",
+        "CA-54"
+      ],
+      "fixture_revision": "1",
+      "status": "NOT_RUN",
+      "baseline_ref": "baseline-1",
+      "setup": [
+        "A running；B ready"
+      ],
+      "steps": [
+        "pause_dispatch",
+        "查询进度三次"
+      ],
+      "fault_point": "none",
+      "expected": {
+        "db_assertions": {
+          "plan.dispatch_gate": "paused",
+          "A.run": "running",
+          "B.started": false,
+          "extra_model_turns": 0
+        },
+        "event_assertions": [
+          "一次 pause 回执",
+          "无 A cancel/steer 事件"
+        ],
+        "file_assertions": [
+          "A 可在原授权继续合法写入"
+        ],
+        "forbidden_effects": [
+          "暂停被实现为杀死所有成员",
+          "进度查询续租或发 prompt"
+        ]
+      },
+      "evidence_required": [
+        "配置/输入快照摘要",
+        "故障注入位置与时间",
+        "前后授权脱敏 DB 投影",
+        "动作/事件/outbox/continuation 账本",
+        "实际进程/写入核对",
+        "文件摘要与检查点",
+        "费用预留/确认/unknown",
+        "执行者/实际结果/缺陷"
+      ],
+      "actual": null
+    },
+    {
+      "id": "PF-06",
+      "title": "已关闭计划不被恢复或迟到事件复活",
+      "acceptance_refs": [
+        "AT-176",
+        "AT-183",
+        "CA-55"
+      ],
+      "fixture_revision": "1",
+      "status": "NOT_RUN",
+      "baseline_ref": "baseline-1",
+      "setup": [
+        "已完成真实停止对账；plan closed/cancelled"
+      ],
+      "steps": [
+        "resume_dispatch",
+        "投递旧 task_completed 通知"
+      ],
+      "fault_point": "FP-10",
+      "expected": {
+        "db_assertions": {
+          "plan.lifecycle": "closed",
+          "plan.dispatch_gate": "closed",
+          "new_tasks": 0,
+          "new_permits": 0
+        },
+        "event_assertions": [
+          "拒绝回执与迟到事件审计"
+        ],
+        "file_assertions": [
+          "原产物保留"
+        ],
+        "forbidden_effects": [
+          "重开旧计划",
+          "清零 root 预算"
+        ]
+      },
+      "evidence_required": [
+        "配置/输入快照摘要",
+        "故障注入位置与时间",
+        "前后授权脱敏 DB 投影",
+        "动作/事件/outbox/continuation 账本",
+        "实际进程/写入核对",
+        "文件摘要与检查点",
+        "费用预留/确认/unknown",
+        "执行者/实际结果/缺陷"
+      ],
+      "actual": null
+    },
+    {
+      "id": "PF-07",
+      "title": "部分验收后停止，代码不回滚",
+      "acceptance_refs": [
+        "AT-177",
+        "AT-183",
+        "CA-55"
+      ],
+      "fixture_revision": "1",
+      "status": "NOT_RUN",
+      "baseline_ref": "baseline-1",
+      "setup": [
+        "A accepted；B failed；C 未启动；全部进程可证明停止",
+        "原范围仍含 A/B/C；费用核对完毕"
+      ],
+      "steps": [
+        "stop_plan 并完成收束"
+      ],
+      "fault_point": "none",
+      "expected": {
+        "db_assertions": {
+          "plan.lifecycle": "closed",
+          "plan.outcome": "partial",
+          "accepted_obligations": 1,
+          "unsatisfied_obligations": 2,
+          "budget_state": "settled",
+          "B.task_state": "cancelled",
+          "C.task_state": "cancelled"
+        },
+        "event_assertions": [
+          "终局报告列出实际已验收子集"
+        ],
+        "file_assertions": [
+          "A accepted commit 存在",
+          "B dirty snapshot 有 pin",
+          "工作树不自动 reset"
+        ],
+        "forbidden_effects": [
+          "称原目标全部成功",
+          "删除失败证据"
+        ]
+      },
+      "evidence_required": [
+        "配置/输入快照摘要",
+        "故障注入位置与时间",
+        "前后授权脱敏 DB 投影",
+        "动作/事件/outbox/continuation 账本",
+        "实际进程/写入核对",
+        "文件摘要与检查点",
+        "费用预留/确认/unknown",
+        "执行者/实际结果/缺陷"
+      ],
+      "actual": null
+    },
+    {
+      "id": "PF-08",
+      "title": "未知启动/费用不释放为可重花额度",
+      "acceptance_refs": [
+        "AT-178",
+        "CA-54"
+      ],
+      "fixture_revision": "1",
+      "status": "NOT_RUN",
+      "baseline_ref": "baseline-1",
+      "setup": [
+        "B 预留 100 单位；启动和用量均 unknown；root 上限 1000"
+      ],
+      "steps": [
+        "stop_plan",
+        "请求释放 B 预留并再派新任务"
+      ],
+      "fault_point": "FP-08",
+      "expected": {
+        "db_assertions": {
+          "B.unknown_reservation": 100,
+          "released_B_units": 0,
+          "plan.lifecycle": "stopping",
+          "plan.outcome": null
+        },
+        "event_assertions": [
+          "预算核对记录存在"
+        ],
+        "file_assertions": [
+          "成果保护引用保留"
+        ],
+        "forbidden_effects": [
+          "unknown=0",
+          "新 root 隐藏消费"
+        ]
+      },
+      "evidence_required": [
+        "配置/输入快照摘要",
+        "故障注入位置与时间",
+        "前后授权脱敏 DB 投影",
+        "动作/事件/outbox/continuation 账本",
+        "实际进程/写入核对",
+        "文件摘要与检查点",
+        "费用预留/确认/unknown",
+        "执行者/实际结果/缺陷"
+      ],
+      "actual": null
+    },
+    {
+      "id": "PF-09",
+      "title": "目标先完成再登记等待",
+      "acceptance_refs": [
+        "AT-180",
+        "CA-56"
+      ],
+      "fixture_revision": "1",
+      "status": "NOT_RUN",
+      "baseline_ref": "baseline-1",
+      "setup": [
+        "task B completed@7；wait W 不存在",
+        "run/epoch 合法"
+      ],
+      "steps": [
+        "提交 register_wait W predicate task_terminal minimum_revision 1",
+        "同参数重复登记"
+      ],
+      "fault_point": "FP-04",
+      "expected": {
+        "db_assertions": {
+          "W.state": "resolved",
+          "W.resolution_count": 1,
+          "W.records": 1
+        },
+        "event_assertions": [
+          "恰一逻辑 wait_resolved/outbox 可重投"
+        ],
+        "file_assertions": [
+          "文件摘要不受等待影响"
+        ],
+        "forbidden_effects": [
+          "永久 registered",
+          "模型轮询",
+          "重复启动 B"
+        ]
+      },
+      "evidence_required": [
+        "配置/输入快照摘要",
+        "故障注入位置与时间",
+        "前后授权脱敏 DB 投影",
+        "动作/事件/outbox/continuation 账本",
+        "实际进程/写入核对",
+        "文件摘要与检查点",
+        "费用预留/确认/unknown",
+        "执行者/实际结果/缺陷"
+      ],
+      "actual": null
+    },
+    {
+      "id": "PF-10",
+      "title": "resolved 后通知丢失可对账",
+      "acceptance_refs": [
+        "AT-181",
+        "CA-56"
+      ],
+      "fixture_revision": "1",
+      "status": "NOT_RUN",
+      "baseline_ref": "baseline-1",
+      "setup": [
+        "W registered；B running"
+      ],
+      "steps": [
+        "B completed 提交",
+        "W resolved 后丢弃通知并重启服务",
+        "运行确定性对账并重投两次"
+      ],
+      "fault_point": "FP-05",
+      "expected": {
+        "db_assertions": {
+          "W.state": "resolved",
+          "W.resolution_count": 1,
+          "model_calls_before_consume": 0
+        },
+        "event_assertions": [
+          "复用同 resolution_id，传输可重复"
+        ],
+        "file_assertions": [
+          "无写入"
+        ],
+        "forbidden_effects": [
+          "用模型询问是否完成",
+          "产生第二次业务结果"
+        ]
+      },
+      "evidence_required": [
+        "配置/输入快照摘要",
+        "故障注入位置与时间",
+        "前后授权脱敏 DB 投影",
+        "动作/事件/outbox/continuation 账本",
+        "实际进程/写入核对",
+        "文件摘要与检查点",
+        "费用预留/确认/unknown",
+        "执行者/实际结果/缺陷"
+      ],
+      "actual": null
+    },
+    {
+      "id": "PF-11",
+      "title": "消费成功但图未 checkpoint",
+      "acceptance_refs": [
+        "AT-181",
+        "CA-56"
+      ],
+      "fixture_revision": "1",
+      "status": "NOT_RUN",
+      "baseline_ref": "baseline-1",
+      "setup": [
+        "W resolved；resolution R；合法 thread lease"
+      ],
+      "steps": [
+        "consume_wait action Y 成功后崩溃",
+        "重试 Y",
+        "Runner 恢复同 continuation_id；重放相同业务 action Z"
+      ],
+      "fault_point": "FP-06",
+      "expected": {
+        "db_assertions": {
+          "W.state": "consumed",
+          "continuation_inbox_rows": 1,
+          "Y.business_receipts": 1,
+          "Z.business_effects": 1
+        },
+        "event_assertions": [
+          "通知 ACK 不删除未处理 continuation"
+        ],
+        "file_assertions": [
+          "同 Z 仅一个实际逻辑变更检查点"
+        ],
+        "forbidden_effects": [
+          "承诺外部 exactly-once",
+          "新 action_id 重派"
+        ]
+      },
+      "evidence_required": [
+        "配置/输入快照摘要",
+        "故障注入位置与时间",
+        "前后授权脱敏 DB 投影",
+        "动作/事件/outbox/continuation 账本",
+        "实际进程/写入核对",
+        "文件摘要与检查点",
+        "费用预留/确认/unknown",
+        "执行者/实际结果/缺陷"
+      ],
+      "actual": null
+    },
+    {
+      "id": "PF-12",
+      "title": "撤权后旧私密等待不能供公开运行读取",
+      "acceptance_refs": [
+        "AT-182",
+        "CA-57"
+      ],
+      "fixture_revision": "1",
+      "status": "NOT_RUN",
+      "baseline_ref": "baseline-1",
+      "setup": [
+        "private run W resolved；撤销 grant；同 member 新 public run"
+      ],
+      "steps": [
+        "消费旧 W",
+        "read_wait W",
+        "读旧 result_ref",
+        "处理迟到通知"
+      ],
+      "fault_point": "FP-09",
+      "expected": {
+        "db_assertions": {
+          "new_model_calls": 0,
+          "new_tasks": 0,
+          "private_bytes_returned": 0,
+          "old_wait": "invalidated"
+        },
+        "event_assertions": [
+          "只有有权审计可见撤权原因"
+        ],
+        "file_assertions": [
+          "不复制旧图/cache"
+        ],
+        "forbidden_effects": [
+          "凭相同 member 取旧私信",
+          "用旧 wait_id 自行扩权"
+        ]
+      },
+      "evidence_required": [
+        "配置/输入快照摘要",
+        "故障注入位置与时间",
+        "前后授权脱敏 DB 投影",
+        "动作/事件/outbox/continuation 账本",
+        "实际进程/写入核对",
+        "文件摘要与检查点",
+        "费用预留/确认/unknown",
+        "执行者/实际结果/缺陷"
+      ],
+      "actual": null
+    },
+    {
+      "id": "PF-13",
+      "title": "过期游标与失效目标不会重播历史",
+      "acceptance_refs": [
+        "AT-181",
+        "AT-182",
+        "CA-57"
+      ],
+      "fixture_revision": "1",
+      "status": "NOT_RUN",
+      "baseline_ref": "baseline-1",
+      "setup": [
+        "W resolved 于 B in_review@4；B 返工 ready@5",
+        "可见 cursor 已过期"
+      ],
+      "steps": [
+        "read feed 旧 cursor",
+        "授权 read_wait + 当前任务",
+        "consume_wait W"
+      ],
+      "fault_point": "none",
+      "expected": {
+        "db_assertions": {
+          "feed_error": "CURSOR_EXPIRED",
+          "consume_error": "WAIT_STALE",
+          "W.state": "invalidated",
+          "new_side_effects": 0
+        },
+        "event_assertions": [
+          "重新同步仅返回当前授权投影"
+        ],
+        "file_assertions": [
+          "无写入"
+        ],
+        "forbidden_effects": [
+          "从头重放副作用",
+          "按旧评审状态派新任务"
+        ]
+      },
+      "evidence_required": [
+        "配置/输入快照摘要",
+        "故障注入位置与时间",
+        "前后授权脱敏 DB 投影",
+        "动作/事件/outbox/continuation 账本",
+        "实际进程/写入核对",
+        "文件摘要与检查点",
+        "费用预留/确认/unknown",
+        "执行者/实际结果/缺陷"
+      ],
+      "actual": null
+    },
+    {
+      "id": "PF-14",
+      "title": "不能删除失败义务伪造整体成功",
+      "acceptance_refs": [
+        "AT-183",
+        "CA-55"
+      ],
+      "fixture_revision": "1",
+      "status": "NOT_RUN",
+      "baseline_ref": "baseline-1",
+      "setup": [
+        "A accepted；B failed；原验收要求两项",
+        "未获得目标变更批准"
+      ],
+      "steps": [
+        "提议删除 B 后完成计划",
+        "尝试 apply_plan"
+      ],
+      "fault_point": "FP-10",
+      "expected": {
+        "db_assertions": {
+          "scope_revision": "unchanged",
+          "plan.outcome": null,
+          "B.obligation": "unsatisfied"
+        },
+        "event_assertions": [
+          "拒绝或待需求确认记录"
+        ],
+        "file_assertions": [
+          "已验收成果保留"
+        ],
+        "forbidden_effects": [
+          "succeeded",
+          "降低验收"
+        ]
+      },
+      "evidence_required": [
+        "配置/输入快照摘要",
+        "故障注入位置与时间",
+        "前后授权脱敏 DB 投影",
+        "动作/事件/outbox/continuation 账本",
+        "实际进程/写入核对",
+        "文件摘要与检查点",
+        "费用预留/确认/unknown",
+        "执行者/实际结果/缺陷"
+      ],
+      "actual": null
+    },
+    {
+      "id": "PF-15",
+      "title": "上游 WIP 拒绝时活动下游被阻断",
+      "acceptance_refs": [
+        "AT-175",
+        "AT-183",
+        "CA-53"
+      ],
+      "fixture_revision": "1",
+      "status": "NOT_RUN",
+      "baseline_ref": "baseline-1",
+      "setup": [
+        "A running 依赖 B WIP change-2；D 与其无关"
+      ],
+      "steps": [
+        "B change-2 被拒绝",
+        "A 尝试写/合并",
+        "D 尝试原授权写入"
+      ],
+      "fault_point": "FP-10",
+      "expected": {
+        "db_assertions": {
+          "A.dependency": "stale",
+          "A.write_allowed": false,
+          "A.merge_allowed": false,
+          "D.eligible": true
+        },
+        "event_assertions": [
+          "实际依赖闭包失效"
+        ],
+        "file_assertions": [
+          "A 不导入旧基线候选"
+        ],
+        "forbidden_effects": [
+          "只通知但照常合并",
+          "停止所有无关成员"
+        ]
+      },
+      "evidence_required": [
+        "配置/输入快照摘要",
+        "故障注入位置与时间",
+        "前后授权脱敏 DB 投影",
+        "动作/事件/outbox/continuation 账本",
+        "实际进程/写入核对",
+        "文件摘要与检查点",
+        "费用预留/确认/unknown",
+        "执行者/实际结果/缺陷"
+      ],
+      "actual": null
+    },
+    {
+      "id": "PF-16",
+      "title": "控制版本冲突无副作用",
+      "acceptance_refs": [
+        "AT-179",
+        "AT-190",
+        "CA-54"
+      ],
+      "fixture_revision": "1",
+      "status": "NOT_RUN",
+      "baseline_ref": "baseline-1",
+      "setup": [
+        "计划执行 revision 5；用户页面使用 revision 4"
+      ],
+      "steps": [
+        "提交 pause_dispatch expected_revision 4",
+        "刷新授权投影后重新确认新动作"
+      ],
+      "fault_point": "none",
+      "expected": {
+        "db_assertions": {
+          "first_control_error": "PLAN_CONFLICT",
+          "first_gate_change": false,
+          "first_external_calls": 0
+        },
+        "event_assertions": [
+          "冲突信息不泄漏隐藏计数"
+        ],
+        "file_assertions": [
+          "无变化"
+        ],
+        "forbidden_effects": [
+          "静默覆盖较新控制决定"
+        ]
+      },
+      "evidence_required": [
+        "配置/输入快照摘要",
+        "故障注入位置与时间",
+        "前后授权脱敏 DB 投影",
+        "动作/事件/outbox/continuation 账本",
+        "实际进程/写入核对",
+        "文件摘要与检查点",
+        "费用预留/确认/unknown",
+        "执行者/实际结果/缺陷"
+      ],
+      "actual": null
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+(node:41952) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✖ runner rejects drift and unauthorized starts without reserving work or acquiring claims (471.1238ms)
+✖ actual development process patches through Broker, creates a real checkpoint and only reaches in_review (423.9814ms)
+✖ progress reads are side-effect free; stop revokes worker but leaves supervisor access and locks (646.004ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 0
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1856.3173
+
+✖ failing tests:
+
+test at tests\runner-process.test.ts:8:1
+✖ runner rejects drift and unauthorized starts without reserving work or acquiring claims (471.1238ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /PROFILE_DRIFT/. Input:
+  
+  'Error: RUNNER_NOT_IMPLEMENTED'
+  
+      at TestContext.<anonymous> (file:///D:/Users/1/Desktop/team/tests/runner-process.test.ts:11:9)
+      at Test.runInAsyncScope (node:async_hooks:228:14)
+      at Test.run (node:internal/test_runner/test:1118:25)
+      at Test.start (node:internal/test_runner/test:1015:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:358:17)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: RUNNER_NOT_IMPLEMENTED
+        at RunnerController.start (file:///D:/Users/1/Desktop/team/packages/service/src/runner.ts:7:43)
+        at file:///D:/Users/1/Desktop/team/tests/runner-process.test.ts:11:22
+        at getActual (node:assert:611:5)
+        at strict.throws (node:assert:759:24)
+        at TestContext.<anonymous> (file:///D:/Users/1/Desktop/team/tests/runner-process.test.ts:11:9)
+        at Test.runInAsyncScope (node:async_hooks:228:14)
+        at Test.run (node:internal/test_runner/test:1118:25)
+        at Test.start (node:internal/test_runner/test:1015:17)
+        at startSubtestAfterBootstrap (node:internal/test_runner/harness:358:17)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5),
+    expected: /PROFILE_DRIFT/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at tests\runner-process.test.ts:17:1
+✖ actual development process patches through Broker, creates a real checkpoint and only reaches in_review (423.9814ms)
+  Error: RUNNER_NOT_IMPLEMENTED
+      at RunnerController.start (file:///D:/Users/1/Desktop/team/packages/service/src/runner.ts:7:43)
+      at TestContext.<anonymous> (file:///D:/Users/1/Desktop/team/tests/runner-process.test.ts:19:32)
+      at Test.runInAsyncScope (node:async_hooks:228:14)
+      at Test.run (node:internal/test_runner/test:1118:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:787:18)
+      at Test.postRun (node:internal/test_runner/test:1247:19)
+      at Test.run (node:internal/test_runner/test:1175:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3)
+
+test at tests\runner-process.test.ts:32:1
+✖ progress reads are side-effect free; stop revokes worker but leaves supervisor access and locks (646.004ms)
+  Error: RUNNER_NOT_IMPLEMENTED
+      at RunnerController.start (file:///D:/Users/1/Desktop/team/packages/service/src/runner.ts:7:43)
+      at TestContext.<anonymous> (file:///D:/Users/1/Desktop/team/tests/runner-process.test.ts:34:37)
+      at Test.runInAsyncScope (node:async_hooks:228:14)
+      at Test.run (node:internal/test_runner/test:1118:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:787:18)
+      at Test.postRun (node:internal/test_runner/test:1247:19)
+      at Test.run (node:internal/test_runner/test:1175:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7)

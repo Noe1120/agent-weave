@@ -1,0 +1,801 @@
+{
+  "date": "2026-11-14",
+  "design_version": "1.6",
+  "coordinator_design_version": "1.2",
+  "layout_revision": "plan-layout-1",
+  "status": "COMPLETE",
+  "source_root": "docs/agent-group-platform-v1",
+  "destination_root": "plan",
+  "source_manifest": [
+    {
+      "path": "deliverables/agent-group-platform-plan-2026-11-14-v1.6.zip",
+      "bytes": 397130,
+      "sha256": "37bc6293051984d5d19c36d226fd40aead632d988361186a90bf83fe762092ad"
+    },
+    {
+      "path": "deliverables/coordinator-agent-plan-2026-11-14-v1.2.md",
+      "bytes": 63312,
+      "sha256": "758e8e008d715569da4cc1d6dcc65d790f237005fcaa494e03dfed160ea52316"
+    },
+    {
+      "path": "deliverables/coordinator-agent-plan-2026-11-14-v1.2.verification.json",
+      "bytes": 708,
+      "sha256": "de131d9d92d39c18ed3a19b7547d39cc0ba1ecaeac8aece1543b8b0ba95f060d"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/01-product-architecture.md",
+      "bytes": 22184,
+      "sha256": "93bb175d6fe5e00856b9687b25f87c8d4578f4a3faf3416cdd5f63fa2a030508"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/02-data-contracts.md",
+      "bytes": 52433,
+      "sha256": "688db715320489701103ef7d614b8cebd14d05a001abea6f31c67cd260cc3b9e"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/03-agent-integration.md",
+      "bytes": 19687,
+      "sha256": "becdcfcd9b2b9aaea758d8699ef3ed2f4d0556f7e5304eb38f0a5b326f7b0e34"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/04-reliability-security-operations.md",
+      "bytes": 27206,
+      "sha256": "620be8d1552fa331ae2b91186409e4adfaf167457928523db1e7e77594328138"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/05-delivery-acceptance.md",
+      "bytes": 47774,
+      "sha256": "96a4806c249d91fbe35274be0f4234f141a6fa6e8ef681ed6b15a7f9c1a21e5c"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/06-evidence-decisions.md",
+      "bytes": 24335,
+      "sha256": "6922c8101ef458c0f8f4cbe87ee61475c858a6d625713e599df126239b314902"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/07-directed-messages-progress.md",
+      "bytes": 14613,
+      "sha256": "10ade2ada0b519b9643441b43d8a029728cb61b3bbb9e46369bc91f1ba8dc220"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/08-core-operating-decisions.md",
+      "bytes": 31141,
+      "sha256": "1317907eb94f7ccf60ce1830d659bc3de3ef82111f78791d4fcbebccd19a0aa8"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/09-review-closure-and-gates.md",
+      "bytes": 27685,
+      "sha256": "92756c7d4bcb4a12b8d6caf35b5f77c6212bc708bda1af21685f403a773b61e3"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/10-delivery-risks-and-controls.md",
+      "bytes": 26943,
+      "sha256": "ddbb5b8f6857dc29caf507c6feaf6ee6c56b00106b8d288cf858f9ff9132db2c"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/11-coordinator-agent.md",
+      "bytes": 63312,
+      "sha256": "758e8e008d715569da4cc1d6dcc65d790f237005fcaa494e03dfed160ea52316"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/12-protocol-closure-and-validation.md",
+      "bytes": 30534,
+      "sha256": "cf9b99173e1ff56a53f1ee3c992792342901942c495f65b91590b11cc264c42c"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/CHANGELOG.md",
+      "bytes": 4102,
+      "sha256": "754908d51fadf5c6b451c371beefab8ff3cd25192eaee3a9efc1e1ee29143479"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/contracts/core.schema.json",
+      "bytes": 27446,
+      "sha256": "4650318401fd8c9cb49cfd971aa11ab04a1e138f56c6d985beb160f55c72f498"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/contracts/wire-examples.json",
+      "bytes": 23421,
+      "sha256": "7b59e436adeb32eb10f17ecbb456c27113b0496c36c4fe3d10b071ea447326db"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/DESIGN-REVIEW.md",
+      "bytes": 3207,
+      "sha256": "a3ae70fd4aa553311e47fd35990a7920becc303dbf930b325b408b24ca6d5e6b"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/README.md",
+      "bytes": 12677,
+      "sha256": "021aeb3848988445c23d47d1c041c8cca15476aecdf911978eb79d4f04c8eb16"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/SHA256SUMS.txt",
+      "bytes": 2339,
+      "sha256": "530521175121da4f235e26325dc24cc1a7e4b4eb88571bf34792afe706cadbd4"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/source-verification.json",
+      "bytes": 15199,
+      "sha256": "5729f312db4787c308a5389cb9fede30f7b4278299ded3c69ce1907fe09aa89c"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/tools/verify_design.py",
+      "bytes": 15880,
+      "sha256": "21ecbfd7897f0def7446bfc8edfa2c7215675855aa538b5c98297dcadbda7fbe"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/validation/collaboration-benchmarks.json",
+      "bytes": 3686,
+      "sha256": "5c607c3943a65ce8256ea94e34b65a26b7bbedb76d47ee2e604411cd585d816b"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/validation/compatibility-matrix.json",
+      "bytes": 21742,
+      "sha256": "0ba2ba69b4ac73ca759b3a332fef137c7e17a5179be2b6377517fe22d21db05c"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/validation/coordinator-eval-corpus.json",
+      "bytes": 33258,
+      "sha256": "7ca959e06a911c8eabc1c861f89c2aa74caca53c290047342abd4854e3cf51a5"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/validation/protocol-fixtures.json",
+      "bytes": 24544,
+      "sha256": "5971df3b1988472bae1ca125c490da3ef9115463d966baa98ae502cfe40be480"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/verification-report.json",
+      "bytes": 35074,
+      "sha256": "a10a32724acdba6c1dfb4bd78a76e79ac9dd26101e4bc2093dee208351b7358d"
+    },
+    {
+      "path": "docs/agent-group-platform-v1/完整方案.md",
+      "bytes": 401215,
+      "sha256": "265d57f0f918231f9aa82aafe069e1a5b9a64f8e79b30aa33c604c3938a90383"
+    },
+    {
+      "path": "docs/research/2026-11-13-agent-group-chat-platform.md",
+      "bytes": 12612,
+      "sha256": "0aa452d236b96163579cc653ebfaf6c04dbfe78b52120b56809071aba4634e49"
+    },
+    {
+      "path": "docs/research/2026-11-13-multi-agent-workbench.md",
+      "bytes": 19211,
+      "sha256": "5dd22765d119bac0ebfeb5887791c8b2fea17f8f6428ecc32a00fa0cb4a96cab"
+    }
+  ],
+  "copy_checks": [
+    {
+      "source": "docs/agent-group-platform-v1/01-product-architecture.md",
+      "target": "plan/01-product-architecture.md",
+      "sha256": "93bb175d6fe5e00856b9687b25f87c8d4578f4a3faf3416cdd5f63fa2a030508",
+      "bytes": 22184,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/02-data-contracts.md",
+      "target": "plan/02-data-contracts.md",
+      "sha256": "688db715320489701103ef7d614b8cebd14d05a001abea6f31c67cd260cc3b9e",
+      "bytes": 52433,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/03-agent-integration.md",
+      "target": "plan/03-agent-integration.md",
+      "sha256": "becdcfcd9b2b9aaea758d8699ef3ed2f4d0556f7e5304eb38f0a5b326f7b0e34",
+      "bytes": 19687,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/04-reliability-security-operations.md",
+      "target": "plan/04-reliability-security-operations.md",
+      "sha256": "620be8d1552fa331ae2b91186409e4adfaf167457928523db1e7e77594328138",
+      "bytes": 27206,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/05-delivery-acceptance.md",
+      "target": "plan/05-delivery-acceptance.md",
+      "sha256": "96a4806c249d91fbe35274be0f4234f141a6fa6e8ef681ed6b15a7f9c1a21e5c",
+      "bytes": 47774,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/06-evidence-decisions.md",
+      "target": "plan/06-evidence-decisions.md",
+      "sha256": "6922c8101ef458c0f8f4cbe87ee61475c858a6d625713e599df126239b314902",
+      "bytes": 24335,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/07-directed-messages-progress.md",
+      "target": "plan/07-directed-messages-progress.md",
+      "sha256": "10ade2ada0b519b9643441b43d8a029728cb61b3bbb9e46369bc91f1ba8dc220",
+      "bytes": 14613,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/08-core-operating-decisions.md",
+      "target": "plan/08-core-operating-decisions.md",
+      "sha256": "1317907eb94f7ccf60ce1830d659bc3de3ef82111f78791d4fcbebccd19a0aa8",
+      "bytes": 31141,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/09-review-closure-and-gates.md",
+      "target": "plan/09-review-closure-and-gates.md",
+      "sha256": "92756c7d4bcb4a12b8d6caf35b5f77c6212bc708bda1af21685f403a773b61e3",
+      "bytes": 27685,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/10-delivery-risks-and-controls.md",
+      "target": "plan/10-delivery-risks-and-controls.md",
+      "sha256": "ddbb5b8f6857dc29caf507c6feaf6ee6c56b00106b8d288cf858f9ff9132db2c",
+      "bytes": 26943,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/11-coordinator-agent.md",
+      "target": "plan/11-coordinator-agent.md",
+      "sha256": "758e8e008d715569da4cc1d6dcc65d790f237005fcaa494e03dfed160ea52316",
+      "bytes": 63312,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/12-protocol-closure-and-validation.md",
+      "target": "plan/12-protocol-closure-and-validation.md",
+      "sha256": "cf9b99173e1ff56a53f1ee3c992792342901942c495f65b91590b11cc264c42c",
+      "bytes": 30534,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/CHANGELOG.md",
+      "target": "plan/CHANGELOG.md",
+      "sha256": "754908d51fadf5c6b451c371beefab8ff3cd25192eaee3a9efc1e1ee29143479",
+      "bytes": 4102,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/contracts/core.schema.json",
+      "target": "plan/contracts/core.schema.json",
+      "sha256": "4650318401fd8c9cb49cfd971aa11ab04a1e138f56c6d985beb160f55c72f498",
+      "bytes": 27446,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/contracts/wire-examples.json",
+      "target": "plan/contracts/wire-examples.json",
+      "sha256": "7b59e436adeb32eb10f17ecbb456c27113b0496c36c4fe3d10b071ea447326db",
+      "bytes": 23421,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/DESIGN-REVIEW.md",
+      "target": "plan/DESIGN-REVIEW.md",
+      "sha256": "a3ae70fd4aa553311e47fd35990a7920becc303dbf930b325b408b24ca6d5e6b",
+      "bytes": 3207,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/README.md",
+      "target": "plan/README.md",
+      "sha256": "021aeb3848988445c23d47d1c041c8cca15476aecdf911978eb79d4f04c8eb16",
+      "bytes": 12677,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/SHA256SUMS.txt",
+      "target": "plan/SHA256SUMS.txt",
+      "sha256": "530521175121da4f235e26325dc24cc1a7e4b4eb88571bf34792afe706cadbd4",
+      "bytes": 2339,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/source-verification.json",
+      "target": "plan/source-verification.json",
+      "sha256": "5729f312db4787c308a5389cb9fede30f7b4278299ded3c69ce1907fe09aa89c",
+      "bytes": 15199,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/tools/verify_design.py",
+      "target": "plan/tools/verify_design.py",
+      "sha256": "21ecbfd7897f0def7446bfc8edfa2c7215675855aa538b5c98297dcadbda7fbe",
+      "bytes": 15880,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/validation/collaboration-benchmarks.json",
+      "target": "plan/validation/collaboration-benchmarks.json",
+      "sha256": "5c607c3943a65ce8256ea94e34b65a26b7bbedb76d47ee2e604411cd585d816b",
+      "bytes": 3686,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/validation/compatibility-matrix.json",
+      "target": "plan/validation/compatibility-matrix.json",
+      "sha256": "0ba2ba69b4ac73ca759b3a332fef137c7e17a5179be2b6377517fe22d21db05c",
+      "bytes": 21742,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/validation/coordinator-eval-corpus.json",
+      "target": "plan/validation/coordinator-eval-corpus.json",
+      "sha256": "7ca959e06a911c8eabc1c861f89c2aa74caca53c290047342abd4854e3cf51a5",
+      "bytes": 33258,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/validation/protocol-fixtures.json",
+      "target": "plan/validation/protocol-fixtures.json",
+      "sha256": "5971df3b1988472bae1ca125c490da3ef9115463d966baa98ae502cfe40be480",
+      "bytes": 24544,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/verification-report.json",
+      "target": "plan/verification-report.json",
+      "sha256": "a10a32724acdba6c1dfb4bd78a76e79ac9dd26101e4bc2093dee208351b7358d",
+      "bytes": 35074,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/agent-group-platform-v1/完整方案.md",
+      "target": "plan/完整方案.md",
+      "sha256": "265d57f0f918231f9aa82aafe069e1a5b9a64f8e79b30aa33c604c3938a90383",
+      "bytes": 401215,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/research/2026-11-13-agent-group-chat-platform.md",
+      "target": "plan/research/2026-11-13-agent-group-chat-platform.md",
+      "sha256": "0aa452d236b96163579cc653ebfaf6c04dbfe78b52120b56809071aba4634e49",
+      "bytes": 12612,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    },
+    {
+      "source": "docs/research/2026-11-13-multi-agent-workbench.md",
+      "target": "plan/research/2026-11-13-multi-agent-workbench.md",
+      "sha256": "5dd22765d119bac0ebfeb5887791c8b2fea17f8f6428ecc32a00fa0cb4a96cab",
+      "bytes": 19211,
+      "status": "EXACT_COPY_BEFORE_LAYOUT_EDITS"
+    }
+  ],
+  "cleanup": {
+    "status": "COMPLETE",
+    "planned_file_count": 31,
+    "planned_files": [
+      {
+        "path": "deliverables/agent-group-platform-plan-2026-11-14-v1.6.zip",
+        "bytes": 397130,
+        "sha256": "37bc6293051984d5d19c36d226fd40aead632d988361186a90bf83fe762092ad",
+        "replacement": "plan/ (full directory plus handoff; no duplicate ZIP)"
+      },
+      {
+        "path": "deliverables/coordinator-agent-plan-2026-11-14-v1.2.md",
+        "bytes": 63312,
+        "sha256": "758e8e008d715569da4cc1d6dcc65d790f237005fcaa494e03dfed160ea52316",
+        "replacement": "plan/11-coordinator-agent.md and plan/verification-report.json"
+      },
+      {
+        "path": "deliverables/coordinator-agent-plan-2026-11-14-v1.2.verification.json",
+        "bytes": 708,
+        "sha256": "de131d9d92d39c18ed3a19b7547d39cc0ba1ecaeac8aece1543b8b0ba95f060d",
+        "replacement": "plan/11-coordinator-agent.md and plan/verification-report.json"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/01-product-architecture.md",
+        "bytes": 22184,
+        "sha256": "93bb175d6fe5e00856b9687b25f87c8d4578f4a3faf3416cdd5f63fa2a030508",
+        "replacement": "plan/01-product-architecture.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/02-data-contracts.md",
+        "bytes": 52433,
+        "sha256": "688db715320489701103ef7d614b8cebd14d05a001abea6f31c67cd260cc3b9e",
+        "replacement": "plan/02-data-contracts.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/03-agent-integration.md",
+        "bytes": 19687,
+        "sha256": "becdcfcd9b2b9aaea758d8699ef3ed2f4d0556f7e5304eb38f0a5b326f7b0e34",
+        "replacement": "plan/03-agent-integration.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/04-reliability-security-operations.md",
+        "bytes": 27206,
+        "sha256": "620be8d1552fa331ae2b91186409e4adfaf167457928523db1e7e77594328138",
+        "replacement": "plan/04-reliability-security-operations.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/05-delivery-acceptance.md",
+        "bytes": 47774,
+        "sha256": "96a4806c249d91fbe35274be0f4234f141a6fa6e8ef681ed6b15a7f9c1a21e5c",
+        "replacement": "plan/05-delivery-acceptance.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/06-evidence-decisions.md",
+        "bytes": 24335,
+        "sha256": "6922c8101ef458c0f8f4cbe87ee61475c858a6d625713e599df126239b314902",
+        "replacement": "plan/06-evidence-decisions.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/07-directed-messages-progress.md",
+        "bytes": 14613,
+        "sha256": "10ade2ada0b519b9643441b43d8a029728cb61b3bbb9e46369bc91f1ba8dc220",
+        "replacement": "plan/07-directed-messages-progress.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/08-core-operating-decisions.md",
+        "bytes": 31141,
+        "sha256": "1317907eb94f7ccf60ce1830d659bc3de3ef82111f78791d4fcbebccd19a0aa8",
+        "replacement": "plan/08-core-operating-decisions.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/09-review-closure-and-gates.md",
+        "bytes": 27685,
+        "sha256": "92756c7d4bcb4a12b8d6caf35b5f77c6212bc708bda1af21685f403a773b61e3",
+        "replacement": "plan/09-review-closure-and-gates.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/10-delivery-risks-and-controls.md",
+        "bytes": 26943,
+        "sha256": "ddbb5b8f6857dc29caf507c6feaf6ee6c56b00106b8d288cf858f9ff9132db2c",
+        "replacement": "plan/10-delivery-risks-and-controls.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/11-coordinator-agent.md",
+        "bytes": 63312,
+        "sha256": "758e8e008d715569da4cc1d6dcc65d790f237005fcaa494e03dfed160ea52316",
+        "replacement": "plan/11-coordinator-agent.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/12-protocol-closure-and-validation.md",
+        "bytes": 30534,
+        "sha256": "cf9b99173e1ff56a53f1ee3c992792342901942c495f65b91590b11cc264c42c",
+        "replacement": "plan/12-protocol-closure-and-validation.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/CHANGELOG.md",
+        "bytes": 4102,
+        "sha256": "754908d51fadf5c6b451c371beefab8ff3cd25192eaee3a9efc1e1ee29143479",
+        "replacement": "plan/CHANGELOG.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/contracts/core.schema.json",
+        "bytes": 27446,
+        "sha256": "4650318401fd8c9cb49cfd971aa11ab04a1e138f56c6d985beb160f55c72f498",
+        "replacement": "plan/contracts/core.schema.json"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/contracts/wire-examples.json",
+        "bytes": 23421,
+        "sha256": "7b59e436adeb32eb10f17ecbb456c27113b0496c36c4fe3d10b071ea447326db",
+        "replacement": "plan/contracts/wire-examples.json"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/DESIGN-REVIEW.md",
+        "bytes": 3207,
+        "sha256": "a3ae70fd4aa553311e47fd35990a7920becc303dbf930b325b408b24ca6d5e6b",
+        "replacement": "plan/DESIGN-REVIEW.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/README.md",
+        "bytes": 12677,
+        "sha256": "021aeb3848988445c23d47d1c041c8cca15476aecdf911978eb79d4f04c8eb16",
+        "replacement": "plan/README.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/SHA256SUMS.txt",
+        "bytes": 2339,
+        "sha256": "530521175121da4f235e26325dc24cc1a7e4b4eb88571bf34792afe706cadbd4",
+        "replacement": "plan/SHA256SUMS.txt"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/source-verification.json",
+        "bytes": 15199,
+        "sha256": "5729f312db4787c308a5389cb9fede30f7b4278299ded3c69ce1907fe09aa89c",
+        "replacement": "plan/source-verification.json"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/tools/verify_design.py",
+        "bytes": 15880,
+        "sha256": "21ecbfd7897f0def7446bfc8edfa2c7215675855aa538b5c98297dcadbda7fbe",
+        "replacement": "plan/tools/verify_design.py"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/validation/collaboration-benchmarks.json",
+        "bytes": 3686,
+        "sha256": "5c607c3943a65ce8256ea94e34b65a26b7bbedb76d47ee2e604411cd585d816b",
+        "replacement": "plan/validation/collaboration-benchmarks.json"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/validation/compatibility-matrix.json",
+        "bytes": 21742,
+        "sha256": "0ba2ba69b4ac73ca759b3a332fef137c7e17a5179be2b6377517fe22d21db05c",
+        "replacement": "plan/validation/compatibility-matrix.json"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/validation/coordinator-eval-corpus.json",
+        "bytes": 33258,
+        "sha256": "7ca959e06a911c8eabc1c861f89c2aa74caca53c290047342abd4854e3cf51a5",
+        "replacement": "plan/validation/coordinator-eval-corpus.json"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/validation/protocol-fixtures.json",
+        "bytes": 24544,
+        "sha256": "5971df3b1988472bae1ca125c490da3ef9115463d966baa98ae502cfe40be480",
+        "replacement": "plan/validation/protocol-fixtures.json"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/verification-report.json",
+        "bytes": 35074,
+        "sha256": "a10a32724acdba6c1dfb4bd78a76e79ac9dd26101e4bc2093dee208351b7358d",
+        "replacement": "plan/verification-report.json"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/完整方案.md",
+        "bytes": 401215,
+        "sha256": "265d57f0f918231f9aa82aafe069e1a5b9a64f8e79b30aa33c604c3938a90383",
+        "replacement": "plan/完整方案.md"
+      },
+      {
+        "path": "docs/research/2026-11-13-agent-group-chat-platform.md",
+        "bytes": 12612,
+        "sha256": "0aa452d236b96163579cc653ebfaf6c04dbfe78b52120b56809071aba4634e49",
+        "replacement": "plan/research/2026-11-13-agent-group-chat-platform.md"
+      },
+      {
+        "path": "docs/research/2026-11-13-multi-agent-workbench.md",
+        "bytes": 19211,
+        "sha256": "5dd22765d119bac0ebfeb5887791c8b2fea17f8f6428ecc32a00fa0cb4a96cab",
+        "replacement": "plan/research/2026-11-13-multi-agent-workbench.md"
+      }
+    ],
+    "removed_files": [
+      {
+        "path": "deliverables/agent-group-platform-plan-2026-11-14-v1.6.zip",
+        "bytes": 397130,
+        "sha256": "37bc6293051984d5d19c36d226fd40aead632d988361186a90bf83fe762092ad",
+        "replacement": "plan/ (full directory plus handoff; no duplicate ZIP)"
+      },
+      {
+        "path": "deliverables/coordinator-agent-plan-2026-11-14-v1.2.md",
+        "bytes": 63312,
+        "sha256": "758e8e008d715569da4cc1d6dcc65d790f237005fcaa494e03dfed160ea52316",
+        "replacement": "plan/11-coordinator-agent.md and plan/verification-report.json"
+      },
+      {
+        "path": "deliverables/coordinator-agent-plan-2026-11-14-v1.2.verification.json",
+        "bytes": 708,
+        "sha256": "de131d9d92d39c18ed3a19b7547d39cc0ba1ecaeac8aece1543b8b0ba95f060d",
+        "replacement": "plan/11-coordinator-agent.md and plan/verification-report.json"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/01-product-architecture.md",
+        "bytes": 22184,
+        "sha256": "93bb175d6fe5e00856b9687b25f87c8d4578f4a3faf3416cdd5f63fa2a030508",
+        "replacement": "plan/01-product-architecture.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/02-data-contracts.md",
+        "bytes": 52433,
+        "sha256": "688db715320489701103ef7d614b8cebd14d05a001abea6f31c67cd260cc3b9e",
+        "replacement": "plan/02-data-contracts.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/03-agent-integration.md",
+        "bytes": 19687,
+        "sha256": "becdcfcd9b2b9aaea758d8699ef3ed2f4d0556f7e5304eb38f0a5b326f7b0e34",
+        "replacement": "plan/03-agent-integration.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/04-reliability-security-operations.md",
+        "bytes": 27206,
+        "sha256": "620be8d1552fa331ae2b91186409e4adfaf167457928523db1e7e77594328138",
+        "replacement": "plan/04-reliability-security-operations.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/05-delivery-acceptance.md",
+        "bytes": 47774,
+        "sha256": "96a4806c249d91fbe35274be0f4234f141a6fa6e8ef681ed6b15a7f9c1a21e5c",
+        "replacement": "plan/05-delivery-acceptance.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/06-evidence-decisions.md",
+        "bytes": 24335,
+        "sha256": "6922c8101ef458c0f8f4cbe87ee61475c858a6d625713e599df126239b314902",
+        "replacement": "plan/06-evidence-decisions.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/07-directed-messages-progress.md",
+        "bytes": 14613,
+        "sha256": "10ade2ada0b519b9643441b43d8a029728cb61b3bbb9e46369bc91f1ba8dc220",
+        "replacement": "plan/07-directed-messages-progress.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/08-core-operating-decisions.md",
+        "bytes": 31141,
+        "sha256": "1317907eb94f7ccf60ce1830d659bc3de3ef82111f78791d4fcbebccd19a0aa8",
+        "replacement": "plan/08-core-operating-decisions.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/09-review-closure-and-gates.md",
+        "bytes": 27685,
+        "sha256": "92756c7d4bcb4a12b8d6caf35b5f77c6212bc708bda1af21685f403a773b61e3",
+        "replacement": "plan/09-review-closure-and-gates.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/10-delivery-risks-and-controls.md",
+        "bytes": 26943,
+        "sha256": "ddbb5b8f6857dc29caf507c6feaf6ee6c56b00106b8d288cf858f9ff9132db2c",
+        "replacement": "plan/10-delivery-risks-and-controls.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/11-coordinator-agent.md",
+        "bytes": 63312,
+        "sha256": "758e8e008d715569da4cc1d6dcc65d790f237005fcaa494e03dfed160ea52316",
+        "replacement": "plan/11-coordinator-agent.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/12-protocol-closure-and-validation.md",
+        "bytes": 30534,
+        "sha256": "cf9b99173e1ff56a53f1ee3c992792342901942c495f65b91590b11cc264c42c",
+        "replacement": "plan/12-protocol-closure-and-validation.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/CHANGELOG.md",
+        "bytes": 4102,
+        "sha256": "754908d51fadf5c6b451c371beefab8ff3cd25192eaee3a9efc1e1ee29143479",
+        "replacement": "plan/CHANGELOG.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/contracts/core.schema.json",
+        "bytes": 27446,
+        "sha256": "4650318401fd8c9cb49cfd971aa11ab04a1e138f56c6d985beb160f55c72f498",
+        "replacement": "plan/contracts/core.schema.json"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/contracts/wire-examples.json",
+        "bytes": 23421,
+        "sha256": "7b59e436adeb32eb10f17ecbb456c27113b0496c36c4fe3d10b071ea447326db",
+        "replacement": "plan/contracts/wire-examples.json"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/DESIGN-REVIEW.md",
+        "bytes": 3207,
+        "sha256": "a3ae70fd4aa553311e47fd35990a7920becc303dbf930b325b408b24ca6d5e6b",
+        "replacement": "plan/DESIGN-REVIEW.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/README.md",
+        "bytes": 12677,
+        "sha256": "021aeb3848988445c23d47d1c041c8cca15476aecdf911978eb79d4f04c8eb16",
+        "replacement": "plan/README.md"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/SHA256SUMS.txt",
+        "bytes": 2339,
+        "sha256": "530521175121da4f235e26325dc24cc1a7e4b4eb88571bf34792afe706cadbd4",
+        "replacement": "plan/SHA256SUMS.txt"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/source-verification.json",
+        "bytes": 15199,
+        "sha256": "5729f312db4787c308a5389cb9fede30f7b4278299ded3c69ce1907fe09aa89c",
+        "replacement": "plan/source-verification.json"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/tools/verify_design.py",
+        "bytes": 15880,
+        "sha256": "21ecbfd7897f0def7446bfc8edfa2c7215675855aa538b5c98297dcadbda7fbe",
+        "replacement": "plan/tools/verify_design.py"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/validation/collaboration-benchmarks.json",
+        "bytes": 3686,
+        "sha256": "5c607c3943a65ce8256ea94e34b65a26b7bbedb76d47ee2e604411cd585d816b",
+        "replacement": "plan/validation/collaboration-benchmarks.json"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/validation/compatibility-matrix.json",
+        "bytes": 21742,
+        "sha256": "0ba2ba69b4ac73ca759b3a332fef137c7e17a5179be2b6377517fe22d21db05c",
+        "replacement": "plan/validation/compatibility-matrix.json"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/validation/coordinator-eval-corpus.json",
+        "bytes": 33258,
+        "sha256": "7ca959e06a911c8eabc1c861f89c2aa74caca53c290047342abd4854e3cf51a5",
+        "replacement": "plan/validation/coordinator-eval-corpus.json"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/validation/protocol-fixtures.json",
+        "bytes": 24544,
+        "sha256": "5971df3b1988472bae1ca125c490da3ef9115463d966baa98ae502cfe40be480",
+        "replacement": "plan/validation/protocol-fixtures.json"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/verification-report.json",
+        "bytes": 35074,
+        "sha256": "a10a32724acdba6c1dfb4bd78a76e79ac9dd26101e4bc2093dee208351b7358d",
+        "replacement": "plan/verification-report.json"
+      },
+      {
+        "path": "docs/agent-group-platform-v1/完整方案.md",
+        "bytes": 401215,
+        "sha256": "265d57f0f918231f9aa82aafe069e1a5b9a64f8e79b30aa33c604c3938a90383",
+        "replacement": "plan/完整方案.md"
+      },
+      {
+        "path": "docs/research/2026-11-13-agent-group-chat-platform.md",
+        "bytes": 12612,
+        "sha256": "0aa452d236b96163579cc653ebfaf6c04dbfe78b52120b56809071aba4634e49",
+        "replacement": "plan/research/2026-11-13-agent-group-chat-platform.md"
+      },
+      {
+        "path": "docs/research/2026-11-13-multi-agent-workbench.md",
+        "bytes": 19211,
+        "sha256": "5dd22765d119bac0ebfeb5887791c8b2fea17f8f6428ecc32a00fa0cb4a96cab",
+        "replacement": "plan/research/2026-11-13-multi-agent-workbench.md"
+      }
+    ],
+    "removed_directories": [
+      "docs/agent-group-platform-v1/contracts",
+      "docs/agent-group-platform-v1/validation",
+      "docs/agent-group-platform-v1/tools",
+      "docs/agent-group-platform-v1",
+      "docs/research",
+      "docs",
+      "deliverables"
+    ],
+    "safety_rule": "Delete only recorded regular files under old docs/deliverables after resolved-path, byte-length and SHA256 checks. Remove directories only when empty; no recursive delete.",
+    "removed_file_count": 31,
+    "removed_bytes": 1504610.0,
+    "preserved_nonempty_directories": []
+  },
+  "scope": "Directory consolidation and handoff only; no business protocol change or product runtime execution.",
+  "layout_changes": {
+    "business_design_version_unchanged": true,
+    "coordinator_version_unchanged": true,
+    "new_files": [
+      "plan/项目交接说明.md",
+      "plan/organization-record.json"
+    ],
+    "source_changes": "Only maintenance location, delivery/export wording, navigation, history banners, verification utility and derived outputs; no business protocol, schema or acceptance definition change.",
+    "copied_files_unchanged": [
+      "plan/01-product-architecture.md",
+      "plan/02-data-contracts.md",
+      "plan/03-agent-integration.md",
+      "plan/04-reliability-security-operations.md",
+      "plan/05-delivery-acceptance.md",
+      "plan/07-directed-messages-progress.md",
+      "plan/08-core-operating-decisions.md",
+      "plan/09-review-closure-and-gates.md",
+      "plan/10-delivery-risks-and-controls.md",
+      "plan/contracts/core.schema.json",
+      "plan/contracts/wire-examples.json",
+      "plan/source-verification.json",
+      "plan/validation/collaboration-benchmarks.json",
+      "plan/validation/compatibility-matrix.json",
+      "plan/validation/coordinator-eval-corpus.json",
+      "plan/validation/protocol-fixtures.json"
+    ],
+    "copied_files_updated": [
+      "plan/06-evidence-decisions.md",
+      "plan/11-coordinator-agent.md",
+      "plan/12-protocol-closure-and-validation.md",
+      "plan/CHANGELOG.md",
+      "plan/DESIGN-REVIEW.md",
+      "plan/README.md",
+      "plan/SHA256SUMS.txt",
+      "plan/tools/verify_design.py",
+      "plan/verification-report.json",
+      "plan/完整方案.md",
+      "plan/research/2026-11-13-agent-group-chat-platform.md",
+      "plan/research/2026-11-13-multi-agent-workbench.md"
+    ],
+    "retained_unique_research": true,
+    "removed_redundant_exports_reason": "Coordinator content is identical to authoritative chapter 11 before layout edits; its separate reading copy/verification and the older-layout ZIP are redundant."
+  }
+}

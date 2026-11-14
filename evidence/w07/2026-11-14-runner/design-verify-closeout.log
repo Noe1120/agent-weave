@@ -1,0 +1,16 @@
+{
+  "document_checks": "PASS",
+  "requirements": 33,
+  "AT": 190,
+  "CA": 60,
+  "product_tests": "NOT_RUN",
+  "wire_examples_checked": 26,
+  "json_examples": 6,
+  "tables_checked": 78,
+  "file_count": 44,
+  "manifest_entries": 43,
+  "manifest_checks": "PASS",
+  "organization_status": "COMPLETE",
+  "package": null,
+  "failures": []
+}

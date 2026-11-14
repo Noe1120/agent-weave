@@ -1,0 +1,41 @@
+(node:22284) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✖ runner unauthorized_patch cannot escape its scope or release before process exit (424.2307ms)
+✖ runner complete_hold cannot escape its scope or release before process exit (405.5403ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1148.9514
+
+✖ failing tests:
+
+test at tests\runner-process.test.ts:288:72
+✖ runner unauthorized_patch cannot escape its scope or release before process exit (424.2307ms)
+  Error: INVALID_REQUEST
+      at demandRunner (file:///D:/Users/1/Desktop/team/packages/service/src/runner-protocol.ts:4:21)
+      at validateStart (file:///D:/Users/1/Desktop/team/packages/service/src/runner-protocol.ts:91:3)
+      at RunnerController.start (file:///D:/Users/1/Desktop/team/packages/service/src/runner.ts:144:15)
+      at TestContext.<anonymous> (file:///D:/Users/1/Desktop/team/tests/runner-process.test.ts:290:53)
+      at Test.runInAsyncScope (node:async_hooks:228:14)
+      at Test.run (node:internal/test_runner/test:1118:25)
+      at Test.start (node:internal/test_runner/test:1015:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:358:17)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+
+test at tests\runner-process.test.ts:288:72
+✖ runner complete_hold cannot escape its scope or release before process exit (405.5403ms)
+  Error: INVALID_REQUEST
+      at demandRunner (file:///D:/Users/1/Desktop/team/packages/service/src/runner-protocol.ts:4:21)
+      at validateStart (file:///D:/Users/1/Desktop/team/packages/service/src/runner-protocol.ts:91:3)
+      at RunnerController.start (file:///D:/Users/1/Desktop/team/packages/service/src/runner.ts:144:15)
+      at TestContext.<anonymous> (file:///D:/Users/1/Desktop/team/tests/runner-process.test.ts:290:53)
+      at Test.runInAsyncScope (node:async_hooks:228:14)
+      at Test.run (node:internal/test_runner/test:1118:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:787:18)
+      at Test.postRun (node:internal/test_runner/test:1247:19)
+      at Test.run (node:internal/test_runner/test:1175:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
