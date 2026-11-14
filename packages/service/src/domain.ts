@@ -14,7 +14,12 @@ export type Action =
   | "broker_write"
   | "runner_start"
   | "runner_read"
-  | "runner_stop";
+  | "runner_stop"
+  | "adapter_configure"
+  | "adapter_read"
+  | "dependency_capture"
+  | "dependency_read"
+  | "knowledge_read";
 export interface Policy {
   id: string;
   project_id: string;
@@ -72,6 +77,8 @@ export interface TaskData {
     | "cancelled";
   candidate_ref: Ref | null;
   inputs_valid: boolean;
+  input_snapshot_ref?: Ref;
+  prerequisite_ids?: string[];
   acceptance_ref: Ref;
 }
 export interface RootData {

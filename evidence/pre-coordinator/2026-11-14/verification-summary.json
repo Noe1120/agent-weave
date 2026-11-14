@@ -1,0 +1,74 @@
+{
+  "date": "2026-11-14",
+  "qualification": "DEVELOPMENT_FOUNDATIONS_ONLY",
+  "baseline": {
+    "node_tests": 177
+  },
+  "final": {
+    "node_tests": 264,
+    "pass": 264,
+    "fail": 0,
+    "skipped": 0,
+    "added": 87,
+    "generate_check": "PASS",
+    "format": "PASS",
+    "typecheck": "PASS",
+    "build": "PASS",
+    "compiled_smoke": "PASS",
+    "runner_host_build": "PASS",
+    "native_csharp_groups": 14,
+    "native_static_tests": 1,
+    "portable_hashes": 989,
+    "design_files": 48,
+    "design_manifest_entries": 47,
+    "p0_offline_tests": 12
+  },
+  "walkthroughs": {
+    "adapter": "PASS",
+    "dependencies_and_authorized_retrieval": "PASS",
+    "offline_sqlite_git_dirty_recovery": "PASS",
+    "native_click": "NOT_RUN"
+  },
+  "preservation": {
+    "protected_files": 29,
+    "changed": 0,
+    "schema": 4,
+    "old_portable_schema": 2
+  },
+  "permissions": {
+    "original_clients_started": 0,
+    "model_calls": 0,
+    "windows_identity_or_acl_changes": 0,
+    "user_actual_databases_opened": 0
+  },
+  "boundaries": {
+    "product_AT_CA": "NOT_RUN",
+    "actual_client_qualification": "UNVERIFIED",
+    "os_isolation": "UNVERIFIED",
+    "formal_freeze": "NOT_FROZEN",
+    "coordinator": "DEFERRED_BY_USER",
+    "production_backup_and_install_upgrade": "NOT_IMPLEMENTED"
+  },
+  "logs_local_only": [
+    "baseline.log",
+    "w08-contract-red.log",
+    "w08-registry-red.log",
+    "w09-red.log",
+    "w10-red-2.log",
+    "edge-red.log",
+    "review-red.log",
+    "task-graph-red.log",
+    "broker-index-red.log",
+    "verify-closeout.log",
+    "native.log",
+    "package.log",
+    "design-verify.log",
+    "p0.log",
+    "adapter-walkthrough.log",
+    "backend-walkthrough-final.log",
+    "snapshot-source-red.log",
+    "verify-source-closure.log",
+    "native-closeout.log",
+    "backend-walkthrough-closeout.log"
+  ]
+}

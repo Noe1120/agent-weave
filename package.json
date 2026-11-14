@@ -28,7 +28,11 @@
     "pretest": "npm run build:runner",
     "build:runner": "powershell -NoProfile -File scripts/build-runner.ps1",
     "test:runner": "npm run build:runner && node --test tests/runner*.test.ts",
-    "test:runner:walkthrough": "npm run build:runner && npm run build && node tests/runner-walkthrough.mjs"
+    "test:runner:walkthrough": "npm run build:runner && npm run build && node tests/runner-walkthrough.mjs",
+    "test:adapter": "node --test tests/adapter*.test.ts",
+    "test:adapter:walkthrough": "npm run build && node tests/adapter-walkthrough.mjs",
+    "test:foundations": "node --test tests/dependencies.test.ts tests/knowledge.test.ts tests/recovery.test.ts",
+    "test:foundations:walkthrough": "npm run build && node tests/pre-coordinator-walkthrough.mjs"
   },
   "dependencies": {
     "ajv": "8.20.0",

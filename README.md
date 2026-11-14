@@ -4,9 +4,9 @@
 
 ## 仓库与当前状态
 
-仓库保存源码、设计和[已审核的W07文本证据](evidence/README.md)，不附带SDK、node_modules、数据库、第三方研究副本或便携包。新克隆请先按下方“开发构建”准备固定运行时并运行验证；不要把本机已有的artifacts路径当成仓库内下载文件。
+仓库保存源码、设计和[已审核的阶段文本证据](evidence/README.md)，不附带SDK、node_modules、数据库、第三方研究副本或便携包。新克隆请先按下方“开发构建”准备固定运行时并运行验证；不要把本机已有的artifacts路径当成仓库内下载文件。
 
-当前W07开发后端已验证；[W08能力与适配基础计划](plan/W08-ADAPTER-FOUNDATION.md)已准备、尚未实施。后续工作直接沿用[AGENTS.md](AGENTS.md)，不重复确认既有要求。
+当前已继续完成[W08能力与适配基础](plan/W08-ADAPTER-FOUNDATION.md)、[W09依赖与授权资料](plan/W09-DEPENDENCIES-KNOWLEDGE.md)、[W10本机离线灾备基础](plan/W10-OFFLINE-RECOVERY.md)，停在管家Agent之前。后续工作直接沿用[AGENTS.md](AGENTS.md)，不重复确认既有要求。
 
 ## 打开本机已有便携包
 
@@ -29,6 +29,15 @@
 - 消息输入按项目保留；切项/刷新/重连不把私密接收人变成群聊。负责人停用后不能静默取消分配。
 - revision CAS 防止覆盖新版本；冲突保留表单输入，可显式读取新版本。不确定提交锁定原内容和 action_id 重试；保存成功但刷新失败单独说明。
 - 配对通过所属子进程私有管道，cookie/CSRF 仅进程内存。双实例同库拒绝打开。正常关闭、意外退出均回收所属服务，不杀其他 Node/Agent。
+
+## 管家之前的新增后端基础
+
+- 能力登记严格区分声明/可用/授权/资格；配置变化失效、撤权重查、幂等/CAS。本地detach只改变平台连接引用，不能杀原客户端；发送/回答/审批/打断未实现即拒绝。
+- 任务依赖DAG和完整changeset输入快照；上游失效阻止Broker继续写入/交付、保留锁和成果。授权资料检索在排序前过滤ACL及来源，无Embedding/模型调用。
+- 本机停稳development仓库的SQLite一致备份、Git对象/index/staged/unstaged/二进制闭包，校验后只恢复到新目录；旧凭据撤销，不自动恢复执行。
+- 这些都是可信进程内开发入口，**没有挂到UI或公共HTTP/MCP**，不代表真实Agent已连接。生产在线灾备/离机加密/安装升级、实际原客户端与OS隔离仍未完成。
+- 验证命令：npm run test:adapter、npm run test:foundations；编译走查：npm run test:adapter:walkthrough、npm run test:foundations:walkthrough。证据目录必须新建，不能覆盖旧结果。
+- [实施范围](plan/PRE-COORDINATOR-FOUNDATIONS.md) · [阶段交付](evidence/pre-coordinator/2026-11-14/COMPLETION.md)。管家方案保持待定，原生UI最后设计，旧便携包未重发。
 
 ## W07 当前源码：开发进程运行器
 

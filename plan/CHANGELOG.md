@@ -1,3 +1,11 @@
+# 管家前W08–W10开发基础 · 2026-11-14
+
+- W08严格适配登记/授权/CAS/幂等、无副作用投影、配置失效、本地detach；真实客户端仍未接入。
+- W09任务DAG、完整changeset输入快照、上游传递失效与Broker/等待边界校验、权限内确定性资料检索；不调用Embedding/模型。
+- W10停稳development范围的SQLite online backup、全部Git对象/index/dirty恢复，凭据撤销、新目录保护；生产pins/在线/离机/RPO/RTO仍未交付。
+- 新增失败回归修复等待忽略上游失效、备份校验产生WAL文件、异步切点遗漏、manifest丢文件、host无退出证明及Broker私有index差异；不删旧断言。
+- UI/core契约/001–004迁移/旧包保持；管家实现暂缓。产品250项NOT_RUN、资格UNVERIFIED、正式冻结NOT_FROZEN不变。
+
 # 仓库发布准备与W08计划 · 2026-11-14
 
 - 用户授权推送Noe1120/agent-weave；登记上传排除项、审核W07文本证据，保留本机完整证据与旧便携包。

@@ -1,0 +1,33 @@
+{
+  "qualification": "COMPILED_DEVELOPMENT_BACKEND_WALKTHROUGH",
+  "steps": [
+    {
+      "step": "dependency_invalidation",
+      "validity": "stale",
+      "task": "running",
+      "retained_locks": 3,
+      "automatic_retry": false
+    },
+    {
+      "step": "authorized_retrieval",
+      "read_count": 100,
+      "read_mutations": 0,
+      "hidden_results": 0,
+      "revocation": "DENIED"
+    },
+    {
+      "step": "offline_recovery",
+      "manifest": "COMPLETE",
+      "restored": "RESTORED_OFFLINE",
+      "staged_and_unstaged": "PRESERVED",
+      "binary": "PRESERVED",
+      "old_token": "REJECTED",
+      "automatic_resume": false
+    }
+  ],
+  "native_click_acceptance": "NOT_RUN",
+  "native_clients_started": 0,
+  "model_calls": 0,
+  "coordinator_implemented": false,
+  "os_isolation": "UNVERIFIED"
+}

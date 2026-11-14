@@ -1,0 +1,30 @@
+{
+  "qualification": "COMPILED_SYNTHETIC_WALKTHROUGH",
+  "steps": [
+    {
+      "step": "register",
+      "reason": "UNVERIFIED"
+    },
+    {
+      "step": "synthetic_observation",
+      "qualification": "UNVERIFIED"
+    },
+    {
+      "step": "configuration_change",
+      "reason": "CONFIG_CHANGED"
+    },
+    {
+      "step": "invalidate_and_old_retry",
+      "state": "invalidated"
+    },
+    {
+      "step": "revoke",
+      "reason": "GRANT_REVOKED"
+    }
+  ],
+  "read_count": 100,
+  "read_mutations": 0,
+  "native_clients_started": 0,
+  "model_calls": 0,
+  "real_client_qualification": "UNVERIFIED"
+}

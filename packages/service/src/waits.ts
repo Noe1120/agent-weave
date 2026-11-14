@@ -1,3 +1,4 @@
+import { assertTaskInputsCurrent } from "./dependencies.ts";
 import { randomUUID } from "node:crypto";
 import type { Store } from "./store.ts";
 import type { Context, Resource, TaskData, WaitData } from "./domain.ts";
@@ -45,6 +46,12 @@ function predicate(s: Store, c: Context, w: WaitData): boolean {
     !t.data.candidate_ref
   )
     return false;
+  try {
+    assertTaskInputsCurrent(s, c, t.id);
+  } catch (e) {
+    if (e instanceof ServiceFault && e.code === "PLAN_STALE") return false;
+    throw e;
+  }
   const a = requireResource(s, c, t.data.acceptance_ref.id, "acceptance");
   const candidate = requireResource(s, c, t.data.candidate_ref.id, "changeset");
   return (

@@ -1,0 +1,10 @@
+{
+  "checked": 29,
+  "changed": [],
+  "status": "PASS",
+  "scope": [
+    "001–004 migrations",
+    "contracts",
+    "desktop sources; bin/obj excluded"
+  ]
+}

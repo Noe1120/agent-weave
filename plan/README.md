@@ -6,11 +6,11 @@
 
 ## 当前构建优先级 · 2026-11-14
 
-用户要求后端/平台先行，原生UI设计最后。W06开发态Broker基础之上，W07已实现固定开发进程的受控启动、授权patch、只读进度、停止/超时与退出对账，见[W07实施记录](W07-DEVELOPMENT-RUNNER.md)。只管理自有合成夹具，不接通原Agent，不等同原WBS工作包或G0/G1完成。源码现为schema 4；0.3.0便携包仍为schema 2、未重发，禁止用旧包打开已升级库。真实原客户端/Windows隔离/完整管家与灾备仍未完成。
+用户要求后端/平台先行，原生UI设计最后。W06开发态Broker基础之上，W07已实现固定开发进程的受控启动、授权patch、只读进度、停止/超时与退出对账，见[W07实施记录](W07-DEVELOPMENT-RUNNER.md)。只管理自有合成夹具，不接通原Agent，不等同原WBS工作包或G0/G1完成。源码现为schema 4；0.3.0便携包仍为schema 2、未重发，禁止用旧包打开已升级库。真实原客户端/Windows隔离/完整管家与生产灾备仍未完成；停稳development环境的本机恢复基础已另行实现。
 
 参考项目研究：[Agents Anywhere 本机接入评估](research/2026-11-14-agents-anywhere.md)。仅静态源码证据；区分自有进程与原客户端会话附着，不替换 Claude Desktop，不改变原生 UI 或 G0/G1 门槛。
 
-下一阶段：[W08原客户端能力与适配边界计划](W08-ADAPTER-FOUNDATION.md)。当前为PLANNED，先能力登记/只读投影，后经授权的原客户端探针；不把W07开发夹具接通当成真实Agent已上线。持续工作规则写入项目根AGENTS.md。
+当前阶段：[管家前实施范围](PRE-COORDINATOR-FOUNDATIONS.md)、[W08适配基础](W08-ADAPTER-FOUNDATION.md)、[W09依赖/授权资料](W09-DEPENDENCIES-KNOWLEDGE.md)、[W10离线灾备](W10-OFFLINE-RECOVERY.md)已实现限定开发范围。真实客户端保持UNVERIFIED，不把底座当Agent上线。用户明确管家方案未定，本轮停在管家之前。持续工作规则见项目根AGENTS.md。
 
 ## 阅读与交接
 

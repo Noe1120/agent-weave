@@ -1,3 +1,4 @@
+import { assertTaskInputsCurrent } from "./dependencies.ts";
 import { randomBytes } from "node:crypto";
 import type { Store } from "./store.ts";
 import type {
@@ -101,6 +102,7 @@ export function applyPlan(
     fail("PLAN_CONFLICT");
   const tasks = p.task_refs.map((ref) => {
     const t = checkedRef<TaskData>(s, c, ref, "task");
+    assertTaskInputsCurrent(s, c, t.id);
     if (t.data.status !== "draft") fail("REASSIGNMENT_REQUIRES_HANDOFF");
     if (!seen.has(t.id)) fail("PLAN_CONFLICT");
     const acceptance = checkedRef<{ state: string }>(

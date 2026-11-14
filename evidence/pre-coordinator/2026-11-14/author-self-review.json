@@ -1,0 +1,38 @@
+{
+  "review": "AUTHOR_SELF_REVIEW_NOT_INDEPENDENT",
+  "date": "2026-11-14",
+  "base": "e16578d3c5e0805462fdddab422282dbd753724d",
+  "checks": [
+    "strict registration and server-owned qualification",
+    "authorization before replay; receipt atomicity and no grant expansion",
+    "reads do not run providers or mutate DB",
+    "task DAG, changeset closure and stale write/wait fencing",
+    "unknown and quarantined executions retain locks",
+    "consistent SQLite/Git/index/dirty recovery; fresh destinations only",
+    "no migrations/contracts/native layout changes",
+    "credentials revoked in backup, no automatic restore execution",
+    "new source tests run in the existing full suite; no assertion removal"
+  ],
+  "fixed_findings": [
+    "Node strip-only parameter-property incompatibility",
+    "Broker authorization variable mismatch",
+    "stale snapshot could resolve review-ready wait",
+    "readonly verification generated WAL sidecars",
+    "source mutation during asynchronous database backup missed cut recheck",
+    "manifest could omit retained files from repository mapping",
+    "host PID without job-empty evidence did not block cut",
+    "omitted upstream refs could bypass declared changeset dependency",
+    "Broker private index and HEAD tracking differ for recovery",
+    "input snapshot did not retain originating task authorization",
+    "content digest omitted upstream dependency-list provenance"
+  ],
+  "limitations": [
+    "native clients and Windows OS isolation UNVERIFIED",
+    "no native clicking/visual acceptance",
+    "no independent review",
+    "no public adapter/task/recovery gateway or UI integration",
+    "no speculative physical workspace materialization or automatic merge",
+    "production backup pins, incremental chains, offsite encryption, RPO/RTO, signed installer and upgrade qualification not implemented",
+    "coordinator implementation intentionally deferred"
+  ]
+}

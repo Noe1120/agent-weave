@@ -1,3 +1,4 @@
+import { assertTaskInputsCurrent, taskInputRefs } from "./dependencies.ts";
 import { canonical, nextRevision } from "./domain.ts";
 import type { Context, TaskData } from "./domain.ts";
 import {
@@ -189,6 +190,7 @@ export class DevelopmentBroker {
     demand(claim.project_id === project, "NOT_FOUND_OR_DENIED");
     const resources = this.resources(c, claim);
     if (write && !historical) {
+      assertTaskInputsCurrent(this.store, c, claim.task_id);
       requireActive(c);
       demand(
         claim.state === "active",
@@ -243,6 +245,7 @@ export class DevelopmentBroker {
           );
           requireActive(ctx);
           const { scope, task, candidate } = this.resources(ctx, claim);
+          assertTaskInputsCurrent(this.store, ctx, claim.task_id);
           demand(
             ctx.run.epoch === claim.run_epoch && ctx.run.id === claim.run_id,
             "LEASE_STALE",
@@ -316,6 +319,7 @@ export class DevelopmentBroker {
         "changeset",
       );
       demand(task.revision === q.expected_task_revision, "TASK_STALE");
+      assertTaskInputsCurrent(this.store, c, task.id);
       demand(
         task.data.status === "queued" && task.data.inputs_valid,
         "TASK_NOT_READY",
@@ -573,7 +577,7 @@ export class DevelopmentBroker {
         this.fault?.("files_applied");
       }
       this.store.transaction(() => {
-        const { claim, candidate } = this.authorize(
+        const { claim, candidate, c } = this.authorize(
           token,
           q.project_id,
           q.claim_id,
@@ -593,6 +597,8 @@ export class DevelopmentBroker {
         candidate.data = {
           ...candidate.data,
           producer_run_id: claim.run_id,
+          producer_task_id: claim.task_id,
+          upstream_refs: taskInputRefs(this.store, c, claim.task_id),
           base_commit: claim.base_commit,
           source_commit: edit.commit,
           tree_digest: edit.tree,

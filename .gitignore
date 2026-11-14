@@ -83,3 +83,15 @@ qa-runtime/
 !/evidence/w07/2026-11-14-runner/walkthrough-closeout/success.json
 !/evidence/w07/2026-11-14-runner/walkthrough-verified.log
 !/evidence/w07/2026-11-14-runner/walkthrough.log
+
+# Reviewed pre-coordinator closeout only; raw DB/Git/backup/runtime evidence stays local.
+!/evidence/pre-coordinator/
+/evidence/pre-coordinator/*
+!/evidence/pre-coordinator/2026-11-14/
+/evidence/pre-coordinator/2026-11-14/*
+!/evidence/pre-coordinator/2026-11-14/COMPLETION.md
+!/evidence/pre-coordinator/2026-11-14/verification-summary.json
+!/evidence/pre-coordinator/2026-11-14/author-self-review.json
+!/evidence/pre-coordinator/2026-11-14/protection-check.json
+!/evidence/pre-coordinator/2026-11-14/adapter-walkthrough-report.json
+!/evidence/pre-coordinator/2026-11-14/backend-walkthrough-report.json
