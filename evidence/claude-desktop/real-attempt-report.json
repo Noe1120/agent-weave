@@ -3,7 +3,7 @@
   "date": "2026-11-16",
   "timezone": "Asia/Tokyo",
   "status": "REAL_CLAUDE_MCP_DISCOVERY_PASS_FULL_INTEGRATION_INCOMPLETE",
-  "attempts": 7,
+  "attempts": 8,
   "first_attempt_historical": {
     "schema": 1,
     "date": "2026-11-15",
@@ -313,6 +313,47 @@
       "raw_report_sha256": "1fcf1fefc3bb5f3eb1f41d5a8ee24d14c4a65cce44f8c9c66849a295cd7896e3",
       "normal_desktop_exit": false,
       "cleanup_method": "Explicit owned Job termination plus retained-root-handle exit verification"
+    },
+    {
+      "attempt": 8,
+      "status": "MCP_DISCOVERY_PASS_MODEL_TASK_NOT_SENT",
+      "observed_at": "2026-11-15T23:18:09.649Z",
+      "mcp": {
+        "schema": 1,
+        "initialize_requests": 1,
+        "initialized": true,
+        "tools_list_requests": 1,
+        "tool_calls": 0,
+        "tool_errors": 0,
+        "resources_list_requests": 1,
+        "prompts_list_requests": 1,
+        "stdin_eof": true,
+        "fault": null
+      },
+      "cleanup_confirmed": true,
+      "owned_root_exit_observed": true,
+      "job_empty": true,
+      "existing_clients_unchanged": true,
+      "root_exit_code": 0,
+      "stop_reason": "ROOT_EXIT",
+      "normal_desktop_exit": "Root exit observed; user action not attributed",
+      "host_sha256": "3672b54904f0471e2f02da4994155c61dfb0709bd0ef90ca7d38c46e5c854d13",
+      "raw_report_sha256": "10eb89ceda039398b9859507fb5556b67bef8bd00c42933e24077ba331eeeb93",
+      "prompts_sent": 0,
+      "service_reads": 0,
+      "ui_observation": {
+        "fresh_profile": true,
+        "gateway_footer_visible": true,
+        "model_warning": "Configured model not available: claude-haiku-4-5",
+        "prompt_typed": false,
+        "click_outcome": "USER_INPUT_DETECTED; click not confirmed",
+        "window_later_unavailable": true,
+        "task_acceptance": "NOT_COMPLETED"
+      },
+      "me_route_pinned_at_launch": false,
+      "copied_gateway_credential_redacted": true,
+      "cost": "UNKNOWN",
+      "total_client_background_model_requests": "UNKNOWN; no network audit"
     }
   ],
   "findings": {
@@ -320,7 +361,7 @@
     "native_reproduction": "SHGetFolderPath(CSIDL_APPDATA) returns HRESULT 80070003 when fresh USERPROFILE lacks AppData/Roaming",
     "repair": "Create USERPROFILE/AppData/Roaming and AppData/Local and verify native resolved paths equal fresh environment values before launch",
     "lifetime_repair": "Retain actual root process handle; explicitly assign root to Job; observe root exit independently of pipe close; require Job empty and unchanged client inventories",
-    "latest_observation": "Attempts 5, 6 and 7 initialized/discovered MCP using the real selected CC Switch third-party gateway configuration in fresh profiles. Attempts 6 and 7 discovered the compiled read connector; tool_calls=0.",
+    "latest_observation": "Attempt8 discovered MCP but no prompt/tool request sent; me routing was not pinned. Latest readonly configuration maps live-state proxy_route to me while legacy selectors disagree; runtime upstream unverified.",
     "mcp_connection_trigger": "Pinned client main-process IPC launches chat MCP only on a request from mainView; no internal IPC injection used",
     "attempt_4_historical_auth_observation": {
       "sign_in_cookie_present": false,
@@ -331,14 +372,15 @@
     "superseded_next_prerequisite": "User-owned authenticated session in a dedicated profile remains to be authorized and verified; login sufficiency is not established",
     "superseded_next_prerequisite_is_not_current": true,
     "root_cause_correction": "Blank independent profile omitted the actual third-party configuration; 3p Desktop resolves MCP preferences in LOCALAPPDATA/Claude-3p. No official login needed for the observed handshake.",
-    "next_prerequisite": "Concrete native window interaction and a bounded synthetic model-tool roundtrip with provider/fee authorization; then same-configuration isolation and lifecycle qualification. No internal IPC/CDP injection or substitute client."
+    "next_prerequisite": "One fresh-profile synthetic UI task remains authorized and unconsumed. User-owned Desktop is now running; no restart/attachment allowed. Wait for user to exit normally, then revalidate me routing and client inventory before independent launch.",
+    "route_guard": "Require pinned me identity and live-state/provider metadata before preparation and immediately before launch; reject omitted route rather than fallback to empty official profile. This is preflight metadata, not live egress enforcement."
   },
   "scope": {
     "model_calls": 0,
     "prompts": 0,
     "login": false,
     "old_credentials": false,
-    "ui_clicks": false,
+    "ui_clicks": "Attempted once in fresh attempt8; user-input detection prevented confirmed action",
     "production_code_changed": true,
     "os_isolation": "NOT_TESTED",
     "network_audit": "NOT_PERFORMED",
@@ -346,7 +388,8 @@
     "selected_local_gateway_credential_reused_with_authorization": true,
     "production_adapter_enabled": false,
     "synthetic_read_connector_added": true,
-    "private_history_read": false
+    "private_history_read": false,
+    "model_call_count_scope": "User-authored task prompts only; Desktop background requests not audited"
   },
   "references": {
     "orca_commit": "af82fa8634e19c0376738ad636237aac847b2179",
@@ -374,8 +417,17 @@
         "scanned_files": 318,
         "gateway_token_matches": 0,
         "unread_files": 0
+      },
+      {
+        "attempt": 8,
+        "scanned_files": 328,
+        "gateway_token_matches": 0,
+        "unread_files": 0,
+        "reparse_entries_not_followed": 0,
+        "scope": "Only stopped fresh attempt8 profile using Windows extended-length paths; no original history"
       }
     ],
-    "scope": "Exact gateway token scan within own stopped acceptance profiles only; no original history read"
+    "scope": "Exact gateway token scan within own stopped acceptance profiles only; no original history read",
+    "original_configuration_unchanged_at_route_correction": true
   }
 }

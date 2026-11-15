@@ -2,28 +2,41 @@
 import { createHash } from "node:crypto";
 import { lstat, mkdir, open, readFile, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, join, resolve } from "node:path";
+import { DatabaseSync } from "node:sqlite";
 import { fileHash, prepareClaudeProbe } from "./claude-desktop-launch.ts";
 
 interface Route {
   source_library: string;
   metadata_sha256: string;
   selected_sha256: string;
+  cc_switch: CcSwitchRoute;
+}
+interface CcSwitchRoute {
+  database: string;
+  live_state: string;
+  live_state_sha256: string;
+  provider_id: string;
+  provider_name: string;
+  provider_meta_sha256: string;
 }
 function object(v: unknown): Record<string, any> {
   if (!v || typeof v !== "object" || Array.isArray(v))
     throw new Error("CLAUDE_3P_CONFIG");
   return v as Record<string, any>;
 }
-async function pinnedJson(path: string, hash: string) {
+async function safeSource(path: string, maxBytes: number) {
   for (let p = path; ; p = dirname(p)) {
     const s = await lstat(p);
     if (
       s.isSymbolicLink() ||
-      (p === path && (!s.isFile() || s.nlink !== 1 || s.size > 65536))
+      (p === path && (!s.isFile() || s.nlink !== 1 || s.size > maxBytes))
     )
       throw new Error("CLAUDE_3P_UNSAFE_SOURCE");
     if (dirname(p) === p) break;
   }
+}
+async function pinnedJson(path: string, hash: string) {
+  await safeSource(path, 65536);
   const bytes = await readFile(path);
   if (createHash("sha256").update(bytes).digest("hex") !== hash)
     throw new Error("CLAUDE_3P_SOURCE_CHANGED");
@@ -31,6 +44,68 @@ async function pinnedJson(path: string, hash: string) {
     return object(JSON.parse(bytes.toString("utf8")));
   } catch {
     throw new Error("CLAUDE_3P_CONFIG");
+  }
+}
+// Configuration evidence only: no request/session tables or upstream credentials.
+// This preflight does not enforce routing after launch or attest to the proxy's memory.
+export async function checkCcSwitchRoute(input: unknown) {
+  const b = object(input) as unknown as CcSwitchRoute;
+  if (
+    Object.keys(b).sort().join() !==
+      "database,live_state,live_state_sha256,provider_id,provider_meta_sha256,provider_name" ||
+    ![b.database, b.live_state].every(
+      (v) => typeof v === "string" && isAbsolute(v),
+    ) ||
+    ![b.live_state_sha256, b.provider_meta_sha256].every(
+      (v) => typeof v === "string" && /^[a-f0-9]{64}$/.test(v),
+    ) ||
+    typeof b.provider_id !== "string" ||
+    !/^[a-zA-Z0-9-]{1,80}$/.test(b.provider_id) ||
+    typeof b.provider_name !== "string" ||
+    b.provider_name.length < 1 ||
+    b.provider_name.length > 80
+  )
+    throw new Error("CLAUDE_3P_ROUTE_CONFIG");
+  const live = await pinnedJson(b.live_state, b.live_state_sha256);
+  const desktop = object(object(live.apps)["claude-desktop"]);
+  if (
+    live.version !== 1 ||
+    desktop.mode !== "proxy" ||
+    desktop.attached !== true ||
+    desktop.proxy_route !== b.provider_id
+  )
+    throw new Error("CLAUDE_3P_ROUTE_MISMATCH");
+  await safeSource(b.database, 256 * 1024 * 1024);
+  const db = new DatabaseSync(b.database, { readOnly: true });
+  try {
+    db.exec("PRAGMA query_only=ON");
+    const rows = db
+      .prepare(
+        "SELECT name, meta FROM providers WHERE app_type='claude-desktop' AND id=?",
+      )
+      .all(b.provider_id);
+    const row = rows[0];
+    if (
+      rows.length !== 1 ||
+      row?.name !== b.provider_name ||
+      typeof row.meta !== "string" ||
+      createHash("sha256").update(row.meta).digest("hex") !==
+        b.provider_meta_sha256
+    )
+      throw new Error("CLAUDE_3P_PROVIDER_CHANGED");
+    let meta;
+    try {
+      meta = object(JSON.parse(row.meta));
+    } catch {
+      throw new Error("CLAUDE_3P_ROUTE_CONFIG");
+    }
+    if (
+      meta.claudeDesktopMode !== "proxy" ||
+      Object.keys(object(meta.claudeDesktopModelRoutes)).length === 0
+    )
+      throw new Error("CLAUDE_3P_ROUTE_CONFIG");
+  } finally {
+    db.close();
   }
 }
 export async function prepareClaudeThirdPartyProbe(
@@ -43,7 +118,7 @@ export async function prepareClaudeThirdPartyProbe(
   const r = object(route) as unknown as Route;
   if (
     Object.keys(r).sort().join() !==
-      "metadata_sha256,selected_sha256,source_library" ||
+      "cc_switch,metadata_sha256,selected_sha256,source_library" ||
     typeof r.source_library !== "string" ||
     !isAbsolute(r.source_library) ||
     ![r.metadata_sha256, r.selected_sha256].every(
@@ -51,6 +126,7 @@ export async function prepareClaudeThirdPartyProbe(
     )
   )
     throw new Error("CLAUDE_3P_CONFIG");
+  await checkCcSwitchRoute(r.cc_switch);
   const source = resolve(r.source_library);
   const meta = await pinnedJson(join(source, "_meta.json"), r.metadata_sha256);
   const id = meta.appliedId;
@@ -146,16 +222,24 @@ export async function prepareClaudeThirdPartyProbe(
     mcp_config_path: mcpPath,
     third_party_config_library_path: library,
     third_party_mode: "3p" as const,
+    cc_switch_route: structuredClone(r.cc_switch),
   };
 }
 
 // Used only before any client is launched; never redact a running client's file.
 export async function checkPreparedProbe<T>(
-  prepared: { root: string; third_party_config_library_path?: string },
+  prepared: {
+    root: string;
+    third_party_config_library_path?: string;
+    cc_switch_route?: CcSwitchRoute;
+  },
   check: () => Promise<T>,
 ): Promise<T> {
   try {
-    return await check();
+    const result = await check();
+    if (prepared.cc_switch_route)
+      await checkCcSwitchRoute(prepared.cc_switch_route);
+    return result;
   } catch (failure) {
     if (prepared.third_party_config_library_path) {
       try {

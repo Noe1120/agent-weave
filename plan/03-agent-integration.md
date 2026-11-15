@@ -84,6 +84,8 @@ GO 条件：固定版本下通过测试；如果产品要作为对外生产服�
 
 ### 5.1 W13本机实施记录（2026-11-16）
 
+用户明确指定CC Switch的me分组＋路由模式。2026-11-16只读复核发现live-state为proxy/attached，proxy_route匹配me；settings旧选择器仍为official、数据库is_current仍为cc7，二者不能替代活动路由证据。此前仅固定Desktop网关文件，未固定me，相关结论已收窄为MCP传输通过。第八次测试窗口发现MCP但未发送prompt、tool_calls=0，模型不可用提示未解决；测试实例退出与凭据清除已核实。现在第三方准备入口要求绑定路由目标、live-state及provider元数据摘要，并在启动前再次核对；这仍不是运行时provider外发证明。用户已授权一次独立窗口合成任务，不重复索取；当前已有用户Claude实例，不能接管或重启，下一次真实尝试尚未启动。
+
 固定官方Desktop 5.11492.2的CC Switch第三方gateway路由已实际通过本地stdio MCP initialize/initialized及tools/resources/prompts发现。旧空profile缺少第三方连接，不能据此要求官方登录。普通--user-data-dir不足以定位3p配置；本机安装会使用LOCALAPPDATA/Claude-3p/configLibrary中_meta.json选定的条目。测试仅在全新标准Windows profile复用获准的本机gateway令牌，不复制上游provider密钥/历史/cookie，不改现有模式或配置。
 
 实现一个合成验收专用的固定project/read-only grant桥：task_get读取新增task安全投影，project_progress只查get_plan_progress，message_poll可选且由执行feed检查grant绑定。固定配置拒绝动态URL/token/project，逐次复核服务权限和声明的披露到期时间，拒绝重定向、超限响应与未知字段；stdout只承载JSONL。协议会话上限1000帧/1MiB，每帧64KiB，单次HTTP超时5秒，响应64KiB。它不是长期运行的生产connector。

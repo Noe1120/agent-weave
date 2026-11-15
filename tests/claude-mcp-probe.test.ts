@@ -244,6 +244,7 @@ test("Claude preparation refuses linked data directory and extra credential conf
 });
 
 import * as thirdPartyModule from "./claude-third-party-probe.ts";
+import { DatabaseSync } from "node:sqlite";
 async function thirdPartyInstallation() {
   const config = await installation();
   const source = join(config.installation_root, "source-user-data");
@@ -273,6 +274,39 @@ async function thirdPartyInstallation() {
     "private-history-fixture",
   );
   const hash = (s: string) => createHash("sha256").update(s).digest("hex");
+  const database = join(source, "cc-switch.db");
+  const liveState = join(source, "live-state.json");
+  const providerId = "00000000-0000-4000-8000-000000000002";
+  const providerMeta = JSON.stringify({
+    claudeDesktopMode: "proxy",
+    apiFormat: "anthropic",
+    claudeDesktopModelRoutes: { "claude-test": { model: "test-upstream" } },
+  });
+  const db = new DatabaseSync(database);
+  db.exec(
+    "CREATE TABLE providers (id TEXT, app_type TEXT, name TEXT, meta TEXT, is_current INTEGER)",
+  );
+  db.prepare(
+    "INSERT INTO providers VALUES (?, 'claude-desktop', 'me', ?, 0)",
+  ).run(providerId, providerMeta);
+  db.prepare(
+    "INSERT INTO providers VALUES ('legacy-other', 'claude-desktop', 'other', '{}', 1)",
+  ).run();
+  db.close();
+  await writeFile(
+    liveState,
+    JSON.stringify({
+      version: 1,
+      apps: {
+        "claude-desktop": {
+          mode: "proxy",
+          attached: true,
+          proxy_route: providerId,
+          contract: { version: 1 },
+        },
+      },
+    }),
+  );
   return {
     config,
     source,
@@ -286,10 +320,18 @@ async function thirdPartyInstallation() {
       selected_sha256: hash(
         await readFile(join(library, appliedId + ".json"), "utf8"),
       ),
+      cc_switch: {
+        database,
+        live_state: liveState,
+        live_state_sha256: hash(await readFile(liveState, "utf8")),
+        provider_id: providerId,
+        provider_name: "me",
+        provider_meta_sha256: hash(providerMeta),
+      },
     },
   };
 }
-test("Claude third-party preparation relocates only the selected CC Switch route", async () => {
+test("Claude preparation follows pinned live me route rather than legacy is_current", async () => {
   const { config, source, route, appliedId } = await thirdPartyInstallation();
   const p = await thirdPartyModule.prepareClaudeThirdPartyProbe(
     config,
@@ -324,6 +366,67 @@ test("Claude third-party preparation relocates only the selected CC Switch route
     "private-history-fixture",
   );
 });
+test("gateway configuration alone cannot authorize a CC Switch route", async () => {
+  const { config, route } = await thirdPartyInstallation();
+  const { cc_switch: _binding, ...gatewayOnly } = route;
+  await assert.rejects(
+    thirdPartyModule.prepareClaudeThirdPartyProbe(config, gatewayOnly, true),
+    /CLAUDE_3P_/,
+  );
+  assert.deepEqual(await readdir(config.data_root), []);
+});
+for (const scenario of [
+  "wrong-provider",
+  "direct",
+  "detached",
+  "name",
+  "model-routes",
+  "live-drift",
+  "missing-provider",
+]) {
+  test(
+    "CC Switch route guard rejects " +
+      scenario +
+      " before profile or credential creation",
+    async () => {
+      const { config, route } = await thirdPartyInstallation();
+      const binding = route.cc_switch;
+      if (["name", "model-routes", "missing-provider"].includes(scenario)) {
+        const db = new DatabaseSync(binding.database);
+        if (scenario === "name")
+          db.prepare("UPDATE providers SET name='not-me' WHERE id=?").run(
+            binding.provider_id,
+          );
+        if (scenario === "model-routes")
+          db.prepare("UPDATE providers SET meta='{}' WHERE id=?").run(
+            binding.provider_id,
+          );
+        if (scenario === "missing-provider")
+          db.prepare("DELETE FROM providers WHERE id=?").run(
+            binding.provider_id,
+          );
+        db.close();
+      } else {
+        const live = JSON.parse(await readFile(binding.live_state, "utf8"));
+        const desktop = live.apps["claude-desktop"];
+        if (scenario === "wrong-provider") desktop.proxy_route = "legacy-other";
+        if (scenario === "direct") desktop.mode = "direct";
+        if (scenario === "detached") desktop.attached = false;
+        if (scenario === "live-drift") desktop.proxy_route = "legacy-other";
+        await writeFile(binding.live_state, JSON.stringify(live));
+        if (scenario !== "live-drift")
+          binding.live_state_sha256 = createHash("sha256")
+            .update(await readFile(binding.live_state))
+            .digest("hex");
+      }
+      await assert.rejects(
+        thirdPartyModule.prepareClaudeThirdPartyProbe(config, route, true),
+        /CLAUDE_3P_/,
+      );
+      assert.deepEqual(await readdir(config.data_root), []);
+    },
+  );
+}
 test("third-party credential preparation requires concrete opt-in before reading source", async () => {
   const { config, route } = await thirdPartyInstallation();
   await assert.rejects(
@@ -446,6 +549,41 @@ test("failed prelaunch checks redact the copied gateway credential and preserve 
   );
 });
 
+test("route change after preparation blocks launch and redacts only the fresh credential", async () => {
+  const { config, route, library, appliedId } = await thirdPartyInstallation();
+  const original = await readFile(join(library, appliedId + ".json"));
+  const databaseBefore = await readFile(route.cc_switch.database);
+  const p = await thirdPartyModule.prepareClaudeThirdPartyProbe(
+    config,
+    route,
+    true,
+  );
+  await assert.rejects(
+    thirdPartyModule.checkPreparedProbe(p, async () => {
+      const live = JSON.parse(
+        await readFile(route.cc_switch.live_state, "utf8"),
+      );
+      live.apps["claude-desktop"].proxy_route = "legacy-other";
+      await writeFile(route.cc_switch.live_state, JSON.stringify(live));
+    }),
+    /CLAUDE_3P_SOURCE_CHANGED/,
+  );
+  assert.equal(
+    JSON.parse(
+      await readFile(
+        join(p.third_party_config_library_path, appliedId + ".json"),
+        "utf8",
+      ),
+    ).inferenceGatewayApiKey,
+    "",
+  );
+  assert.deepEqual(
+    await readFile(join(library, appliedId + ".json")),
+    original,
+  );
+  assert.deepEqual(await readFile(route.cc_switch.database), databaseBefore);
+});
+
 test("real entry refuses third-party credentials without separate opt-in before source access", async () => {
   const dir = await mkdtemp(join(tmpdir(), "team-claude-3p-guard-"));
   const output = join(dir, "attempt");
@@ -465,6 +603,25 @@ test("real entry refuses third-party credentials without separate opt-in before 
   );
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /CLAUDE_CREDENTIAL_REUSE_AUTHORIZATION_REQUIRED/);
+  assert.deepEqual(await readdir(dir), []);
+});
+
+test("real entry cannot fall back to an empty official profile when the CC Switch route is omitted", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "team-claude-route-required-"));
+  const result = spawnSync(
+    process.execPath,
+    [
+      resolve("tests/claude-desktop-live.mjs"),
+      "--allow-claude-desktop-probe",
+      "--config",
+      join(dir, "missing.json"),
+      "--output",
+      join(dir, "attempt"),
+    ],
+    { windowsHide: true, encoding: "utf8" },
+  );
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /CLAUDE_CC_SWITCH_ROUTE_REQUIRED/);
   assert.deepEqual(await readdir(dir), []);
 });
 
@@ -558,7 +715,13 @@ test("real Desktop entry refuses absent authorization and a reused attempt direc
   );
   const repeated = spawnSync(
     process.execPath,
-    [...args, "--allow-claude-desktop-probe"],
+    [
+      ...args,
+      "--allow-claude-desktop-probe",
+      "--third-party-route",
+      join(dir, "missing-route.json"),
+      "--allow-third-party-credential-reuse",
+    ],
     { windowsHide: true, encoding: "utf8" },
   );
   assert.notEqual(repeated.status, 0);
@@ -643,6 +806,9 @@ test("fresh real entry refuses missing config before any launch", async () => {
     [
       resolve("tests/claude-desktop-live.mjs"),
       "--allow-claude-desktop-probe",
+      "--third-party-route",
+      join(dir, "missing-route.json"),
+      "--allow-third-party-credential-reuse",
       "--config",
       join(dir, "missing.json"),
       "--output",

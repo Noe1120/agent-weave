@@ -145,7 +145,7 @@ W06/W07已提供开发态Broker、逻辑单写者、真实Git证据链和自有�
 
 ## Claude Desktop本地MCP与只读桥 · 2026-11-16
 
-官方Desktop 5.11492.2已通过用户实际的CC Switch第三方gateway配置完成本地MCP握手；不要求官方登录。累计七次真实尝试，第五次为空MCP，第六/七次发现编译后的只读工具。原配置四份摘要不变、原DSH进程不变，测试实例退出已确认，复制到新profile的gateway令牌已清除。
+官方Desktop 5.11492.2在独立第三方profile已完成本地MCP握手，不要求官方登录。累计八次尝试，第八次窗口仍未发送模型任务、工具调用为0；退出及测试凭据清除已核实。用户指定CC Switch的me＋路由模式，此前仅核对gateway不足以证明该路由；本轮已增加me路由配置校验，运行时上游和完整任务仍未验收。已有用户Claude实例不接管。
 
 新增task_get、project_progress和可选message_poll，复用服务的grant/policy/run/ACL检查；任务投影是第七类resource/0.1只读投影。没有模型可指定的URL、token、project、shell或写工具。协议读取、撤权、分页、错误处理与编译后重连走查均通过；默认verify不启动原客户端。
 

@@ -30,6 +30,7 @@ assert.equal(
   "Explicit fresh-profile Desktop probe authorization required",
 );
 assert.equal(process.platform, "win32");
+assert.ok(values["third-party-route"], "CLAUDE_CC_SWITCH_ROUTE_REQUIRED");
 if (values["third-party-route"])
   assert.equal(
     values["allow-third-party-credential-reuse"],

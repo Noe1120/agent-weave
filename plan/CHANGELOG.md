@@ -1,5 +1,10 @@
 # W13 CC Switch原配置核实、真实MCP与只读桥 · 2026-11-16
 
+## 2026-11-16：Claude me路由核对修正
+
+用户明确指定CC Switch的me分组＋路由模式。2026-11-16只读复核发现live-state为proxy/attached，proxy_route匹配me；settings旧选择器仍为official、数据库is_current仍为cc7，二者不能替代活动路由证据。此前仅固定Desktop网关文件，未固定me，相关结论已收窄为MCP传输通过。第八次测试窗口发现MCP但未发送prompt、tool_calls=0，模型不可用提示未解决；测试实例退出与凭据清除已核实。现在第三方准备入口要求绑定路由目标、live-state及provider元数据摘要，并在启动前再次核对；这仍不是运行时provider外发证明。用户已授权一次独立窗口合成任务，不重复索取；当前已有用户Claude实例，不能接管或重启，下一次真实尝试尚未启动。
+
+
 - 只读核实实际第三方gateway链路，纠正下方历史“需要官方登录”的推断；独立3p配置必须写入实际LOCALAPPDATA/Claude-3p。
 - 第五至七次真实官方Desktop握手/发现及清理通过，保留前四次历史失败。原配置与既有客户端不变，复制的gateway令牌清除；无模型prompt、窗口点击或历史访问。
 - 新增验收专用固定范围MCP只读桥、task第七类投影、撤权/分页/错误/重连回归；外发声明未达到生产强制边界，真实tool_calls=0。

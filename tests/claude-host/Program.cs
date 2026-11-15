@@ -33,7 +33,7 @@ internal static class Program
             var exe = Field(config, "executable"); var cwd = Field(config, "cwd"); var output = Field(config, "output");
             if (!Path.IsPathFullyQualified(exe) || !Path.IsPathFullyQualified(cwd) || !Path.IsPathFullyQualified(output)) throw new InvalidDataException("CONFIG_PATH");
             var timeout = config.GetProperty("timeout_ms").GetInt32();
-            if (timeout < 100 || timeout > 60000) throw new InvalidDataException("CONFIG_TIMEOUT");
+            if (timeout < 100 || timeout > 600000) throw new InvalidDataException("CONFIG_TIMEOUT");
             var start = new ProcessStartInfo(exe) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardInput = true, RedirectStandardOutput = true, RedirectStandardError = true, WorkingDirectory = cwd };
             foreach (var arg in config.GetProperty("args").EnumerateArray()) start.ArgumentList.Add(arg.GetString() ?? throw new InvalidDataException("CONFIG_ARG"));
             start.Environment.Clear();

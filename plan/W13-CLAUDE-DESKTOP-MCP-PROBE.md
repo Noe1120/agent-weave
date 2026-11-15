@@ -2,6 +2,14 @@
 
 日期：2026-11-16（Asia/Tokyo）。当前状态：**第五至七次真实尝试通过CC Switch第三方配置的MCP握手/发现与清理；只读桥合成走查通过，完整Claude任务接入仍未完成**。前四次空配置记录保留；原客户端完整工作能力仍待逐项验收。
 
+## me路由核对与第八次验收增量
+
+用户明确指定CC Switch的me分组＋路由模式。2026-11-16只读复核发现live-state为proxy/attached，proxy_route匹配me；settings旧选择器仍为official、数据库is_current仍为cc7，二者不能替代活动路由证据。此前仅固定Desktop网关文件，未固定me，相关结论已收窄为MCP传输通过。第八次测试窗口发现MCP但未发送prompt、tool_calls=0，模型不可用提示未解决；测试实例退出与凭据清除已核实。现在第三方准备入口要求绑定路由目标、live-state及provider元数据摘要，并在启动前再次核对；这仍不是运行时provider外发证明。用户已授权一次独立窗口合成任务，不重复索取；当前已有用户Claude实例，不能接管或重启，下一次真实尝试尚未启动。
+
+第八次窗口实际可见Gateway页脚及Configured model not available（claude-haiku-4-5）；该显示不能证明使用官方账号，也不能证明me模型请求成功。没有发送测试prompt、没有服务读取；后续窗口句柄失效，host记录ROOT_EXIT/exit0及Job为空。仅核实自有实例退出，不控制随后出现的用户实例。CC Switch窗口最小化且检测到用户输入，本轮没有取得有效界面核对，不以配置表冒充UI验收。
+
+新增回归先证明仅网关配置会被旧入口错误接受，再验证缺少绑定、其他分组、直连、断开、名称/模型路由变更和准备后漂移均阻止启动；准备后失败清除测试凭据，不写源配置。 真实入口省略第三方路由也明确拒绝，不再退回空profile。最终全量431/431，0失败/0跳过；原生14＋1、旧包989、设计51文件/P0共12项和编译只读走查通过。host仅提高验收上限至十分钟，默认发现仍60秒；超出上限仍拒绝，停止/根句柄/Job证据要求不变。
+
 ## 范围与依据
 
 固定本机官方Windows包5.11492.2.0（应用5.11492.2）、签名与EXE/ASAR摘要。官方Desktop作为MCP客户端主动初始化本地stdio server，不能照搬DSH的ACP会话方法；不替换为Claude Code/SDK/API。用户要求找到失败原因并持续重试，已覆盖上轮提出的单个遗留进程核验清理。
@@ -64,16 +72,16 @@ MCP握手即使成功也只证明传输，不证明任务执行、自动唤醒�
 
 | 阶段 | 结果与实际边界 |
 | --- | --- |
-| 实际身份/第三方配置核实 | PASS，只读配置元数据；不读历史 |
+| 实际身份/第三方配置核实 | Desktop身份/网关传输已核实；me仅有本轮路由配置元数据，运行时上游仍UNVERIFIED |
 | 本地MCP握手与工具发现 | PASS_REAL，固定官方Desktop/CC Switch |
 | task/progress/feed只读桥 | PASS_SYNTHETIC，默认构建及stdio连接器；未注册生产成员 |
 | 断开、重连、撤权、分页/零写入 | PASS_SYNTHETIC；原客户端仅发现，没有模型调用 |
-| 原客户端一次模型任务/工具往返/消息回复 | NOT_RUN，需要新测试会话的具体窗口操作及一次合成任务/费用授权 |
+| 原客户端一次模型任务/工具往返/消息回复 | NOT_COMPLETED；一次独立窗口合成任务已获授权，第八次未发送；现有用户实例不得接管 |
 | 自动唤醒、忙碌排队、取消/恢复与会话切换 | UNVERIFIED，没有已验证原Desktop驱动接口；不替换为Code/SDK或注入内部IPC |
 | 实际provider外发绑定/私密域/Windows强制隔离 | NOT_IMPLEMENTED_OR_NOT_TESTED，不用Job或声明字段代替强制边界 |
 | 原生WPF点击、生产注册/凭据/安装升级 | NOT_RUN_OR_NOT_DELIVERED |
 
-下一步可执行的具体验收：在独立3p测试profile的新对话中，经批准的Computer Use选择已发现的Agent Weave只读工具，向当前CC Switch provider发送一条只含合成task UUID的请求，让其调用task_get并复述queued状态；只允许一条用户prompt，不读已有聊天、不写项目、不改原配置。记录实际tool call及回复、费用已知/未知，并核对退出和撤权。当前窗口工具此前拒绝读取Team；未解除该限制，不换工具模拟点击或绕过。该原客户端模型/窗口步骤尚未执行，不能据此报告全阶段完成。
+下一步可执行的具体验收：在独立3p测试profile的新对话中，经批准的Computer Use选择已发现的Agent Weave只读工具，向当前CC Switch provider发送一条只含合成task UUID的请求，让其调用task_get并复述queued状态；只允许一条用户prompt，不读已有聊天、不写项目、不改原配置。记录实际tool call及回复、费用已知/未知，并核对退出和撤权。Team窗口限制仍不能绕过。第八次独立Claude窗口观察已执行，但模型任务未发送，不能据此报告全阶段完成；用户对该一次合成任务的授权保留，费用未知不报零。
 
 本桥当前synthetic_only/provider_fingerprint仅为可信验收声明，未构成服务端分类/网络绑定；固定配置需由可信代码准备。正式部署必须补服务签发的外发授权、provider变化失效与安全凭据配置，随后同配置联合验收。250 AT/CA与资格模板不变。
 

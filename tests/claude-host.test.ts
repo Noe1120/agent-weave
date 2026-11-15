@@ -10,7 +10,7 @@ after(() => {
   for (const host of hosts)
     if (host.exitCode === null && !host.killed) host.kill();
 });
-async function run(args: string[], stopOnOutput = true) {
+async function run(args: string[], stopOnOutput = true, timeoutMs = 2000) {
   const dll = resolve("artifacts/claude-probe-host/Claude.ProbeHost.dll");
   await access(dll);
   const output = await mkdtemp(join(tmpdir(), "team-claude-host-"));
@@ -40,7 +40,7 @@ async function run(args: string[], stopOnOutput = true) {
         SystemRoot: process.env.SystemRoot!,
         PATH: process.env.SystemRoot! + "\\System32",
       },
-      timeout_ms: 2000,
+      timeout_ms: timeoutMs,
     }) + "\n",
   );
   const code = await exited;
@@ -48,6 +48,24 @@ async function run(args: string[], stopOnOutput = true) {
   await closed;
   return { code, messages, stderr, output };
 }
+test("direct host accepts a bounded ten-minute UI acceptance window and still stops on command", async () => {
+  const r = await run(
+    ["-e", "console.log('ready');setInterval(()=>{},1000)"],
+    true,
+    600000,
+  );
+  assert.equal(r.code, 0, JSON.stringify(r.messages));
+  const end = r.messages.find((m) => m.kind === "exited");
+  assert.equal(end.reason, "CONTROLLER_STOP");
+  assert.equal(end.root_exit_observed, true);
+  assert.equal(end.job_empty, true);
+});
+test("direct host rejects an unbounded UI lifetime before starting any process", async () => {
+  const r = await run(["-e", "console.log('must-not-launch')"], true, 600001);
+  assert.equal(r.code, 1);
+  assert.ok(r.messages.some((m) => m.code === "CONFIG_TIMEOUT"));
+  assert.ok(!r.messages.some((m) => m.kind === "started"));
+});
 test("direct host retains root handle, terminates root and descendant, and proves Job empty", async () => {
   const r = await run([
     "-e",

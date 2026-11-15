@@ -137,4 +137,4 @@ W03 已执行 Node 依赖锁定安装、本机确定性服务测试及编译冒�
 
 ## Claude Desktop本地MCP与只读桥 · 2026-11-16
 
-[W13](W13-CLAUDE-DESKTOP-MCP-PROBE.md)已按本机CC Switch第三方配置接通官方Claude Desktop的本地MCP。累计七次真实尝试，第五次空MCP、第六/七次编译只读连接器均通过握手与工具发现，清理通过；无需官方登录。已实现task_get、project_progress及可选message_poll的固定范围只读桥，并完成编译后的读取、重连和撤权走查。真实Desktop工具调用为0，尚非完整任务接入。下一门槛为获准的原生窗口/一次合成模型任务、外发与费用边界，以及同配置Windows隔离；管家仍不构建。见[证据](../evidence/claude-desktop/COMPLETION.md)。
+[W13](W13-CLAUDE-DESKTOP-MCP-PROBE.md)已完成MCP发现与合成只读桥，真实Desktop工具调用仍为0。用户明确指定CC Switch的me分组＋路由模式。2026-11-16只读复核发现live-state为proxy/attached，proxy_route匹配me；settings旧选择器仍为official、数据库is_current仍为cc7，二者不能替代活动路由证据。此前仅固定Desktop网关文件，未固定me，相关结论已收窄为MCP传输通过。第八次测试窗口发现MCP但未发送prompt、tool_calls=0，模型不可用提示未解决；测试实例退出与凭据清除已核实。现在第三方准备入口要求绑定路由目标、live-state及provider元数据摘要，并在启动前再次核对；这仍不是运行时provider外发证明。用户已授权一次独立窗口合成任务，不重复索取；当前已有用户Claude实例，不能接管或重启，下一次真实尝试尚未启动。 同配置Windows隔离和完整任务接入未完成；管家仍不构建。见[证据](../evidence/claude-desktop/COMPLETION.md)。

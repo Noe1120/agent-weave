@@ -4,7 +4,7 @@
   "checks": [
     {
       "check": "Actual selected CC Switch config verified locally without history reads; official Desktop identity retained",
-      "result": "PASS"
+      "result": "PASS_DESKTOP_GATEWAY_ONLY; earlier me route attribution insufficient; corrected below"
     },
     {
       "check": "Original selected/config metadata and preferences unchanged; copied gateway credentials redacted and exact-token scan empty",
@@ -45,10 +45,26 @@
     {
       "check": "Release regressions root-caused: DSH synthetic cleanup budget; Runner input fault versus independent output exit evidence",
       "result": "PASS_RED_GREEN; strict failures/unknown state/lock retention preserved; no new real DSH operations"
+    },
+    {
+      "check": "User correction: live proxy_route maps to me; official/is_current fields are not routing proof",
+      "result": "PASS_READONLY_METADATA; no upstream runtime attestation"
+    },
+    {
+      "check": "Missing route, wrong provider/mode, detached state, metadata drift and prepare-to-launch drift refuse launch; copied token redacted on failed prelaunch",
+      "result": "PASS_SYNTHETIC; gateway-only acceptance reproduced red then green"
+    },
+    {
+      "check": "Attempt8 UI warning and no task; cleanup and328-file token scan",
+      "result": "MCP_PASS_TASK_NOT_SENT; no full integration claim"
+    },
+    {
+      "check": "Existing user Claude started after attempt8 cleanup",
+      "result": "PRESERVED; no attach/restart/history access"
     }
   ],
   "remaining_actions": [
-    "Authorize and perform one native fresh-profile synthetic model/tool roundtrip, including fee/data boundary; do not request official login.",
+    "Previously authorized one fresh-profile synthetic UI task remains unsent. Existing user Claude must exit normally before the guarded independent launch; revalidate me route first. No official login.",
     "Complete production provisioning/provider-bound disclosure and same-configuration Windows isolation before sensitive or writing access.",
     "Validate Desktop response states/cancel/recovery without unsupported hooks or client substitution."
   ],

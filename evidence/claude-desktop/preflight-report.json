@@ -91,5 +91,23 @@
     "stale_selector_warning": "settings.json official selector and live-state direct field do not describe the complete active Desktop routing",
     "official_login_required": false,
     "source": "Actual local configuration metadata and pinned installed code; not inferred from online side chats"
+  },
+  "me_route_correction": {
+    "observed_at": "2026-11-15T23:27:02.434093+00:00",
+    "requested_group": "me",
+    "live_state_mode": "proxy",
+    "live_state_attached": true,
+    "proxy_route_matches_me": true,
+    "legacy_db_current": "cc7",
+    "legacy_settings_selector": "claude-desktop-official",
+    "gateway_listener_owned_by_cc_switch": true,
+    "gateway_token_matches_selected_desktop_config": true,
+    "history_read": false,
+    "original_configuration_written": false,
+    "route_guard_real_readonly_check": "PASS; no profile created or client launched",
+    "runtime_upstream_attestation": "UNVERIFIED",
+    "cc_switch_ui_verification": "NOT_COMPLETED; minimized/user-input detected; no configuration clicks",
+    "existing_user_desktop": "RUNNING; not attached, restarted, closed or read",
+    "previous_attribution_limitation": "Gateway discovery did not establish me route. Earlier evidence preserved without retroactive relabeling."
   }
 }
