@@ -5,7 +5,47 @@ import { resolve, join } from "node:path";
 import { createInterface } from "node:readline";
 import { spawn } from "node:child_process";
 import { tempWorkspace } from "./temp.ts";
+import { runnerFixture } from "./runner-helpers.ts";
+import { RunnerHost } from "../packages/service/src/runner-host.ts";
 const dll = resolve("artifacts/runner-host/Team.RunnerHost.dll");
+for (const corruptOutput of [false, true])
+  test(
+    "host input failure keeps exit proof only when the output protocol stays valid: " +
+      !corruptOutput,
+    async () => {
+      const f = runnerFixture();
+      let injected = false;
+      const faults: string[] = [];
+      const host = new RunnerHost(f.profile, { scenario: "idle" }, (event) => {
+        if (event.kind === "fault") faults.push(event.code);
+        if (event.kind === "worker" && !injected) {
+          injected = true;
+          host.process.stdin.emit("error", new Error("synthetic EPIPE"));
+          if (corruptOutput)
+            host.process.stdout.emit("data", Buffer.from("{invalid\n"));
+        }
+      });
+      const timer = setTimeout(() => host.abort(), 10000);
+      try {
+        const result = await host.closed;
+        assert.equal(injected, true);
+        assert.deepEqual(faults, ["HOST_INPUT_CLOSED"]);
+        assert.equal(result.fault, "HOST_INPUT_CLOSED");
+        if (corruptOutput) assert.equal(result.evidence, null);
+        else {
+          assert.equal(
+            result.evidence?.job_empty,
+            true,
+            JSON.stringify(result),
+          );
+          assert.equal(result.evidence?.reason, "CONTROLLER_STOP");
+        }
+      } finally {
+        clearTimeout(timer);
+        await f.dispose();
+      }
+    },
+  );
 test("native host assigns the development worker to a Job before begin and proves its descendants exited", async () => {
   assert.ok(
     existsSync(dll),

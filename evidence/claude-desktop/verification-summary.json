@@ -1,16 +1,16 @@
 {
-  "date": "2026-11-15",
+  "date": "2026-11-16",
   "timezone": "Asia/Tokyo",
   "phase": "W13_CLAUDE_DESKTOP_MCP_PROBE",
-  "overall": "STARTUP_AND_CLEANUP_FIXED_MCP_PENDING_AUTH_PREREQUISITE",
+  "overall": "REAL_MCP_DISCOVERY_AND_SYNTHETIC_READ_BRIDGE_PASS_FULL_INTEGRATION_INCOMPLETE",
   "service": {
     "command": "npm run verify",
     "exit_code": 0,
-    "tests": 390,
-    "pass": 390,
+    "tests": 419,
+    "pass": 419,
     "fail": 0,
     "skip": 0,
-    "synthetic_claude_tests": 37,
+    "synthetic_claude_tests": 63,
     "compiled_smoke": "PASS",
     "real_clients_started_by_verify": 0
   },
@@ -26,18 +26,21 @@
     "rebuilt": false
   },
   "real_attempt": {
-    "count": 4,
+    "count": 7,
     "version": "5.11492.2",
     "process_started": true,
     "startup_fixed": true,
     "app_ready_observed": true,
-    "mcp_handshake": false,
+    "mcp_handshake": true,
     "cleanup_confirmed": true,
     "remaining_probe_processes": 0,
     "existing_dsh_processes_unchanged": true,
     "retries_without_login": 3,
-    "next_prerequisite": "User-authorized dedicated-profile login remains unverified",
-    "normal_desktop_exit": false
+    "next_prerequisite": "Native synthetic model/tool roundtrip and same-configuration qualification; not official login",
+    "normal_desktop_exit": false,
+    "third_party_cc_switch": true,
+    "read_connector_discovery_attempts": 2,
+    "real_tool_calls": 0
   },
   "design": {
     "status": "PASS",
@@ -49,7 +52,7 @@
     "status": "PASS",
     "tests": 12
   },
-  "production_code_changed": false,
+  "production_code_changed": true,
   "coordinator_implemented": false,
   "source_schema": 4,
   "portable_schema": 2,
@@ -58,29 +61,143 @@
   "os_isolation": "NOT_TESTED",
   "review": "AUTHOR_SELF_REVIEW_NOT_INDEPENDENT",
   "logs": {
-    "service_sha256": "f0e863b9df49e1a9ade50835cff65772169323c21bea06b815d5ae95ad02a458",
-    "first_service_failure_sha256": "88cae4516a61bbe00fac7bcf384665a16b9b60fdb0c6f950643b51084335d3a2",
-    "native_sha256": "392b6c32ce6ab8dbde9894e708bf901d7e429abbae604771ee46d19b62e3acd6",
+    "service_sha256": "85a7eb70fd56518a572eabc49a94f6f23d622f9c1f4601e95873950c0e8fe3e3",
+    "first_service_failure_sha256": "b99858ceced0372ac68282012e8397391bbf6cf962218ce88a50f0f7169e238a",
+    "claude_sha256": "c2ad26148e3f8db17516b8575b733a301bc709b6a3efe45f5929c6965bc50a9e",
+    "native_sha256": "ae76e1c21eabdbe8b5c1f46741f0524cc676a21caf521a8bfc9948ac205856c3",
     "package_sha256": "77c06975809839528ad44681a225adfd36628db49898b4eac30815809a5f75dd",
-    "design_sha256": "569329aca03afd4c83908b5854dcd29f2a4bb5c2d9b920e57905025504aafbcd",
-    "p0_sha256": "37103baa268d6e713ebd6487944ce8447448029a7bd9124d797d4d5afac47139",
-    "known_folder_red_sha256": "b94eba84a1931ce8f1ce392de03efdb7ead5d4de0f6bf027622d420296c6ce19",
-    "known_folder_green_sha256": "c83f8449a1c9c3b0f76a3281103f1305efe62908a4388ab2126962c2ea4c1519",
-    "dsh_exit_red_sha256": "500e8a4a6aae712e390a4546ecdb901e5b11ca3ac02213d63ddd3ad6baf4b1b6",
-    "dsh_exit_green_sha256": "9d329256c6c64b0e9941f198523d61630eeb193fbf239738f24809b87d04d093"
+    "prelaunch_red_sha256": "8e9abacd6e9721d61162cfed66c5a52299ccf14cc5994fa289ec3134f5a38cf0",
+    "prelaunch_green_sha256": "bd07a647241f3098e3bef24dce9424c5f0ffd08e2012f165f4fe903d8e30eec0",
+    "compiled_read_walkthrough_sha256": "d206778970ab9ed4260bcea07eeacb1c574a9f33f831d189c20539e7effde452",
+    "first_compiled_read_failure_sha256": "4d4043acca04d204e6d23a2b7a7350d095b979adfb8fb94d9189599533b07366",
+    "real_final_sha256": "5d1628b459dbc73937fe9239719a2360819a6225911da3c92e4967520514e134",
+    "preservation_sha256": "a27f7239262bbc7dbf08ae6693a905c429a56d572094c2b57aec4b26871ae82b",
+    "design_sha256": "605484a3cc6ea6bccae941f02b9af0cbb792168b6418f6ef37451848502c7f72",
+    "p0_sha256": "0f70e437d5565baed1bf0ffdc25fdcd4eb238d31a05f615b16449fb44b5e1817",
+    "dsh_failed_full_sha256": "253595bdda09cfdffe35b616b17dc2357de891dd6ec56f1a185916cb52415445",
+    "runner_failed_full_sha256": "c8b92c82220c9b6f7713b9aea37ae6292765bace7776e2433c2b8ff46185d2b6",
+    "dsh_stress_red_sha256": "074af41cc4518f9dc6e217fe919be9e8997e321eff385fa65022f700d16de04e",
+    "dsh_stress_green_sha256": "152fbf3b930c5b686c3608c076d83e95f15fd1c039ed1c9c8b9fd69dc3c0bc4a",
+    "dsh_deadline_red_sha256": "a7145883e0c0753caca4f72be37a6bde1eca0e4d7e9c092a2d60e6682216ab34",
+    "dsh_deadline_green_sha256": "d0d415d2b0d9b6696cac603e90d4608ac70ba294982b326b2d6de09065fb109b",
+    "runner_input_red_sha256": "1316786365036f84d9a14008c1c442a9d7bc44bb45a252ac1f825d0b66650372",
+    "runner_input_green_sha256": "8ea6cb803d48f7d336f9d32039f2899eceb32b10d9ce9c0e875b10c437df7308",
+    "runner_flood_green_sha256": "b34c7cd296da6f955c8a7d6af136d5cda8bd9a68749eae2c7fd2177ef2deeadc",
+    "compiled_read_release_sha256": "56b5de9014f794c2625f07f9c7606d8eb77078e943dcc442070cf7f8fcbf499d",
+    "runner_walkthrough_sha256": "3b3c2138d99ec18c3c7afff2487399c104e95d773fda6750619cfb334c125b0b"
   },
   "warnings": [
     "Node SQLite experimental warning remains visible.",
-    "37 synthetic Claude passes do not qualify real MCP transport or OS isolation.",
-    "Real Desktop listener and renderer warnings preserved locally.",
-    "DSH probe helper changed, production DSH controller unchanged; no extra real DSH execution."
+    "Real Desktop tool discovery is not a model/tool execution, L1-L3 qualification or OS isolation.",
+    "synthetic_only/provider_fingerprint are trusted acceptance declarations, not production data classification or provider egress enforcement.",
+    "No native window automation, model prompt, production config change or coordinator implementation.",
+    "First compiled walkthrough expected ready after apply_plan; corrected to documented queued without changing production state machine; failed evidence retained.",
+    "Forced test Desktop cleanup is not graceful EOF; native network/file accesses not audited."
   ],
   "first_full_run": {
-    "tests": 389,
-    "pass": 388,
+    "tests": 415,
+    "pass": 414,
     "fail": 1,
     "skip": 0,
-    "failure": "DSH acceptance permission rejection did not observe root exit; retained original failure log",
-    "response": "Reproduced close-versus-exit gap with detached synthetic pipe holder; separately record root exit and stream closure; no success while streams remain open"
+    "failure": "OpenAPI old route-count expectation 23 versus intentional task projection route 24",
+    "response": "Update intentional contract expectation; additionally assert task projection strict fields and Bearer auth. No service validation bypass."
+  },
+  "prior_verification_historical": {
+    "date": "2026-11-15",
+    "overall": "STARTUP_AND_CLEANUP_FIXED_MCP_PENDING_AUTH_PREREQUISITE",
+    "service": {
+      "command": "npm run verify",
+      "exit_code": 0,
+      "tests": 416,
+      "pass": 416,
+      "fail": 0,
+      "skip": 0,
+      "synthetic_claude_tests": 63,
+      "compiled_smoke": "PASS",
+      "real_clients_started_by_verify": 0
+    },
+    "logs": {
+      "service_sha256": "f0e863b9df49e1a9ade50835cff65772169323c21bea06b815d5ae95ad02a458",
+      "first_service_failure_sha256": "88cae4516a61bbe00fac7bcf384665a16b9b60fdb0c6f950643b51084335d3a2",
+      "native_sha256": "392b6c32ce6ab8dbde9894e708bf901d7e429abbae604771ee46d19b62e3acd6",
+      "package_sha256": "77c06975809839528ad44681a225adfd36628db49898b4eac30815809a5f75dd",
+      "design_sha256": "569329aca03afd4c83908b5854dcd29f2a4bb5c2d9b920e57905025504aafbcd",
+      "p0_sha256": "37103baa268d6e713ebd6487944ce8447448029a7bd9124d797d4d5afac47139",
+      "known_folder_red_sha256": "b94eba84a1931ce8f1ce392de03efdb7ead5d4de0f6bf027622d420296c6ce19",
+      "known_folder_green_sha256": "c83f8449a1c9c3b0f76a3281103f1305efe62908a4388ab2126962c2ea4c1519",
+      "dsh_exit_red_sha256": "500e8a4a6aae712e390a4546ecdb901e5b11ca3ac02213d63ddd3ad6baf4b1b6",
+      "dsh_exit_green_sha256": "9d329256c6c64b0e9941f198523d61630eeb193fbf239738f24809b87d04d093"
+    },
+    "first_full_run": {
+      "tests": 389,
+      "pass": 388,
+      "fail": 1,
+      "skip": 0,
+      "failure": "DSH acceptance permission rejection did not observe root exit; retained original failure log",
+      "response": "Reproduced close-versus-exit gap with detached synthetic pipe holder; separately record root exit and stream closure; no success while streams remain open"
+    }
+  },
+  "production_adapter_enabled": false,
+  "compiled_read_walkthrough": {
+    "status": "COMPILED_SYNTHETIC_WALKTHROUGH_PASS",
+    "steps": [
+      {
+        "step": "connect_read_progress",
+        "connection": 1,
+        "progress_reads": 20,
+        "db_mutations": 0
+      },
+      {
+        "step": "connector_eof",
+        "connection": 1,
+        "exit_code": 0
+      },
+      {
+        "step": "connect_read_progress",
+        "connection": 2,
+        "progress_reads": 20,
+        "db_mutations": 0
+      },
+      {
+        "step": "revoke_after_reconnect",
+        "result": "DENIED"
+      },
+      {
+        "step": "connector_eof",
+        "connection": 2,
+        "exit_code": 0
+      }
+    ],
+    "native_clients_started": 0,
+    "model_calls": 0,
+    "ui_clicks": 0,
+    "real_client_qualification": "UNVERIFIED"
+  },
+  "release_regressions": [
+    {
+      "tests": 416,
+      "pass": 415,
+      "fail": 1,
+      "cause": "DSH synthetic helper uses 300ms EOF window for normal exits; 32-way stress reproduced timeout after all RPCs acknowledged",
+      "fix": "Normal cleanup uses existing 5s probe budget; 600ms delayed-EOF regression; intentional EOF/pipe timeout cases retain 300ms"
+    },
+    {
+      "tests": 417,
+      "pass": 416,
+      "fail": 1,
+      "cause": "Runner input EPIPE stopped parsing independent valid exit evidence during flood",
+      "fix": "Retain visible input fault while validating output evidence independently; malformed/missing output still unconfirmed; preserve output-limit cause and quarantined locks"
+    }
+  ],
+  "runner_compiled_walkthrough": {
+    "status": "PASS",
+    "scenarios": [
+      "success",
+      "idle",
+      "malformed"
+    ],
+    "original_clients_started": 0,
+    "model_calls": 0,
+    "timestamp_note": "Runner walkthrough uses fixed synthetic clock 2026-11-14; release verification occurred 2026-11-16 Asia/Tokyo"
   }
 }

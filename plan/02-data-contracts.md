@@ -442,3 +442,7 @@ edit journal 提交链为 prepared → applied → recording → committed → h
 core apply_plan 的 plan_ref 指向已持久化的不可变计划，必须含本章 §14 的 payload_digest/read_set/write_set/input_snapshot 及授权绑定；引用结构没有免除这些要求。wire 的 expected_resource_versions 与服务同名版本集合逐项校验。core request_id 是调用追踪 ID；continuation_reply 的 input_request_id 对应原 waiting request，不得混淆。answer_ref 指向通过原消息/输入入口保存的同受众不可变回答对象，服务再校验内容类型、请求绑定和外发。
 
 规范基线：contracts/core.schema.json、contracts/wire-examples.json；故障材料 validation/protocol-fixtures.json。未知版本/字段/枚举拒绝；状态/CAS/ACL 仍由服务语义检查。原有 task/run/input_request 状态不被新 plan_execution 聚合替代。
+
+## W13只读任务投影实施增量（2026-11-16）
+
+resource/0.1新增第七类task投影及GET /v1/projects/{project_id}/task/{id}绑定，只包含status、candidate_ref、inputs_valid、acceptance_ref和公共投影信封。复用既有grant/policy/run/ACL与引用闭包检查，不增加管理写入口，不返回凭据、native binding或任意任务正文。core/1.0及001–004数据库迁移不变。MCP合成验收桥的实施边界见03 §5.1与W13；不能从工具定义推断真实Desktop已经执行任务。

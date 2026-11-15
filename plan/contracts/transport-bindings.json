@@ -73,6 +73,11 @@
       "resource_type": "acceptance",
       "method": "GET",
       "path": "/v1/projects/{project_id}/acceptance/{id}"
+    },
+    {
+      "resource_type": "task",
+      "method": "GET",
+      "path": "/v1/projects/{project_id}/task/{id}"
     }
   ],
   "transport_errors": {

@@ -110,5 +110,6 @@ reader.on("line", (line) => {
 });
 reader.on("close", () => {
   if (mode === "ignore-eof") setInterval(() => {}, 1000);
+  else if (mode === "delayed-eof") setTimeout(() => {}, 600);
   else process.exitCode = mode === "exit-failure" ? 7 : 0;
 });

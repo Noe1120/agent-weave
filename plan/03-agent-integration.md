@@ -4,7 +4,7 @@
 
 > 2026-11-15：W11已用本机官方DeepSeek Harness 0.2.1-rc.3完成独立ACP initialize生命周期实测，ACP协议1/bridge 0.0.1；没有session/prompt或原Desktop附着。声明能力不是可执行资格，详见[W11](W11-DSH-ACP-LIFECYCLE.md)。
 
-本文件优先保留用户明确点名的 Codex、Claude Desktop 和 DeepSeek Harness。除上述DSH初始化生命周期外，原客户端工作能力尚无本项目的真实运行验收结果。03 与 05 的门槛是实施团队必须完成的验证工作。
+本文件优先保留用户明确点名的 Codex、Claude Desktop 和 DeepSeek Harness。DSH初始化/新会话与下述W13 Claude MCP发现已有分项实测；完整原客户端任务能力仍未验收。03 与 05 的门槛是实施团队必须完成的验证工作。
 
 ## 1. 接入等级与发布口径
 
@@ -81,6 +81,14 @@ GO 条件：固定版本下通过测试；如果产品要作为对外生产服�
 前端文件交付采用显式授权的 workspace_read / workspace_apply_patch / checks_run；也可以使用客户端已经具备且经验证的文件能力。平台不能控制用户另行安装的其他 MCP server，不能保证所有路径都在本平台沙箱内。
 
 原客户端只共享经授权的群数据；不要求导出个人历史、其他项目对话或隐藏记忆。若须经过 UI 自动化才能执行，单列脆弱性测试与维护费用，不能作为未说明的可靠默认路径。
+
+### 5.1 W13本机实施记录（2026-11-16）
+
+固定官方Desktop 5.11492.2的CC Switch第三方gateway路由已实际通过本地stdio MCP initialize/initialized及tools/resources/prompts发现。旧空profile缺少第三方连接，不能据此要求官方登录。普通--user-data-dir不足以定位3p配置；本机安装会使用LOCALAPPDATA/Claude-3p/configLibrary中_meta.json选定的条目。测试仅在全新标准Windows profile复用获准的本机gateway令牌，不复制上游provider密钥/历史/cookie，不改现有模式或配置。
+
+实现一个合成验收专用的固定project/read-only grant桥：task_get读取新增task安全投影，project_progress只查get_plan_progress，message_poll可选且由执行feed检查grant绑定。固定配置拒绝动态URL/token/project，逐次复核服务权限和声明的披露到期时间，拒绝重定向、超限响应与未知字段；stdout只承载JSONL。协议会话上限1000帧/1MiB，每帧64KiB，单次HTTP超时5秒，响应64KiB。它不是长期运行的生产connector。
+
+synthetic_only与provider_fingerprint当前是可信验收配置声明，不提供生产数据分类或实际provider网络绑定；不得据此放行真实私密数据。尚未接入邀请、受保护凭据配置、实际原生会话绑定或服务端外发策略。两次真实发现均tool_calls=0；编译连接器读取/重连/撤权属于合成MCP客户端走查，不提升L1–L3。严格写入、真实任务/自动唤醒、窗口与OS隔离仍待验收。见[W13](W13-CLAUDE-DESKTOP-MCP-PROBE.md)。
 
 ## 6. Claude Code / Agent SDK 是独立选项
 

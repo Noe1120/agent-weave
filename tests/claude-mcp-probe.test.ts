@@ -243,6 +243,231 @@ test("Claude preparation refuses linked data directory and extra credential conf
   assert.deepEqual(await readdir(config.data_root), []);
 });
 
+import * as thirdPartyModule from "./claude-third-party-probe.ts";
+async function thirdPartyInstallation() {
+  const config = await installation();
+  const source = join(config.installation_root, "source-user-data");
+  const library = join(source, "configLibrary");
+  await mkdir(library, { recursive: true });
+  const appliedId = "00000000-0000-4000-8000-000000000001";
+  await writeFile(
+    join(library, "_meta.json"),
+    JSON.stringify({
+      entries: [{ id: appliedId, name: "CC Switch" }],
+      appliedId,
+    }),
+  );
+  await writeFile(
+    join(library, appliedId + ".json"),
+    JSON.stringify({
+      inferenceProvider: "gateway",
+      inferenceGatewayBaseUrl: "http://127.0.0.1:15721/claude-desktop",
+      inferenceGatewayApiKey: "local-test-secret",
+      inferenceGatewayAuthScheme: "bearer",
+      inferenceModels: [{ name: "claude-test" }],
+    }),
+  );
+  await mkdir(join(source, "sessions"));
+  await writeFile(
+    join(source, "sessions", "never-copy.txt"),
+    "private-history-fixture",
+  );
+  const hash = (s: string) => createHash("sha256").update(s).digest("hex");
+  return {
+    config,
+    source,
+    library,
+    appliedId,
+    route: {
+      source_library: library,
+      metadata_sha256: hash(
+        await readFile(join(library, "_meta.json"), "utf8"),
+      ),
+      selected_sha256: hash(
+        await readFile(join(library, appliedId + ".json"), "utf8"),
+      ),
+    },
+  };
+}
+test("Claude third-party preparation relocates only the selected CC Switch route", async () => {
+  const { config, source, route, appliedId } = await thirdPartyInstallation();
+  const p = await thirdPartyModule.prepareClaudeThirdPartyProbe(
+    config,
+    route,
+    true,
+  );
+  const selected = JSON.parse(
+    await readFile(
+      join(p.third_party_config_library_path, appliedId + ".json"),
+      "utf8",
+    ),
+  );
+  assert.equal(selected.inferenceProvider, "gateway");
+  assert.equal(selected.inferenceGatewayApiKey, "local-test-secret");
+  assert.equal(p.third_party_mode, "3p");
+  assert.equal(p.env.ANTHROPIC_AUTH_TOKEN, undefined);
+  const configFile = JSON.parse(await readFile(p.mcp_config_path, "utf8"));
+  assert.equal(configFile.deploymentMode, "3p");
+  assert.deepEqual(Object.keys(configFile.mcpServers), ["agent-weave-probe"]);
+  assert.equal(p.profile, join(p.env.LOCALAPPDATA!, "Claude-3p"));
+  assert.equal(p.args[0], "--user-data-dir=" + p.profile);
+  assert.doesNotMatch(
+    JSON.stringify(p),
+    /local-test-secret|private-history-fixture/,
+  );
+  assert.deepEqual((await readdir(p.profile)).sort(), [
+    "claude_desktop_config.json",
+    "configLibrary",
+  ]);
+  assert.equal(
+    await readFile(join(source, "sessions", "never-copy.txt"), "utf8"),
+    "private-history-fixture",
+  );
+});
+test("third-party credential preparation requires concrete opt-in before reading source", async () => {
+  const { config, route } = await thirdPartyInstallation();
+  await assert.rejects(
+    thirdPartyModule.prepareClaudeThirdPartyProbe(
+      config,
+      { ...route, source_library: "missing" },
+      false,
+    ),
+    /CLAUDE_CREDENTIAL_REUSE_AUTHORIZATION_REQUIRED/,
+  );
+  assert.deepEqual(await readdir(config.data_root), []);
+});
+test("third-party source drift is rejected before creating a profile", async () => {
+  const { config, route } = await thirdPartyInstallation();
+  await assert.rejects(
+    thirdPartyModule.prepareClaudeThirdPartyProbe(
+      config,
+      { ...route, selected_sha256: "a".repeat(64) },
+      true,
+    ),
+    /CLAUDE_3P_SOURCE_CHANGED/,
+  );
+  assert.deepEqual(await readdir(config.data_root), []);
+});
+
+for (const scenario of ["remote", "unknown-command", "traversal", "linked"]) {
+  test(
+    "third-party preparation refuses " + scenario + " before creating files",
+    async () => {
+      const { config, route, library, appliedId } =
+        await thirdPartyInstallation();
+      const target = join(library, appliedId + ".json");
+      if (scenario === "traversal") {
+        await writeFile(
+          join(library, "_meta.json"),
+          JSON.stringify({ appliedId: "../sessions/never-copy" }),
+        );
+        route.metadata_sha256 = createHash("sha256")
+          .update(await readFile(join(library, "_meta.json")))
+          .digest("hex");
+      } else if (scenario === "linked") {
+        const linked = library + "-link";
+        await symlink(library, linked, "junction");
+        route.source_library = linked;
+      } else {
+        const selected = JSON.parse(await readFile(target, "utf8"));
+        if (scenario === "remote")
+          selected.inferenceGatewayBaseUrl = "https://remote.invalid";
+        else selected.credentialHelper = "do not execute";
+        await writeFile(target, JSON.stringify(selected));
+        route.selected_sha256 = createHash("sha256")
+          .update(await readFile(target))
+          .digest("hex");
+      }
+      await assert.rejects(
+        thirdPartyModule.prepareClaudeThirdPartyProbe(config, route, true),
+        /CLAUDE_3P_/,
+      );
+      assert.deepEqual(await readdir(config.data_root), []);
+    },
+  );
+}
+
+test("completed probe can redact only its newly copied gateway credential without touching source", async () => {
+  const { config, route, library, appliedId } = await thirdPartyInstallation();
+  const p = await thirdPartyModule.prepareClaudeThirdPartyProbe(
+    config,
+    route,
+    true,
+  );
+  await thirdPartyModule.redactProbeCredential(p);
+  const copy = JSON.parse(
+    await readFile(
+      join(p.third_party_config_library_path, appliedId + ".json"),
+      "utf8",
+    ),
+  );
+  assert.equal(copy.inferenceGatewayApiKey, "");
+  assert.equal(
+    JSON.parse(await readFile(join(library, appliedId + ".json"), "utf8"))
+      .inferenceGatewayApiKey,
+    "local-test-secret",
+  );
+  await assert.rejects(
+    thirdPartyModule.redactProbeCredential({
+      ...p,
+      third_party_config_library_path: library,
+    }),
+    /CLAUDE_3P_CLEANUP_SCOPE/,
+  );
+});
+
+test("failed prelaunch checks redact the copied gateway credential and preserve the original failure", async () => {
+  const { config, route, library, appliedId } = await thirdPartyInstallation();
+  const p = await thirdPartyModule.prepareClaudeThirdPartyProbe(
+    config,
+    route,
+    true,
+  );
+  const failure = new Error("SYNTHETIC_KNOWN_FOLDER_FAILURE");
+  await assert.rejects(
+    thirdPartyModule.checkPreparedProbe(p, async () => {
+      throw failure;
+    }),
+    (e) => e === failure,
+  );
+  assert.equal(
+    JSON.parse(
+      await readFile(
+        join(p.third_party_config_library_path, appliedId + ".json"),
+        "utf8",
+      ),
+    ).inferenceGatewayApiKey,
+    "",
+  );
+  assert.equal(
+    JSON.parse(await readFile(join(library, appliedId + ".json"), "utf8"))
+      .inferenceGatewayApiKey,
+    "local-test-secret",
+  );
+});
+
+test("real entry refuses third-party credentials without separate opt-in before source access", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "team-claude-3p-guard-"));
+  const output = join(dir, "attempt");
+  const result = spawnSync(
+    process.execPath,
+    [
+      resolve("tests/claude-desktop-live.mjs"),
+      "--allow-claude-desktop-probe",
+      "--config",
+      join(dir, "missing.json"),
+      "--output",
+      output,
+      "--third-party-route",
+      join(dir, "missing-route.json"),
+    ],
+    { windowsHide: true, encoding: "utf8" },
+  );
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /CLAUDE_CREDENTIAL_REUSE_AUTHORIZATION_REQUIRED/);
+  assert.deepEqual(await readdir(dir), []);
+});
+
 import { createInterface as lines } from "node:readline";
 async function hostedWorker(input: unknown) {
   const host = spawn(

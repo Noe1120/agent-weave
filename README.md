@@ -143,6 +143,12 @@ python -B plan/tools/verify_design.py
 
 W06/W07已提供开发态Broker、逻辑单写者、真实Git证据链和自有合成进程退出对账；这些能力尚未用于真实原客户端。原客户端连接/自动派送、同配置强制隔离与写权撤销、跨任务依赖交接、附件/授权检索、SSE/MCP、LangGraph/RAG管家、费用结算及完整灾备仍待完成。下一步优先准备原客户端能力/适配边界与获准后的P0/G0/G1探针，再推进后端；原生UI最后，真实点击/视觉验收仍需Team窗口操作授权。不能因开发测试通过而提升产品门槛。
 
-## Claude Desktop接入尝试 · 2026-11-15
+## Claude Desktop本地MCP与只读桥 · 2026-11-16
 
-[W13](plan/W13-CLAUDE-DESKTOP-MCP-PROBE.md)已定位并修复空profile的Windows已知文件夹缺失，以及打包客户端根句柄/退出观测缺口。累计四次真实尝试，后两次正常启动，三次重试全部清理通过且原DSH不变。仍未接通MCP：独立profile未登录，页面没有发起连接请求。下一步需要用户参与验证专用profile登录，不发模型prompt。见[证据与下一入口](evidence/claude-desktop/COMPLETION.md)。
+官方Desktop 5.11492.2已通过用户实际的CC Switch第三方gateway配置完成本地MCP握手；不要求官方登录。累计七次真实尝试，第五次为空MCP，第六/七次发现编译后的只读工具。原配置四份摘要不变、原DSH进程不变，测试实例退出已确认，复制到新profile的gateway令牌已清除。
+
+新增task_get、project_progress和可选message_poll，复用服务的grant/policy/run/ACL检查；任务投影是第七类resource/0.1只读投影。没有模型可指定的URL、token、project、shell或写工具。协议读取、撤权、分页、错误处理与编译后重连走查均通过；默认verify不启动原客户端。
+
+这是**合成验收专用桥，不是生产连接器或完整Claude任务接入**。配置中的synthetic_only/provider_fingerprint由可信验收者声明，尚未接入服务端的实际provider外发绑定、生产凭据配置和邀请流程，不可用于真实私密数据。真实Desktop只发现工具，tool_calls=0；完整消息往返、主动响应、窗口切换/最小化、取消恢复和Windows隔离均未通过。
+
+源码验证：npm run test:claude；编译走查：npm run test:claude:read:walkthrough。后者只建合成库并启动本项目stdio连接器，可用CLAUDE_READ_EVIDENCE指定不存在的新证据目录。真实Desktop入口须保留显式授权开关、固定安装/选中配置摘要与独立profile；不自动改写用户配置。详见[W13](plan/W13-CLAUDE-DESKTOP-MCP-PROBE.md)及[验证记录](evidence/claude-desktop/COMPLETION.md)。

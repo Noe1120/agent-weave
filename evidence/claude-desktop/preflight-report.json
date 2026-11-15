@@ -40,7 +40,8 @@
     "Selected userData contains claude_desktop_config.json; standard user-data-dir is considered a chosen folder in installed startup code.",
     "Production removes CLAUDE_USER_DATA_DIR without developer-approved signed test authorization; no such hooks were used.",
     "Static profile handling does not establish runtime isolation or no-network behavior.",
-    "No supported ACP session/new equivalent was established for this Desktop integration."
+    "No supported ACP session/new equivalent was established for this Desktop integration.",
+    "3p userData relocates to LOCALAPPDATA/Claude-3p; MCP preferences and selected configLibrary must exist there in a fresh test profile. This supersedes any empty-profile official-login inference."
   ],
   "copyright": "Only hashes and original analysis retained; no third-party installation source uploaded.",
   "retry_research": {
@@ -67,5 +68,28 @@
     "installed_static_observation": "Pinned main process handles MCP connection requests from mainView; no direct invocation, code patches or development-test hooks used",
     "known_folder_api": "SHGetFolderPath(CSIDL_APPDATA/CSIDL_LOCAL_APPDATA)",
     "not_a_latest_version_claim": true
+  },
+  "cc_switch_verified_local": {
+    "observed_date": "2026-11-15",
+    "mode": "Desktop 3p / selected CC Switch gateway / loopback bearer",
+    "cc_switch_version": "4.0.16",
+    "cc_switch_exe_sha256": "92df67c0b1b0c1b2ca18654c8b96a009eda2a21fb117d75bc5d596b76293f592",
+    "database_access": "mode=ro; query_only; configuration/provider tables only",
+    "desktop_provider_rows": 6,
+    "current_nonofficial_provider_rows": 1,
+    "current_provider_mode": "proxy",
+    "api_format": "anthropic",
+    "selected_models": 4,
+    "gateway_listener_owned_by_cc_switch": true,
+    "gateway_token_matches_desktop_selected_config": true,
+    "upstream_secret_copied": false,
+    "history_read": false,
+    "original_configuration_modified": false,
+    "actual_3p_userdata": "LOCALAPPDATA/Claude-3p",
+    "selected_library_metadata_sha256": "f352e5866842f6d5a03dd94ea17281afb47d91ff48693d0c2543bbd1f6e793fe",
+    "selected_config_sha256": "a005dd7cb18e9ba9212a06535979ca9c8213fb0f237f5e9b216d39eb03960918",
+    "stale_selector_warning": "settings.json official selector and live-state direct field do not describe the complete active Desktop routing",
+    "official_login_required": false,
+    "source": "Actual local configuration metadata and pinned installed code; not inferred from online side chats"
   }
 }

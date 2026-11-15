@@ -135,6 +135,6 @@ W03 已执行 Node 依赖锁定安装、本机确定性服务测试及编译冒�
 
 当前原生客户端阶段见 [W05-NATIVE-DESKTOP.md](W05-NATIVE-DESKTOP.md)。这是前端与所属服务生命周期交付，不等同原 WBS 受控执行/恢复的 W05 完成。原生窗口操作权限不足，真实点击/视觉走查待补；产品门槛保持不变。
 
-## Claude Desktop接入尝试 · 2026-11-15
+## Claude Desktop本地MCP与只读桥 · 2026-11-16
 
-[W13](W13-CLAUDE-DESKTOP-MCP-PROBE.md)累计四次官方Desktop真实尝试。已修复Windows AppData初始化和根句柄回收，首次遗留已清理，三次重试退出均通过；后两次正常启动。60秒未登录观察仍无MCP请求，需用户参与验证专用profile登录前提。合成与真实证据分列，生产执行及管家未开放。
+[W13](W13-CLAUDE-DESKTOP-MCP-PROBE.md)已按本机CC Switch第三方配置接通官方Claude Desktop的本地MCP。累计七次真实尝试，第五次空MCP、第六/七次编译只读连接器均通过握手与工具发现，清理通过；无需官方登录。已实现task_get、project_progress及可选message_poll的固定范围只读桥，并完成编译后的读取、重连和撤权走查。真实Desktop工具调用为0，尚非完整任务接入。下一门槛为获准的原生窗口/一次合成模型任务、外发与费用边界，以及同配置Windows隔离；管家仍不构建。见[证据](../evidence/claude-desktop/COMPLETION.md)。

@@ -2079,6 +2079,128 @@
         }
       }
     },
+    "/v1/projects/{project_id}/task/{id}": {
+      "get": {
+        "operationId": "read_task",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authorized safe projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/resource_result_task"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BAD_REQUEST",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransportError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHENTICATED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransportError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "UNTRUSTED_ORIGIN_OR_HOST",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransportError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND_OR_DENIED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransportError"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "METHOD_NOT_ALLOWED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransportError"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "BODY_TOO_LARGE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransportError"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "UNSUPPORTED_MEDIA_TYPE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransportError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL_ERROR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransportError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/console/pair": {
       "post": {
         "operationId": "v1_console_pair",
@@ -5391,6 +5513,46 @@
         ],
         "additionalProperties": false
       },
+      "resource_task": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "queued",
+              "running",
+              "in_review",
+              "ready_to_merge",
+              "completed",
+              "cancelled"
+            ]
+          },
+          "candidate_ref": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/resource_ref"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "inputs_valid": {
+            "type": "boolean"
+          },
+          "acceptance_ref": {
+            "$ref": "#/components/schemas/resource_ref"
+          }
+        },
+        "required": [
+          "status",
+          "candidate_ref",
+          "inputs_valid",
+          "acceptance_ref"
+        ],
+        "additionalProperties": false
+      },
       "ResourceResult": {
         "title": "Authorized read-only resource projections (baseline)",
         "oneOf": [
@@ -5574,6 +5736,38 @@
               },
               "data": {
                 "$ref": "#/components/schemas/resource_acceptance"
+              }
+            },
+            "required": [
+              "contract_version",
+              "kind",
+              "project_id",
+              "resource_type",
+              "ref",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "contract_version": {
+                "const": "resource/0.1"
+              },
+              "kind": {
+                "const": "resource_result"
+              },
+              "project_id": {
+                "$ref": "#/components/schemas/resource_uuid"
+              },
+              "resource_type": {
+                "const": "task"
+              },
+              "ref": {
+                "$ref": "#/components/schemas/resource_ref"
+              },
+              "data": {
+                "$ref": "#/components/schemas/resource_task"
               }
             },
             "required": [
@@ -5810,6 +6004,46 @@
             "required": [
               "state",
               "criteria_refs"
+            ],
+            "additionalProperties": false
+          },
+          "task": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "queued",
+                  "running",
+                  "in_review",
+                  "ready_to_merge",
+                  "completed",
+                  "cancelled"
+                ]
+              },
+              "candidate_ref": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/resource_ref"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "inputs_valid": {
+                "type": "boolean"
+              },
+              "acceptance_ref": {
+                "$ref": "#/components/schemas/resource_ref"
+              }
+            },
+            "required": [
+              "status",
+              "candidate_ref",
+              "inputs_valid",
+              "acceptance_ref"
             ],
             "additionalProperties": false
           }
@@ -6277,6 +6511,38 @@
           },
           "data": {
             "$ref": "#/components/schemas/resource_acceptance"
+          }
+        },
+        "required": [
+          "contract_version",
+          "kind",
+          "project_id",
+          "resource_type",
+          "ref",
+          "data"
+        ],
+        "additionalProperties": false
+      },
+      "resource_result_task": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": "resource/0.1"
+          },
+          "kind": {
+            "const": "resource_result"
+          },
+          "project_id": {
+            "$ref": "#/components/schemas/resource_uuid"
+          },
+          "resource_type": {
+            "const": "task"
+          },
+          "ref": {
+            "$ref": "#/components/schemas/resource_ref"
+          },
+          "data": {
+            "$ref": "#/components/schemas/resource_task"
           }
         },
         "required": [

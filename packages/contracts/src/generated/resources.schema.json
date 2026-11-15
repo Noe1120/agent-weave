@@ -194,6 +194,38 @@
         "data"
       ],
       "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "resource/0.1"
+        },
+        "kind": {
+          "const": "resource_result"
+        },
+        "project_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "resource_type": {
+          "const": "task"
+        },
+        "ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "data": {
+          "$ref": "#/$defs/task"
+        }
+      },
+      "required": [
+        "contract_version",
+        "kind",
+        "project_id",
+        "resource_type",
+        "ref",
+        "data"
+      ],
+      "additionalProperties": false
     }
   ],
   "$defs": {
@@ -419,6 +451,46 @@
       "required": [
         "state",
         "criteria_refs"
+      ],
+      "additionalProperties": false
+    },
+    "task": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "queued",
+            "running",
+            "in_review",
+            "ready_to_merge",
+            "completed",
+            "cancelled"
+          ]
+        },
+        "candidate_ref": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ref"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inputs_valid": {
+          "type": "boolean"
+        },
+        "acceptance_ref": {
+          "$ref": "#/$defs/ref"
+        }
+      },
+      "required": [
+        "status",
+        "candidate_ref",
+        "inputs_valid",
+        "acceptance_ref"
       ],
       "additionalProperties": false
     }

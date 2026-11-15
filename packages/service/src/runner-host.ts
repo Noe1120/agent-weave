@@ -105,9 +105,11 @@ export class RunnerHost {
       lines = 0,
       evidence: ExitEvidence | null = null,
       fault: string | null = null,
+      invalidOutput = false,
       started = false,
       finished = false;
-    const fail = (code: string) => {
+    const fail = (code: string, invalidatesOutput = true) => {
+      invalidOutput ||= invalidatesOutput;
       if (fault) return;
       fault = code;
       onEvent({ kind: "fault", code });
@@ -116,11 +118,11 @@ export class RunnerHost {
     this.closed = new Promise((resolveClosed) => {
       p.on("error", () => fail("HOST_SPAWN_FAILED"));
       p.stdin.on("error", () => {
-        if (!this.stopped) fail("HOST_INPUT_CLOSED");
+        if (!this.stopped) fail("HOST_INPUT_CLOSED", false);
       });
       p.stderr.on("data", () => fail("HOST_UNEXPECTED_STDERR"));
       p.stdout.on("data", (chunk: Buffer) => {
-        if (fault) return;
+        if (invalidOutput) return;
         total += chunk.length;
         if (total > 8 * 1024 * 1024) {
           fail("HOST_OUTPUT_LIMIT");
@@ -195,13 +197,16 @@ export class RunnerHost {
             fail("HOST_PROTOCOL");
             return;
           }
-          if (fault) return;
+          if (invalidOutput) return;
         }
       });
       p.once("close", (code) => {
-        if (buffer.length && !fault) fault = "HOST_PARTIAL_FRAME";
+        if (buffer.length) {
+          invalidOutput = true;
+          fault ??= "HOST_PARTIAL_FRAME";
+        }
         resolveClosed({
-          evidence: code === 0 && !fault ? evidence : null,
+          evidence: code === 0 && !invalidOutput ? evidence : null,
           fault:
             fault ?? (code !== 0 || !evidence ? "HOST_EXIT_UNCONFIRMED" : null),
         });

@@ -411,11 +411,20 @@ export class RunnerController {
         this.store.putRun(run);
       }
     } else if (e.state === "stopping") {
+      // A host stopping itself can close input before its independent output
+      // reports the actual failure and Job-empty proof. Keep that root cause.
+      if (
+        e.reason === "HOST_INPUT_CLOSED" &&
+        result.evidence.reason &&
+        !["CONTROLLER_STOP", "CONTROLLER_EOF"].includes(result.evidence.reason)
+      )
+        e.reason = result.evidence.reason;
       e.state =
         e.reason === "USER_STOP" || e.reason === "CONTROLLER_SHUTDOWN"
           ? "stopped"
           : "failed";
     } else if (
+      result.fault ||
       result.evidence.reason ||
       result.evidence.exit_code !== 0 ||
       !e.complete
@@ -423,6 +432,7 @@ export class RunnerController {
       this.revoke(e);
       e.state = "failed";
       e.reason =
+        result.fault ??
         result.evidence.reason ??
         (result.evidence.exit_code !== 0
           ? "WORKER_EXIT_NONZERO"

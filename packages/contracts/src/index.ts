@@ -34,6 +34,7 @@ export type ResourceKind =
   | "changeset"
   | "root"
   | "environment"
+  | "task"
   | "acceptance";
 export type ErrorCode = CoreError["code"];
 const ajv = new Ajv2020({

@@ -1,56 +1,120 @@
 {
-  "date": "2026-11-15",
+  "date": "2026-11-16",
   "type": "AUTHOR_SELF_REVIEW_NOT_INDEPENDENT",
   "checks": [
     {
-      "check": "Original Desktop identity, pins and new profile; no substitute or protected hooks",
+      "check": "Actual selected CC Switch config verified locally without history reads; official Desktop identity retained",
       "result": "PASS"
     },
     {
-      "check": "Root handle retained, explicit Job association, separate process exit and pipe closure, independent client inventory",
-      "result": "PASS_FOR_RECORDED_RETRIES_NOT_OS_ISOLATION"
+      "check": "Original selected/config metadata and preferences unchanged; copied gateway credentials redacted and exact-token scan empty",
+      "result": "PASS_FOR_OWN_STOPPED_PROFILES"
     },
     {
-      "check": "AppData startup root cause reproduced with native Windows API and fixed before retry",
+      "check": "All seven real attempts retain separate results and hashes; no rewrite of earlier failures",
       "result": "PASS"
     },
     {
-      "check": "All four attempts, initial leftover and its authorized resolution preserved",
-      "result": "PASS"
+      "check": "Real Desktop MCP initializes and discovers the compiled read connector",
+      "result": "PASS_REAL_DISCOVERY_ONLY; tool_calls=0"
     },
     {
-      "check": "MCP client actually connects and discovers empty capabilities",
-      "result": "NOT_PASSED"
-    },
-    {
-      "check": "Bounded local diagnostics and output-limit failure retained",
+      "check": "HTTP reads preserve service grant/policy/run/ACL checks; no dynamic URL/token/project or shell/write tools",
       "result": "PASS_SYNTHETIC"
     },
     {
-      "check": "DSH helper records root exit without clearing the protocol fault while a descendant holds pipes",
-      "result": "PASS_SYNTHETIC; no new real DSH test"
+      "check": "Malformed frames/upstream feeds, redirects, scope injection, revocation, pagination, expiry and zero-write progress",
+      "result": "PASS_SYNTHETIC"
     },
     {
-      "check": "Production service/WPF/schema/DSH controller/coordinator/old portable remain unchanged",
-      "result": "PASS"
+      "check": "Compiled stdio connect/read/progress/EOF/reconnect/revoke sequence",
+      "result": "PASS_SYNTHETIC_NOT_NATIVE_USER_ACCEPTANCE"
+    },
+    {
+      "check": "Prelaunch failure cleans copied credential and keeps failure visible",
+      "result": "PASS_SYNTHETIC_RED_GREEN"
+    },
+    {
+      "check": "Schema4/migrations/core1.0/WPF/DSH controller/coordinator/old portable preserved",
+      "result": "PASS; task resource projection is intentional additive HTTP contract"
+    },
+    {
+      "check": "Production provider-bound egress, private session isolation, Windows security boundary",
+      "result": "NOT_IMPLEMENTED_OR_NOT_TESTED; no production enablement"
+    },
+    {
+      "check": "Release regressions root-caused: DSH synthetic cleanup budget; Runner input fault versus independent output exit evidence",
+      "result": "PASS_RED_GREEN; strict failures/unknown state/lock retention preserved; no new real DSH operations"
     }
   ],
   "remaining_actions": [
-    "Obtain user participation and specific authorization for login in the dedicated profile; then verify empty MCP without model prompts.",
-    "Do not repeat identical unauthenticated attempts or assume login will guarantee transport success."
+    "Authorize and perform one native fresh-profile synthetic model/tool roundtrip, including fee/data boundary; do not request official login.",
+    "Complete production provisioning/provider-bound disclosure and same-configuration Windows isolation before sensitive or writing access.",
+    "Validate Desktop response states/cancel/recovery without unsupported hooks or client substitution."
   ],
   "not_claimed": [
     "Full Claude integration",
-    "MCP handshake",
-    "model task execution",
+    "real model task/tool roundtrip",
     "native click acceptance",
     "Windows security isolation",
     "network/file access audit",
+    "production egress enforcement",
+    "independent review",
     "coordinator implementation"
   ],
   "source_review": {
     "orca_commit": "af82fa8634e19c0376738ad636237aac847b2179",
     "code_copied": false,
     "third_party_checkout_committed": false
+  },
+  "historical_review": {
+    "date": "2026-11-15",
+    "checks": [
+      {
+        "check": "Original Desktop identity, pins and new profile; no substitute or protected hooks",
+        "result": "PASS"
+      },
+      {
+        "check": "Root handle retained, explicit Job association, separate process exit and pipe closure, independent client inventory",
+        "result": "PASS_FOR_RECORDED_RETRIES_NOT_OS_ISOLATION"
+      },
+      {
+        "check": "AppData startup root cause reproduced with native Windows API and fixed before retry",
+        "result": "PASS"
+      },
+      {
+        "check": "All four attempts, initial leftover and its authorized resolution preserved",
+        "result": "PASS"
+      },
+      {
+        "check": "MCP client actually connects and discovers empty capabilities",
+        "result": "NOT_PASSED"
+      },
+      {
+        "check": "Bounded local diagnostics and output-limit failure retained",
+        "result": "PASS_SYNTHETIC"
+      },
+      {
+        "check": "DSH helper records root exit without clearing the protocol fault while a descendant holds pipes",
+        "result": "PASS_SYNTHETIC; no new real DSH test"
+      },
+      {
+        "check": "Production service/WPF/schema/DSH controller/coordinator/old portable remain unchanged",
+        "result": "PASS"
+      }
+    ],
+    "remaining_actions": [
+      "Obtain user participation and specific authorization for login in the dedicated profile; then verify empty MCP without model prompts.",
+      "Do not repeat identical unauthenticated attempts or assume login will guarantee transport success."
+    ],
+    "not_claimed": [
+      "Full Claude integration",
+      "MCP handshake",
+      "model task execution",
+      "native click acceptance",
+      "Windows security isolation",
+      "network/file access audit",
+      "coordinator implementation"
+    ]
   }
 }

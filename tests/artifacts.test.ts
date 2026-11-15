@@ -19,9 +19,9 @@ test("generated artifacts match authoritative source without rewriting", () => {
   );
   assert.equal(r.status, 0, r.stdout + r.stderr);
 });
-test("OpenAPI has all eight request operations, six resource projections and full error mapping", () => {
+test("OpenAPI has all eight request operations, seven resource projections and full error mapping", () => {
   assert.equal(openapi.openapi, "3.1.1");
-  assert.equal(Object.keys(openapi.paths).length, 23);
+  assert.equal(Object.keys(openapi.paths).length, 24);
   assert.deepEqual(
     Object.keys(openapi["x-error-mapping"]).sort(),
     source.$defs.service_error.properties.code.enum.slice().sort(),
@@ -38,12 +38,24 @@ test("OpenAPI has all eight request operations, six resource projections and ful
     assert.deepEqual(op.security, [{ bearerAuth: [] }]);
   }
   for (const b of bindings.resources) {
+    assert.deepEqual(openapi.paths[b.path].get.security, [{ bearerAuth: [] }]);
     assert.equal(
       openapi.paths[b.path].get.responses["200"].content["application/json"]
         .schema.$ref,
       "#/components/schemas/resource_result_" + b.resource_type,
     );
   }
+  const task = openapi.components.schemas.resource_result_task;
+  assert.equal(task.additionalProperties, false);
+  assert.equal(task.properties.data.$ref, "#/components/schemas/resource_task");
+  const data = openapi.components.schemas.resource_task;
+  assert.equal(data.additionalProperties, false);
+  assert.deepEqual(data.required, [
+    "status",
+    "candidate_ref",
+    "inputs_valid",
+    "acceptance_ref",
+  ]);
 });
 test("every OpenAPI schema reference resolves and wire cases retain strict validity", () => {
   function visit(value: unknown) {

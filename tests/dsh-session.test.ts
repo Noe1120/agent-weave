@@ -18,7 +18,9 @@ async function run(mode: string, sinkFails = false) {
   const stderr: Buffer[] = [];
   const report = await probeFreshSession(child, resolve("."), {
     requestMs: mode.includes("timeout") ? 300 : 5000,
-    closeMs: 300,
+    // Ordinary process exit uses the probe's 5s cleanup budget. Only tests
+    // intentionally withholding EOF/pipe closure use a shortened deadline.
+    closeMs: ["ignore-eof", "permission-held-pipe"].includes(mode) ? 300 : 5000,
     onStderr(bytes) {
       if (sinkFails) throw new Error("disk full");
       stderr.push(bytes);
@@ -28,7 +30,7 @@ async function run(mode: string, sinkFails = false) {
 }
 test("fresh session probe sends exactly initialize/new/close and EOF with no MCP or prompt", async () => {
   const { report, stderr } = await run("ok");
-  assert.equal(report.outcome, "PASS");
+  assert.equal(report.outcome, "PASS", JSON.stringify(report));
   assert.equal(report.fault, null);
   assert.deepEqual(report.requests, [
     "initialize",
@@ -54,6 +56,13 @@ test("fresh session probe sends exactly initialize/new/close and EOF with no MCP
   );
   assert.match(report.session_id_sha256!, /^[a-f0-9]{64}$/);
   assert.doesNotMatch(JSON.stringify(report), /private-secret|a65577b1/);
+});
+test("ordinary EOF cleanup allows bounded scheduling delay while timeout fixtures retain short deadlines", async () => {
+  const { report } = await run("delayed-eof");
+  assert.equal(report.outcome, "PASS", JSON.stringify(report));
+  assert.equal(report.exit.forced, false);
+  assert.equal(report.exit.code, 0);
+  assert.equal(report.streams_closed, true);
 });
 for (const [mode, fault] of [
   ["auth", "DSH_AUTH_REQUIRED"],

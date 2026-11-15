@@ -7,11 +7,20 @@ import { createInterface } from "node:readline";
 import { parseArgs } from "node:util";
 import { prepareClaudeProbe, fileHash } from "./claude-desktop-launch.ts";
 import { summarizeClaudeAttempt } from "./claude-desktop-result.ts";
+import {
+  prepareClaudeThirdPartyProbe,
+  redactProbeCredential,
+  checkPreparedProbe,
+} from "./claude-third-party-probe.ts";
+import { McpReadClient } from "../packages/service/src/mcp-read-client.ts";
 const { values } = parseArgs({
   options: {
     "allow-claude-desktop-probe": { type: "boolean" },
     config: { type: "string" },
     output: { type: "string" },
+    "third-party-route": { type: "string" },
+    "allow-third-party-credential-reuse": { type: "boolean" },
+    "read-connector-config": { type: "string" },
   },
   strict: true,
 });
@@ -21,6 +30,12 @@ assert.equal(
   "Explicit fresh-profile Desktop probe authorization required",
 );
 assert.equal(process.platform, "win32");
+if (values["third-party-route"])
+  assert.equal(
+    values["allow-third-party-credential-reuse"],
+    true,
+    "CLAUDE_CREDENTIAL_REUSE_AUTHORIZATION_REQUIRED",
+  );
 assert.ok(values.config && isAbsolute(values.config));
 assert.ok(values.output && isAbsolute(values.output));
 mkdirSync(values.output);
@@ -50,6 +65,12 @@ function inventory() {
 const config = JSON.parse(
   readFileSync(values.config, "utf8").replace(/^\uFEFF/, ""),
 );
+if (values["read-connector-config"]) {
+  assert.ok(isAbsolute(values["read-connector-config"]));
+  new McpReadClient(
+    JSON.parse(readFileSync(values["read-connector-config"], "utf8")),
+  ).checkDisclosure();
+}
 const before = inventory();
 write("process-before.json", before);
 assert.ok(
@@ -60,30 +81,64 @@ assert.ok(
 );
 const hostDll = resolve("artifacts/claude-probe-host/Claude.ProbeHost.dll");
 assert.ok(existsSync(hostDll), "CLAUDE_OWNED_HOST_NOT_BUILT");
-const prepared = await prepareClaudeProbe(config);
-const known = JSON.parse(
-  execFileSync(
-    resolve(".tools/dotnet/dotnet.exe"),
-    [hostDll, "--known-folders"],
-    { env: prepared.env, windowsHide: true, encoding: "utf8", timeout: 10000 },
-  ),
-);
-assert.equal(
-  known.roaming.toLowerCase(),
-  prepared.env.APPDATA.toLowerCase(),
-  "CLAUDE_ROAMING_PATH_MISMATCH",
-);
-assert.equal(
-  known.local.toLowerCase(),
-  prepared.env.LOCALAPPDATA.toLowerCase(),
-  "CLAUDE_LOCAL_PATH_MISMATCH",
-);
-write("launch-intent.json", {
-  at: new Date().toISOString(),
-  prepared,
-  host_sha256: await fileHash(hostDll),
-  scope:
-    "fresh profile / empty MCP / no login or prompt / retained root handle",
+const prepared = values["third-party-route"]
+  ? await prepareClaudeThirdPartyProbe(
+      config,
+      JSON.parse(
+        readFileSync(values["third-party-route"], "utf8").replace(
+          /^\uFEFF/,
+          "",
+        ),
+      ),
+      values["allow-third-party-credential-reuse"],
+    )
+  : await prepareClaudeProbe(config);
+await checkPreparedProbe(prepared, async () => {
+  if (values["read-connector-config"]) {
+    const path = join(prepared.profile, "claude_desktop_config.json");
+    const prefs = JSON.parse(readFileSync(path, "utf8"));
+    prefs.mcpServers["agent-weave-probe"] = {
+      command: config.node,
+      args: [
+        config.server,
+        "--config",
+        values["read-connector-config"],
+        "--report",
+        prepared.report,
+      ],
+    };
+    writeFileSync(path, JSON.stringify(prefs) + "\n");
+  }
+  const known = JSON.parse(
+    execFileSync(
+      resolve(".tools/dotnet/dotnet.exe"),
+      [hostDll, "--known-folders"],
+      {
+        env: prepared.env,
+        windowsHide: true,
+        encoding: "utf8",
+        timeout: 10000,
+      },
+    ),
+  );
+  assert.equal(
+    known.roaming.toLowerCase(),
+    prepared.env.APPDATA.toLowerCase(),
+    "CLAUDE_ROAMING_PATH_MISMATCH",
+  );
+  assert.equal(
+    known.local.toLowerCase(),
+    prepared.env.LOCALAPPDATA.toLowerCase(),
+    "CLAUDE_LOCAL_PATH_MISMATCH",
+  );
+  write("launch-intent.json", {
+    at: new Date().toISOString(),
+    prepared,
+    host_sha256: await fileHash(hostDll),
+    scope: values["third-party-route"]
+      ? "fresh 3p profile / selected local gateway credential / MCP discovery only / no prompt / retained root handle"
+      : "fresh profile / empty MCP / no login or prompt / retained root handle",
+  });
 });
 const host = spawn(resolve(".tools/dotnet/dotnet.exe"), [hostDll], {
   cwd: prepared.cwd,
@@ -237,11 +292,18 @@ const report = {
     login: false,
     model_prompt: false,
     original_profile: false,
+    third_party_config: !!values["third-party-route"],
+    selected_gateway_credential_reused: !!values["third-party-route"],
     ui_acceptance: false,
     os_isolation: false,
     production_adapter: false,
+    read_connector_discovery: !!values["read-connector-config"],
   },
 };
+if (values["third-party-route"] && report.cleanup_confirmed) {
+  await redactProbeCredential(prepared);
+  report.scope.copied_gateway_credential_redacted = true;
+}
 write("report.json", report);
 console.log(JSON.stringify(report, null, 2));
 process.exitCode = report.status === "REAL_CLAUDE_MCP_HANDSHAKE_PASS" ? 0 : 2;

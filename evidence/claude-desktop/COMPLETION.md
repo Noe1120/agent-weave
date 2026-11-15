@@ -1,28 +1,33 @@
 # W13 Claude Desktop当前交付记录
 
-日期：2026-11-15（Asia/Tokyo）。状态：**启动与清理缺陷已修复，真实MCP握手仍未通过，Claude接入尚未完成**。累计四次实际启动，当前没有本次Claude残留。
+日期：2026-11-16（Asia/Tokyo）。状态：**真实本地MCP握手/工具发现与合成只读桥已通过；完整Claude任务接入尚未完成。** 不将工具发现写成模型实际执行。
 
-## 已完成与真实证据
+## 根因与实际完成
 
-- 官方Desktop 5.11492.2身份、签名及固定EXE/ASAR摘要保持；不替换为Claude Code、SDK或模型API。
-- 用户要求找根因并重试后，按创建时间、路径、独立profile参数核验首次遗留，通过保留句柄终止并确认退出。首次失败报告原样嵌入[真实记录](real-attempt-report.json)，没有改写成成功。
-- 验收host直接持有实际Desktop根进程句柄并显式入Job；分别核验根退出、Job为空、host退出与原客户端清单。退出不依赖管道close；64KiB本地诊断有明确失败上限。
-- 第二次实测取得明确启动错误 Failed to get 'appData' path。原生SHGetFolderPath复现HRESULT 80070003，修复USERPROFILE/AppData/Roaming及Local布局，并在每次实际启动前核验原生路径。
-- 第三、四次正常启动；第三次30秒总窗口中页面约27秒才就绪，第四次延长到60秒，页面约17秒就绪，但均没有MCP连接请求。
-- 三次重试均完整清理，六个原DSH进程身份不变。回收使用强制终止，不能称Desktop正常EOF退出。真实尝试的host构建摘要分别保留；之后输出故障报告和DSH辅助探针的加固另经合成回归。
+- 保留官方Claude Desktop 5.11492.2身份、签名与固定EXE/ASAR摘要，不替换为Code/SDK/API。前四次失败和首次遗留清理原始记录保留。
+- 本机只读核实CC Switch 4.0.16配置DB中的Desktop provider、选定3p配置库及所属回环gateway；仅配置元数据，不读取聊天/请求历史、不输出密钥。旧official/direct选择字段不代表完整活动路由。
+- 根因是独立空profile未带实际第三方连接，且固定Desktop将3p userData移到LOCALAPPDATA/Claude-3p。已纠正“需官方登录”推断，不改用户模式，不索取官方订阅登录。
+- 第五次真实空MCP握手通过；第六/七次真实编译只读桥握手及tools/resources/prompts发现通过，**tool_calls均为0**。第七次使用最终构建，早期构建摘要独立保留。
+- 每次只复用选中本机gateway令牌到新标准Windows profile，不复制上游provider秘密、历史或cookie。原四份配置摘要不变、原六个DSH进程不变；根句柄退出、Job为空、host退出均确认。回收是强制终止，不是Desktop正常EOF，也不是OS隔离。
+- 三个测试profile的复制令牌已清除，180/315/318文件的精确令牌扫描均0匹配/0未读；扫描仅覆盖自建已停止目录。临时服务grant撤销、配置token清空。
 
-## 当前阻塞与下一步
+## 源码与用户路径检验
 
-第四次日志确认无登录cookie，accountId/orgId为空，MCP日志为空；固定版本的chat MCP连接由mainView请求触发。下一步需用户明确允许并亲自在本阶段专用profile完成登录，再只验证空MCP握手。登录是否足够仍需实测，不能保证；不会复制旧凭据、调用内部IPC或绕过登录/反自动化。
+- 固定范围stdio桥提供task_get、project_progress与可选message_poll；不开放写入/shell/控制/模型调用。服务逐次复核grant、policy、run与资源ACL，拒绝模型指定URL/token/project。新增task第七类安全投影，core/1.0及schema4/001–004不变。
+- **仅用于合成验收**：synthetic_only/provider_fingerprint为可信配置声明，尚不提供服务端生产分类或实际provider网络绑定。不能配置真实私密数据或宣称生产外发安全；生产邀请/受保护凭据/原生会话绑定未交付。
+- 全量verify **419/419，0失败/0跳过**；Claude专项 **63/63**。构建/类型/格式/生成与编译冒烟通过。默认verify不启动真实Agent。
+- 编译stdio走查：连接→读取任务→20次只读进度→EOF→重连→再次读取及20次进度→撤权拒绝→EOF，零读取写入。合成客户端，不是原生点击或模型操作。
+- 原生 **14组C# + 1项WPF静态**通过；旧包 **989文件**通过。设计/P0结果见[验证汇总](verification-summary.json)。
+- 预启动错误清除复制凭据有红绿回归，清除错误不吞掉。首轮OpenAPI路由数旧断言失败及首轮走查错误ready预期均保留；task路由为有意新增，apply_plan后实际契约仍queued，没有改状态机或删安全校验。
 
-登录不隐含允许模型prompt、计费调用、旧历史访问或窗口自动化。本轮没有登录、模型请求或窗口点击。MCP握手未通过，因此生产适配器未开放；L1–L3/OS资格和250 AT/CA没有升级，管家没有构建。
+## 尚未完成及明确入口
 
-## 回归、根因记录与参考
+真实Desktop的一次模型工具往返/消息回复、自动唤醒、忙碌排队、切会话/最小化、取消恢复，以及同配置私密隔离和Windows强制隔离未验收；原生WPF点击、生产注册/安装升级仍未交付。**L1–L3不升级，250 AT/CA保持NOT_RUN，管家未构建。**
 
-- 最终全量verify：**390/390通过，0失败、0跳过**；包含37项Claude专项合成回归。生成、格式、类型、构建及编译冒烟通过，verify不启动真实客户端。
-- 首轮全量389项有1项DSH权限拒绝清理观测失败，日志保留。检查后增加独立后代持管道场景，稳定复现close不能代表根退出；DSH验收辅助现分别记录exit与streams_closed，管道未关闭仍失败。不能据此臆定首轮间歇失败的全部底层时序；生产DSH控制器及既有实际会话证据未改。
-- 原生14组C#及1项WPF静态通过；旧包989个文件清单/摘要通过。设计51文件/50摘要和P0 12项通过，见[验证汇总](verification-summary.json)。SQLite实验警告、真实Desktop本身的监听器警告保留，没有修改或抑制第三方报错。
-- 按用户建议研究Orca固定提交af82fa8634e19c0376738ad636237aac847b2179，借鉴进程身份复核、未证实退出不释放的原则。其Claude Code/SDK路径不能替代本项目指定Desktop，没有复制或运行其代码。
-- [作者自检](author-self-review.json)不是独立审核。未做网络/文件访问审计，不把独立profile或Job回收当Windows强制隔离。原生点击仍未验收。
+下一具体验收需在新测试profile通过获准窗口操作发送一条合成task UUID请求，由现有CC Switch provider调用task_get并复述状态；不接触已有对话，不改原配置。仍需具体窗口与一次模型任务/费用授权；此前窗口访问拒绝不能通过内部IPC/CDP/其他点击工具绕过。无支持的驱动接口时保留能力阻塞，不用Code或直接API替代。
 
-仅上传五份审核文本。实际profile、配置、日志、进程快照、错误转储、第三方checkout和二进制留本机且被忽略。下一入口详见[W13](../../plan/W13-CLAUDE-DESKTOP-MCP-PROBE.md)。
+[作者自检](author-self-review.json)不是独立审核；无网络/文件访问审计。只上传五份脱敏文本，profile/配置/数据库/原始诊断/第三方源码不上传。详见[W13计划](../../plan/W13-CLAUDE-DESKTOP-MCP-PROBE.md)、[真实尝试](real-attempt-report.json)和[本机预检](preflight-report.json)。
+
+发布前复验新增定位DSH合成测试时限问题：正常流程三个RPC均已确认，但测试辅助统一只给300ms EOF退出时间；32路并发复现31通过/1个DSH_EOF_TIMEOUT（实际exit0但超时已触发，仍正确判失败）。增加600ms延迟EOF的确定性红绿回归，普通退出使用已有探针默认5秒预算；故意忽略EOF/后代持管道的故障用例仍300ms、原失败断言保留。37项会话回归及32路并发通过；不修改生产DSH控制器或协议辅助，也没有新增真实DSH调用。原始复验失败/压力复现均保留，不能把旧失败日志改成通过。
+
+另一轮全量复验触发W07 flood退出竞态：原生host因输出超限退出时，控制器仍在写ack，输入EPIPE先到使RunnerHost停止读取stdout，丢失后到的独立Job-empty/exit证据。确定性回归复现后，输入故障保持可见，但继续严格解析独立输出；只有完整合法exited及host退出0才能保留证据。畸形输出/缺失证据仍UNKNOWN；controller保留实际输出超限根因，任务仍失败、grant撤销、锁隔离，不把错误改成成功。新增输入故障/同时输出损坏两条回归，原flood失败断言不变。仅修改W07开发运行器，不扩大原客户端或OS资格。

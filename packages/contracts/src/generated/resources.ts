@@ -48,6 +48,14 @@ export type ResourceResult =
       resource_type: "acceptance";
       ref: Ref;
       data: Acceptance;
+    }
+  | {
+      contract_version: "resource/0.1";
+      kind: "resource_result";
+      project_id: Uuid;
+      resource_type: "task";
+      ref: Ref;
+      data: Task;
     };
 export type Uuid = string;
 export type Revision = string;
@@ -93,4 +101,10 @@ export interface Environment {
 export interface Acceptance {
   state: "draft" | "confirmed" | "superseded";
   criteria_refs: Ref[];
+}
+export interface Task {
+  status: "draft" | "queued" | "running" | "in_review" | "ready_to_merge" | "completed" | "cancelled";
+  candidate_ref: Ref | null;
+  inputs_valid: boolean;
+  acceptance_ref: Ref;
 }
