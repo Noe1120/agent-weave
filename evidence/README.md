@@ -27,3 +27,7 @@ W07的source-manifest、before-manifest和evidence-manifest是该阶段完成时
 ## DSH独立新会话验收
 
 [W12交付](dsh-session/COMPLETION.md)分别记录35项合成测试与一次真实initialize/new/close/EOF。仅上传完成记录、验证汇总、作者自检、保护检查和真实会话摘要；会话ID仅公开摘要，原profile/持久化内容/配置选项/进程快照/日志保留本机。无prompt或旧凭据，不升级执行或OS资格。
+
+## Claude Desktop独立MCP尝试
+
+[W13记录](claude-desktop/COMPLETION.md)分开登记合成协议通过和真实连接失败。官方Desktop启动后未见MCP握手，所属开发Job已空仍有本次进程待处理。仅公开5份审核文本，原profile、日志、启动参数、PID快照和安装源码不上网。

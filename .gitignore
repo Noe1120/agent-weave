@@ -121,3 +121,12 @@ qa-runtime/
 !/evidence/dsh-session/author-self-review.json
 !/evidence/dsh-session/protection-check.json
 !/evidence/dsh-session/real-session-report.json
+
+# Reviewed Claude Desktop feasibility only; new profiles/raw logs/source remain local.
+!/evidence/claude-desktop/
+/evidence/claude-desktop/*
+!/evidence/claude-desktop/COMPLETION.md
+!/evidence/claude-desktop/verification-summary.json
+!/evidence/claude-desktop/author-self-review.json
+!/evidence/claude-desktop/preflight-report.json
+!/evidence/claude-desktop/real-attempt-report.json

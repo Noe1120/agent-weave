@@ -1452,6 +1452,7 @@
     "W10-OFFLINE-RECOVERY.md",
     "W11-DSH-ACP-LIFECYCLE.md",
     "W12-DSH-SESSION-PREFLIGHT.md",
+    "W13-CLAUDE-DESKTOP-MCP-PROBE.md",
     "contracts/core.schema.json",
     "contracts/error-mapping.json",
     "contracts/resource.schema.json",

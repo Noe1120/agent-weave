@@ -1,0 +1,46 @@
+{
+  "date": "2026-11-15",
+  "sources": [
+    {
+      "url": "https://support.claude.com/en/articles/10949351-getting-started-with-local-mcp-servers-on-claude-desktop",
+      "final_url": "https://support.claude.com/en/articles/10949351-getting-started-with-local-mcp-servers-on-claude-desktop",
+      "status": 200,
+      "bytes": 235149,
+      "sha256": "64c6e9623e58564aefc7060d70fa44cfec9ee1b1483e96513924c628900a1e7d"
+    },
+    {
+      "url": "https://modelcontextprotocol.io/specification/2025-06-18/basic/lifecycle",
+      "final_url": "https://modelcontextprotocol.io/specification/2025-06-18/basic/lifecycle",
+      "status": 200,
+      "bytes": 208044,
+      "sha256": "524944d538c39714e0840ef95171d9fcc45ce035c502af5b2f47c684e20b329f"
+    }
+  ],
+  "installed_client": {
+    "package": "Claude_5.11492.2.0_x64__pzs8sxrjxfjjc",
+    "app_version": "5.11492.2",
+    "publisher": "Anthropic, PBC",
+    "signature": "Valid",
+    "exe_sha256": "af221264738995e5c1fce1bcd8a074d95726eda29c91e5af53568ae424632573",
+    "asar_sha256": "b4a182034ceed794e61141dca163df839a1e9cb67c205efd6d576f5ccfd5b2f2",
+    "build": "b1edc63367ca6fb5fa8d5a72604951a71b37dd58"
+  },
+  "local_static_files": [
+    {
+      "entry": ".vite/build/index.pre.js",
+      "sha256": "1bf47335edc916c7ba4b2bff2c9c091e0eabb73fc9ae3f5b6caa439b591e9e69"
+    },
+    {
+      "entry": ".vite/build/index.chunk-C8fqCNNh.js",
+      "sha256": "afda8ae26d34cfadf3a640b9be3d51b6a2152aa3ac3a62c64c860d9ad3a800c8"
+    }
+  ],
+  "findings": [
+    "Desktop is the MCP client; a local stdio server is the target for initialize and discovery.",
+    "Selected userData contains claude_desktop_config.json; standard user-data-dir is considered a chosen folder in installed startup code.",
+    "Production removes CLAUDE_USER_DATA_DIR without developer-approved signed test authorization; no such hooks were used.",
+    "Static profile handling does not establish runtime isolation or no-network behavior.",
+    "No supported ACP session/new equivalent was established for this Desktop integration."
+  ],
+  "copyright": "Only hashes and original analysis retained; no third-party installation source uploaded."
+}

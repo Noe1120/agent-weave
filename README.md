@@ -142,3 +142,7 @@ python -B plan/tools/verify_design.py
 **250 项 AT/CA 仍为 NOT_RUN；原客户端兼容 UNVERIFIED；正式契约冻结 NOT_FROZEN。**
 
 W06/W07已提供开发态Broker、逻辑单写者、真实Git证据链和自有合成进程退出对账；这些能力尚未用于真实原客户端。原客户端连接/自动派送、同配置强制隔离与写权撤销、跨任务依赖交接、附件/授权检索、SSE/MCP、LangGraph/RAG管家、费用结算及完整灾备仍待完成。下一步优先准备原客户端能力/适配边界与获准后的P0/G0/G1探针，再推进后端；原生UI最后，真实点击/视觉验收仍需Team窗口操作授权。不能因开发测试通过而提升产品门槛。
+
+## Claude Desktop接入尝试 · 2026-11-15
+
+[W13](plan/W13-CLAUDE-DESKTOP-MCP-PROBE.md)已完成空能力MCP探针与一次官方Desktop 5.11492.2真实尝试。尚未接通：未见MCP握手，且开发Job清空后本次Claude进程仍存活，清理待确认。test:claude:live已明确拒绝重试；生产服务、WPF与管家不变。见[真实失败证据与下一入口](evidence/claude-desktop/COMPLETION.md)。

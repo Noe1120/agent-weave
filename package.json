@@ -35,7 +35,9 @@
     "test:foundations:walkthrough": "npm run build && node tests/pre-coordinator-walkthrough.mjs",
     "test:dsh": "node --test tests/dsh*.test.ts",
     "test:dsh:live": "node tests/dsh-live-walkthrough.mjs",
-    "test:dsh:session:live": "node tests/dsh-session-live.mjs"
+    "test:dsh:session:live": "node tests/dsh-session-live.mjs",
+    "test:claude": "node --test tests/claude*.test.ts",
+    "test:claude:live": "node tests/claude-desktop-live.mjs"
   },
   "dependencies": {
     "ajv": "8.20.0",

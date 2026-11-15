@@ -1,0 +1,52 @@
+{
+  "date": "2026-11-15",
+  "type": "AUTHOR_SELF_REVIEW_NOT_INDEPENDENT",
+  "checks": [
+    {
+      "check": "Original client identity, installed signature, pinned executable/archive",
+      "result": "PASS"
+    },
+    {
+      "check": "Correct Desktop-client / probe-server MCP direction, bounded input and no exposed data or tools",
+      "result": "PASS"
+    },
+    {
+      "check": "Fresh selected profile, minimal launch environment, no protected test hooks or old credentials",
+      "result": "PASS_FOR_PROBE_PREPARATION_NOT_OS_AUDIT"
+    },
+    {
+      "check": "No successful status from Job-empty alone; exact failed attempt retained",
+      "result": "PASS"
+    },
+    {
+      "check": "Installed packaged client cleanup and MCP handshake",
+      "result": "FAIL_CLEANUP_PENDING"
+    },
+    {
+      "check": "Repeated real launch prevented by explicit known-prerequisite failure",
+      "result": "PASS"
+    },
+    {
+      "check": "Production service/contracts/runner/WPF unchanged; old portable manifest intact",
+      "result": "PASS"
+    }
+  ],
+  "root_cause_review": [
+    "Initial probe mistakenly treated Desktop as the MCP server; regression and implementation now use Desktop as client.",
+    "Owned development Job is suitable for its cooperative synthetic fixture but proved insufficient for this installed packaged Desktop. The specific Windows transfer mechanism remains unknown.",
+    "First attempt used host close event rather than separately observing process exit, so pipe retention cannot establish whether the host itself still ran. Raw evidence does not claim a normal exit.",
+    "Typecheck found an untyped summary module; converted to explicitly typed TypeScript without weakening compiler settings."
+  ],
+  "remaining_actions": [
+    "Recheck identity and close the one remaining probe Desktop process only after specific user authorization or user action.",
+    "Implement and synthetically verify a lifetime host retaining the actual original client handle, then separately authorize/attempt another real connection.",
+    "Investigate early-startup/MCP prerequisite only after lifetime ownership is reliable; do not assume login is the cause."
+  ],
+  "not_claimed": [
+    "real MCP connection",
+    "model task execution",
+    "native window click acceptance",
+    "OS security isolation",
+    "coordinator implementation"
+  ]
+}
