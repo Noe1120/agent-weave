@@ -1,0 +1,55 @@
+{
+  "date": "2026-11-15",
+  "review_type": "AUTHOR_SELF_REVIEW_NOT_INDEPENDENT",
+  "scope": [
+    "tests/dsh-session-probe.ts",
+    "tests/dsh-session-launch.ts",
+    "tests/dsh-session-live.mjs",
+    "tests/dsh-session.test.ts",
+    "tests/fixtures/dsh-session-fixture.mjs",
+    "package.json",
+    ".gitignore",
+    "current handover and W12 plan"
+  ],
+  "checks": [
+    {
+      "check": "Production initialize-only adapter untouched",
+      "result": "PASS"
+    },
+    {
+      "check": "Only fixed initialize/session-new/session-close methods; no generic RPC, permission response or automatic new retry",
+      "result": "PASS"
+    },
+    {
+      "check": "Exact hello, response identity, UUID and close receipt validation; malformed, unsolicited and oversized frames are visible failures",
+      "result": "PASS"
+    },
+    {
+      "check": "Bounded request/EOF cleanup uses only live owned handle; unobserved exit remains UNKNOWN",
+      "result": "PASS"
+    },
+    {
+      "check": "Official executable/archive pins, unlinked paths, new profile directories and minimal allowlisted environment",
+      "result": "PASS"
+    },
+    {
+      "check": "Live entry requires explicit flag; existing output directory rejects before launch",
+      "result": "PASS"
+    },
+    {
+      "check": "Public report excludes raw session ID, config options, paths, stderr and process inventory",
+      "result": "PASS"
+    },
+    {
+      "check": "Default verify launches only synthetic fixtures; real acceptance separately recorded",
+      "result": "PASS"
+    }
+  ],
+  "known_limits": [
+    "Empty home and read-only permission preference are not OS SID/ACL/network isolation.",
+    "No prompt or model task was exercised; client qualification stays UNVERIFIED.",
+    "session/close leaves newly created persisted data locally; it is not deletion.",
+    "No WPF click acceptance or production session API added.",
+    "Pin validation is prelaunch detection, not protection from concurrent privileged installation tampering."
+  ]
+}

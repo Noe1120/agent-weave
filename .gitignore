@@ -112,3 +112,12 @@ qa-runtime/
 !/evidence/coordinator-latest/verification-summary.json
 !/evidence/coordinator-latest/source-import-check.json
 !/evidence/coordinator-latest/dsh-session-preflight.json
+
+# Reviewed W12 fresh-session summaries only; profiles, session data and raw diagnostics stay local.
+!/evidence/dsh-session/
+/evidence/dsh-session/*
+!/evidence/dsh-session/COMPLETION.md
+!/evidence/dsh-session/verification-summary.json
+!/evidence/dsh-session/author-self-review.json
+!/evidence/dsh-session/protection-check.json
+!/evidence/dsh-session/real-session-report.json

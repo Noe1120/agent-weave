@@ -18,7 +18,7 @@
 
 这是可信进程内后端模块，**不是已接通真实任务的完整Agent，也未接入UI/HTTP/MCP**。原生界面和旧包不变，资格仍UNVERIFIED。默认验证只跑合成夹具；真实走查必须显式授权并传入固定配置。详见[阶段交付](evidence/dsh-lifecycle/COMPLETION.md)。
 
-下一步见[W12独立新会话预检](plan/W12-DSH-SESSION-PREFLIGHT.md)：仅完成官方包只读核查，真实新会话探针尚未执行。
+[W12独立新会话探针](plan/W12-DSH-SESSION-PREFLIGHT.md)已按单独授权完成：真实initialize → session/new（空MCP）→ session/close → EOF退出0，原6个Desktop进程未变。没有prompt或旧凭据；这是独立验收工具，生产适配器仍只开放initialize，执行资格未升级。证据见[evidence/dsh-session](evidence/dsh-session/COMPLETION.md)。
 
 ## 打开本机已有便携包
 

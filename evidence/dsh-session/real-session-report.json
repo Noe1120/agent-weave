@@ -1,0 +1,45 @@
+{
+  "status": "REAL_DSH_FRESH_SESSION_PASS",
+  "observed_at": "2026-11-15T05:41:09.797Z",
+  "client_version": "0.2.1-rc.3",
+  "executable_sha256": "fd7d298f4ba03ee9bab1719a892afeaef5c09bf50c574a592a64c85f64574c0c",
+  "archive_sha256": "04b32e3a872826ba15cfb2081c6a929a8d4ecaa65e09a2543e5a6b30e2eff1f0",
+  "lifecycle": {
+    "outcome": "PASS",
+    "fault": null,
+    "rpc_error_code": null,
+    "requests": [
+      "initialize",
+      "session/new",
+      "session/close"
+    ],
+    "acknowledged": [
+      "initialize",
+      "session/new",
+      "session/close"
+    ],
+    "session_state": "closed",
+    "session_id_sha256": "44c3069c3c0cb230c90e06aad60f3fe6381d39cdca4464c0500aa7d52a176975",
+    "stdin_eof": true,
+    "stderr_bytes": 0,
+    "exit": {
+      "code": 0,
+      "signal": null,
+      "observed": true,
+      "forced": false
+    }
+  },
+  "desktop_processes": {
+    "before": 6,
+    "after": 6,
+    "unchanged": true
+  },
+  "outbound_prompt_requests": 0,
+  "mcp_servers_supplied": 0,
+  "existing_credentials_supplied": false,
+  "old_session_operations": 0,
+  "model_invocation": "no prompt sent; not an OS network audit",
+  "qualification": "UNVERIFIED",
+  "windows_isolation": "NOT_TESTED",
+  "native_click_acceptance": "NOT_RUN"
+}

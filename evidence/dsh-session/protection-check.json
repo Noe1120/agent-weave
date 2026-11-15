@@ -1,0 +1,33 @@
+{
+  "date": "2026-11-15",
+  "timezone": "Asia/Tokyo",
+  "base_commit": "428eac1adf219892d02edc75bf8c626cb8b6572a",
+  "production_packages_diff_empty": true,
+  "protected_sources_unchanged": [
+    "packages/service",
+    "packages/desktop",
+    "packages/contracts",
+    "packages/runner",
+    "plan/contracts"
+  ],
+  "protected_hashes": {
+    "packages/service/src/dsh-acp.ts": "7f14a7339e5c5adafef46f5895b4bac5ec6b406c4cb0465e02592c3d957ff41b",
+    "packages/service/src/dsh-runtime.ts": "5ec6fdd67764a8633166c4a80d3af113240c57d2f09e618af00a0beffc1aebd8",
+    "packages/service/src/recovery.ts": "ef8d6b7f9ce6707a4b6d22fc1bca25fa6f70e4c72f6d5ff523d45b25055860f3",
+    "artifacts/Team-0.3.0-win-x64/package-manifest.json": "20968202a4c578cd26d116212d66e971c5ec7149855dc3542c43c3ead7abf92c"
+  },
+  "original_workspace_clean_before_integration": true,
+  "coordinator_design_revision": "coordinator-core-review-1",
+  "coordinator_implemented": false,
+  "portable_package_files_verified": 989,
+  "portable_package_schema": 2,
+  "source_schema": 4,
+  "real_database_opened": false,
+  "desktop_processes_unchanged": true,
+  "desktop_processes": 6,
+  "new_probe_work_directory_empty": true,
+  "new_profile_files": 8,
+  "new_profile_retained_local": true,
+  "native_click_acceptance": "NOT_RUN",
+  "windows_isolation": "NOT_TESTED"
+}

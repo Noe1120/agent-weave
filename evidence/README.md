@@ -23,3 +23,7 @@ W07的source-manifest、before-manifest和evidence-manifest是该阶段完成时
 ## 最新管家方案确认与DSH下一步预检
 
 [整合记录](coordinator-latest/COMPLETION.md)登记用户确认的最新版设计、源内容保留核验和DSH只读预检。本轮未构建管家或创建真实DSH会话；评估材料仍未运行。仅4份明确白名单摘要上传，原始diff、安装源码和日志保留本机。
+
+## DSH独立新会话验收
+
+[W12交付](dsh-session/COMPLETION.md)分别记录35项合成测试与一次真实initialize/new/close/EOF。仅上传完成记录、验证汇总、作者自检、保护检查和真实会话摘要；会话ID仅公开摘要，原profile/持久化内容/配置选项/进程快照/日志保留本机。无prompt或旧凭据，不升级执行或OS资格。

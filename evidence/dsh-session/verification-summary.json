@@ -1,0 +1,75 @@
+{
+  "date": "2026-11-15",
+  "timezone": "Asia/Tokyo",
+  "phase": "W12_DSH_FRESH_SESSION_PROBE",
+  "authorization": "Explicit fresh empty-profile initialize/new/close/EOF; no prompt, model invocation, old credentials or history",
+  "service": {
+    "command": "npm run verify",
+    "exit_code": 0,
+    "tests": 352,
+    "pass": 352,
+    "fail": 0,
+    "skip": 0,
+    "build_smoke": "PASS",
+    "native_clients_started_by_verify": 0
+  },
+  "dsh_synthetic": {
+    "new_tests": 35,
+    "previous_tests": 49,
+    "total": 84,
+    "result": "PASS"
+  },
+  "real_client": {
+    "attempts": 1,
+    "result": "REAL_DSH_FRESH_SESSION_PASS",
+    "version": "0.2.1-rc.3",
+    "protocol_requests": 3,
+    "prompt_requests": 0,
+    "old_session_operations": 0,
+    "exit_code": 0,
+    "forced": false,
+    "stderr_bytes": 0,
+    "desktop_processes_unchanged": true,
+    "report": "real-session-report.json"
+  },
+  "native": {
+    "csharp_groups": 14,
+    "wpf_static": 1,
+    "result": "PASS",
+    "click_acceptance": "NOT_RUN"
+  },
+  "portable_package": {
+    "files": 989,
+    "result": "PASS"
+  },
+  "design": {
+    "status": "PASS",
+    "files": 50,
+    "manifest_entries": 49,
+    "product_tests": "NOT_RUN"
+  },
+  "p0": {
+    "status": "PASS",
+    "tests": 12
+  },
+  "product_acceptance": {
+    "platform_AT": 190,
+    "coordinator_CA": 60,
+    "status": "NOT_RUN"
+  },
+  "client_qualification": "UNVERIFIED",
+  "os_isolation": "NOT_TESTED",
+  "coordinator_implemented": false,
+  "review": "AUTHOR_SELF_REVIEW",
+  "warnings": [
+    "Node SQLite experimental warning remains visible."
+  ],
+  "local_logs": {
+    "service_sha256": "921ec57f1642af173054fa0d8d8d83f3a935a276cce846d191ebf05eb130f69f",
+    "native_sha256": "d80dfed3bafc4adff8fdfeab505271ebe130680eaf966f180d81ea1a6e3577ea",
+    "package_sha256": "77c06975809839528ad44681a225adfd36628db49898b4eac30815809a5f75dd",
+    "synthetic_sha256": "2f319137a40bdccfaa7d0ea1966793055a416eef3b55f6461312b4890e4c9754",
+    "design_sha256": "de1fd2f4091ef367002e3f73e90b4a335a3ac59ff35c562c632f240a7d47bc5a",
+    "p0_sha256": "0f70e437d5565baed1bf0ffdc25fdcd4eb238d31a05f615b16449fb44b5e1817"
+  }
+}

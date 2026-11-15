@@ -34,7 +34,8 @@
     "test:foundations": "node --test tests/dependencies.test.ts tests/knowledge.test.ts tests/recovery.test.ts",
     "test:foundations:walkthrough": "npm run build && node tests/pre-coordinator-walkthrough.mjs",
     "test:dsh": "node --test tests/dsh*.test.ts",
-    "test:dsh:live": "node tests/dsh-live-walkthrough.mjs"
+    "test:dsh:live": "node tests/dsh-live-walkthrough.mjs",
+    "test:dsh:session:live": "node tests/dsh-session-live.mjs"
   },
   "dependencies": {
     "ajv": "8.20.0",
