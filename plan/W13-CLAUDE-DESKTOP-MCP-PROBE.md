@@ -32,6 +32,6 @@ MCP握手即使成功也只证明传输，不证明读取群数据、自动唤�
 
 已补充结果判定回归：只要原客户端进程清单未恢复，即便握手成功/Job已空，也保持cleanup_unconfirmed。公开test:claude:live入口现明确抛出CLAUDE_PACKAGED_LIFETIME_UNQUALIFIED，在修复所属句柄管理前不再启动。旧尝试脚本仅本地留证，没有保留不可用的自动化为生产功能。
 
-仍有一个本次启动的Claude进程待处理，PID/创建时间/完整新profile参数仅在本地证据中；原持有句柄的worker已结束。遵循AGENTS.md不重开保存PID实施终止、不改用窗口工具绕过原拒绝，因此需要用户关闭该进程，或具体允许核验身份后仅终止此遗留进程。该授权只涉及这一次遗留清理。
+仍有一个本次启动的Claude进程待处理，PID/创建时间/完整新profile参数仅在本地证据中；原持有句柄的worker已结束。沿用用户要求的W11关闭边界（[W11](W11-DSH-ACP-LIFECYCLE.md)仅当前所属句柄，不按持久PID杀进程），并遵守AGENTS.md的原客户端边界；不改用窗口工具绕过原拒绝，因此需要用户关闭该进程，或具体允许核验身份后仅终止此遗留进程。该授权只涉及这一次遗留清理。
 
 没有模型prompt/工具调用、登录或旧凭据提供；不把空目录当Windows隔离。没有改生产接口、数据库、WPF、旧包或管家实现。详情见[真实尝试记录](../evidence/claude-desktop/real-attempt-report.json)与[阶段交付](../evidence/claude-desktop/COMPLETION.md)。下一入口为遗留清理及具有可验证所属进程句柄的正式Windows打包客户端启动方案，然后再考虑MCP握手；当前未接通。
