@@ -2,6 +2,7 @@
 export function summarizeClaudeAttempt({
   mcp,
   jobEmpty,
+  ownedRootExitObserved,
   existingClientsUnchanged,
   hostExitObserved,
   hostExitCode,
@@ -14,6 +15,7 @@ export function summarizeClaudeAttempt({
     fault: string | null;
   } | null;
   jobEmpty: boolean;
+  ownedRootExitObserved: boolean;
   existingClientsUnchanged: boolean;
   hostExitObserved: boolean;
   hostExitCode: number | null;
@@ -26,6 +28,7 @@ export function summarizeClaudeAttempt({
     mcp.fault === null;
   const cleanup =
     jobEmpty === true &&
+    ownedRootExitObserved === true &&
     existingClientsUnchanged === true &&
     hostExitObserved === true &&
     hostExitCode === 0 &&

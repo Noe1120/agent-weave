@@ -83,17 +83,16 @@ export async function prepareClaudeProbe(input: unknown) {
   if (!system || !isAbsolute(system)) throw new Error("CLAUDE_SYSTEMROOT");
   const root = await mkdtemp(join(c.data_root, "claude-probe-"));
   const dirs: Record<string, string> = {};
-  for (const n of [
-    "profile",
-    "user",
-    "appdata",
-    "localappdata",
-    "temp",
-    "work",
-  ]) {
+  for (const n of ["profile", "user", "temp", "work"]) {
     dirs[n] = join(root, n);
     await mkdir(dirs[n]!);
   }
+  // Windows SHGetFolderPath expands USERPROFILE and verifies these folders.
+  // APPDATA overrides alone do not create the native known-folder locations.
+  dirs.appdata = join(dirs.user!, "AppData", "Roaming");
+  dirs.localappdata = join(dirs.user!, "AppData", "Local");
+  await mkdir(dirs.appdata, { recursive: true });
+  await mkdir(dirs.localappdata, { recursive: true });
   const report = join(root, "mcp-report.json");
   const config = {
     mcpServers: {

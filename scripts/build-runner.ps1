@@ -6,3 +6,6 @@ if(!$Dotnet){$Dotnet=Join-Path $root '.tools/dotnet/dotnet.exe'}
 $env:DOTNET_CLI_TELEMETRY_OPTOUT='1';$env:DOTNET_NOLOGO='1'
 & $Dotnet build packages/runner/RunnerHost.csproj -c Release -o artifacts/runner-host
 if($LASTEXITCODE -ne 0){throw 'RunnerHost build failed'}
+
+& $Dotnet build tests/claude-host/Claude.ProbeHost.csproj -c Release -o artifacts/claude-probe-host
+if($LASTEXITCODE -ne 0){throw 'Claude probe host build failed'}

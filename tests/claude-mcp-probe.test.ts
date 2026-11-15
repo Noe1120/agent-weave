@@ -352,6 +352,7 @@ test("Job-empty never promotes a surviving original client to successful cleanup
   const r = summarizeClaudeAttempt({
     mcp: completeMcp,
     jobEmpty: true,
+    ownedRootExitObserved: true,
     existingClientsUnchanged: false,
     hostExitObserved: true,
     hostExitCode: 0,
@@ -365,6 +366,7 @@ test("missing MCP handshake is a real failed prerequisite even if cleanup succee
   const r = summarizeClaudeAttempt({
     mcp: null,
     jobEmpty: true,
+    ownedRootExitObserved: true,
     existingClientsUnchanged: true,
     hostExitObserved: true,
     hostExitCode: 0,
@@ -377,6 +379,7 @@ test("only actual handshake plus observed clean containment can pass feasibility
   const r = summarizeClaudeAttempt({
     mcp: completeMcp,
     jobEmpty: true,
+    ownedRootExitObserved: true,
     existingClientsUnchanged: true,
     hostExitObserved: true,
     hostExitCode: 0,
@@ -388,6 +391,7 @@ test("only actual handshake plus observed clean containment can pass feasibility
 test("unobserved host or explicit fault cannot become a successful attempt", () => {
   for (const extra of [
     { hostExitObserved: false },
+    { ownedRootExitObserved: false },
     { hostExitCode: 1 },
     { hostFault: "HOST_STDOUT" },
     { jobEmpty: false },
@@ -395,6 +399,7 @@ test("unobserved host or explicit fault cannot become a successful attempt", () 
     const r = summarizeClaudeAttempt({
       mcp: completeMcp,
       jobEmpty: true,
+      ownedRootExitObserved: true,
       existingClientsUnchanged: true,
       hostExitObserved: true,
       hostExitCode: 0,
@@ -405,7 +410,7 @@ test("unobserved host or explicit fault cannot become a successful attempt", () 
   }
 });
 
-test("known unqualified packaged lifetime prevents a fresh real retry before config read", async () => {
+test("fresh real entry refuses missing config before any launch", async () => {
   const dir = await mkdtemp(join(tmpdir(), "team-claude-stop-"));
   const output = join(dir, "attempt");
   const r = spawnSync(
@@ -421,6 +426,24 @@ test("known unqualified packaged lifetime prevents a fresh real retry before con
     { windowsHide: true, encoding: "utf8" },
   );
   assert.notEqual(r.status, 0);
-  assert.match(r.stderr, /CLAUDE_PACKAGED_LIFETIME_UNQUALIFIED/);
+  assert.match(r.stderr, /ENOENT/);
   assert.deepEqual(await readdir(output), []);
+});
+
+test("fresh Windows profile resolves both native app-data known folders inside its root", async () => {
+  const p = await prepareClaudeProbe(await installation());
+  const r = spawnSync(
+    resolve(".tools/dotnet/dotnet.exe"),
+    [
+      resolve("artifacts/claude-probe-host/Claude.ProbeHost.dll"),
+      "--known-folders",
+    ],
+    { env: p.env, windowsHide: true, encoding: "utf8" },
+  );
+  assert.equal(r.status, 0, r.stderr);
+  const known = JSON.parse(r.stdout);
+  assert.equal(known.roaming.toLowerCase(), p.env.APPDATA!.toLowerCase());
+  assert.equal(known.local.toLowerCase(), p.env.LOCALAPPDATA!.toLowerCase());
+  assert.ok(known.roaming.startsWith(p.root));
+  assert.ok(known.local.startsWith(p.root));
 });

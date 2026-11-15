@@ -13,6 +13,7 @@ export interface SessionProbeReport {
   session_id_sha256: string | null;
   stdin_eof: boolean;
   stderr_bytes: number;
+  streams_closed: boolean;
   exit: {
     code: number | null;
     signal: string | null;
@@ -65,12 +66,18 @@ export function probeFreshSession(
       session_id_sha256: null,
       stdin_eof: false,
       stderr_bytes: 0,
+      streams_closed: false,
       exit: { code: null, signal: null, observed: false, forced: false },
     };
     let sessionId: string | null = null,
       expectedId = 0,
       pending = Buffer.alloc(0),
       stdoutBytes = 0;
+    let rootExit: {
+      code: number | null;
+      signal: string | null;
+      observed: boolean;
+    } = { code: null, signal: null, observed: false };
     let ended = false,
       closing = false;
     let requestTimer: NodeJS.Timeout | undefined,
@@ -80,6 +87,7 @@ export function probeFreshSession(
       code: number | null,
       signal: string | null,
       observed: boolean,
+      streamsClosed = false,
     ) {
       if (ended) return;
       ended = true;
@@ -87,6 +95,8 @@ export function probeFreshSession(
       clearTimeout(closeTimer);
       clearTimeout(finalTimer);
       report.exit = { code, signal, observed, forced: report.exit.forced };
+      report.streams_closed = streamsClosed;
+      if (observed && !streamsClosed) report.fault ??= "DSH_PIPE_TIMEOUT";
       if (pending.length) report.fault ??= "DSH_PROTOCOL";
       if (code !== 0 || !closing) report.fault ??= "DSH_EXIT";
       report.outcome = !observed
@@ -106,11 +116,18 @@ export function probeFreshSession(
       child.stdin.end();
       closeTimer = setTimeout(() => {
         if (ended) return;
-        report.fault ??= "DSH_EOF_TIMEOUT";
-        report.exit.forced = true;
-        // Only this owned handle, never a persisted PID or an attached Desktop process.
-        child.kill();
-        finalTimer = setTimeout(() => finish(null, null, false), 2000);
+        report.fault ??= rootExit.observed
+          ? "DSH_PIPE_TIMEOUT"
+          : "DSH_EOF_TIMEOUT";
+        if (!rootExit.observed) {
+          report.exit.forced = true;
+          // Only this owned handle, never a persisted PID or an attached Desktop process.
+          child.kill();
+        }
+        finalTimer = setTimeout(
+          () => finish(rootExit.code, rootExit.signal, rootExit.observed),
+          2000,
+        );
       }, closeMs);
     }
     function fail(code: string) {
@@ -260,6 +277,11 @@ export function probeFreshSession(
       if (!closing) fail(pending.length ? "DSH_PROTOCOL" : "DSH_DISCONNECTED");
     });
     child.once("error", () => fail("DSH_LAUNCH"));
-    child.once("close", (code, signal) => finish(code, signal, true));
+    child.once("exit", (code, signal) => {
+      rootExit = { code, signal, observed: true };
+    });
+    child.once("close", (code, signal) =>
+      finish(code, signal, rootExit.observed, true),
+    );
   });
 }

@@ -30,4 +30,4 @@ W07的source-manifest、before-manifest和evidence-manifest是该阶段完成时
 
 ## Claude Desktop独立MCP尝试
 
-[W13记录](claude-desktop/COMPLETION.md)分开登记合成协议通过和真实连接失败。官方Desktop启动后未见MCP握手，所属开发Job已空仍有本次进程待处理。仅公开5份审核文本，原profile、日志、启动参数、PID快照和安装源码不上网。
+[W13记录](claude-desktop/COMPLETION.md)保留首次失败，并追加遗留清理和三次真实重试。Windows目录初始化及根句柄回收已修复，后两次正常启动、重试均清理通过；未登录的独立profile仍未发起MCP。仅公开5份审核文本，原profile、日志、参数、PID和第三方checkout留本机。

@@ -94,7 +94,7 @@ for (const [mode, fault] of [
           ["initialize", "session/new", "session/close"].includes(s),
         ),
       );
-      assert.equal(report.exit.observed, true);
+      assert.equal(report.exit.observed, true, JSON.stringify(report));
       assert.equal(report.stdin_eof, true);
       assert.doesNotMatch(JSON.stringify(report), /private-secret/);
       if (mode === "permission" || mode === "missing-session")
@@ -291,4 +291,14 @@ test("live entry rejects missing authorization and existing attempt folder befor
   assert.notEqual(repeat.status, 0);
   assert.match(repeat.stderr, /EEXIST/);
   assert.deepEqual(await readdir(root), []);
+});
+
+test("fresh session records actual root exit while a descendant holds output pipes", async () => {
+  const { report } = await run("permission-held-pipe");
+  assert.equal(report.fault, "DSH_SERVER_REQUEST");
+  assert.equal(report.outcome, "FAILED");
+  assert.equal(report.exit.observed, true);
+  assert.equal(report.exit.forced, false);
+  assert.equal(report.exit.code, 0);
+  assert.equal(report.streams_closed, false);
 });

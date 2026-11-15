@@ -42,5 +42,30 @@
     "Static profile handling does not establish runtime isolation or no-network behavior.",
     "No supported ACP session/new equivalent was established for this Desktop integration."
   ],
-  "copyright": "Only hashes and original analysis retained; no third-party installation source uploaded."
+  "copyright": "Only hashes and original analysis retained; no third-party installation source uploaded.",
+  "retry_research": {
+    "date": "2026-11-15",
+    "sources": [
+      {
+        "url": "https://learn.microsoft.com/en-us/windows/win32/procthread/job-objects",
+        "topic": "explicit process Job association and nested-job limitations"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/chromium/chromium/main/base/base_paths_win.cc",
+        "sha256": "1fc4f76134a918d3ddb8f9ac9ee77edd89bab2b2023722df17b25d9390bf19ca",
+        "topic": "DIR_ROAMING_APP_DATA resolves through SHGetFolderPath"
+      },
+      {
+        "url": "https://github.com/stablyai/orca/blob/af82fa8634e19c0376738ad636237aac847b2179/src/main/providers/foreground/windows/agent-process.ts",
+        "sha256": "4bd5617680456953bb13b2426e769dc555fccb3bc3129bef21c8086a94163428"
+      },
+      {
+        "url": "https://github.com/stablyai/orca/blob/af82fa8634e19c0376738ad636237aac847b2179/src/main/claude/structured/claude-structured-session-adapter.ts",
+        "sha256": "3636ee950ccd001a322dc42f996b617b8ccbf433f841aedb971a12533f963521"
+      }
+    ],
+    "installed_static_observation": "Pinned main process handles MCP connection requests from mainView; no direct invocation, code patches or development-test hooks used",
+    "known_folder_api": "SHGetFolderPath(CSIDL_APPDATA/CSIDL_LOCAL_APPDATA)",
+    "not_a_latest_version_claim": true
+  }
 }

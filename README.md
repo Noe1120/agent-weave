@@ -145,4 +145,4 @@ W06/W07已提供开发态Broker、逻辑单写者、真实Git证据链和自有�
 
 ## Claude Desktop接入尝试 · 2026-11-15
 
-[W13](plan/W13-CLAUDE-DESKTOP-MCP-PROBE.md)已完成空能力MCP探针与一次官方Desktop 5.11492.2真实尝试。尚未接通：未见MCP握手，且开发Job清空后本次Claude进程仍存活，清理待确认。test:claude:live已明确拒绝重试；生产服务、WPF与管家不变。见[真实失败证据与下一入口](evidence/claude-desktop/COMPLETION.md)。
+[W13](plan/W13-CLAUDE-DESKTOP-MCP-PROBE.md)已定位并修复空profile的Windows已知文件夹缺失，以及打包客户端根句柄/退出观测缺口。累计四次真实尝试，后两次正常启动，三次重试全部清理通过且原DSH不变。仍未接通MCP：独立profile未登录，页面没有发起连接请求。下一步需要用户参与验证专用profile登录，不发模型prompt。见[证据与下一入口](evidence/claude-desktop/COMPLETION.md)。

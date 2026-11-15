@@ -1,3 +1,4 @@
+import { spawn } from "node:child_process";
 import { createInterface } from "node:readline";
 const mode = process.argv[2] ?? "ok";
 const sessionId = "a65577b1-04d9-4e6e-83db-8fe306bcd401";
@@ -39,7 +40,13 @@ reader.on("line", (line) => {
     if (mode === "long-frame")
       return process.stdout.write("x".repeat(65537) + "\n");
     if (mode === "stderr-flood") return process.stderr.write("x".repeat(65537));
-    if (mode === "permission")
+    if (mode === "permission-held-pipe")
+      spawn(process.execPath, ["-e", "setTimeout(()=>{},4200)"], {
+        detached: true,
+        windowsHide: true,
+        stdio: ["ignore", 1, 2],
+      }).unref();
+    if (mode === "permission" || mode === "permission-held-pipe")
       return output({
         jsonrpc: "2.0",
         id: 77,

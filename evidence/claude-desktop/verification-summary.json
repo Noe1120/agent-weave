@@ -2,15 +2,15 @@
   "date": "2026-11-15",
   "timezone": "Asia/Tokyo",
   "phase": "W13_CLAUDE_DESKTOP_MCP_PROBE",
-  "overall": "REAL_CONNECTION_FAILED_CLEANUP_PENDING",
+  "overall": "STARTUP_AND_CLEANUP_FIXED_MCP_PENDING_AUTH_PREREQUISITE",
   "service": {
     "command": "npm run verify",
     "exit_code": 0,
-    "tests": 384,
-    "pass": 384,
+    "tests": 390,
+    "pass": 390,
     "fail": 0,
     "skip": 0,
-    "synthetic_claude_tests": 32,
+    "synthetic_claude_tests": 37,
     "compiled_smoke": "PASS",
     "real_clients_started_by_verify": 0
   },
@@ -26,14 +26,18 @@
     "rebuilt": false
   },
   "real_attempt": {
-    "count": 1,
+    "count": 4,
     "version": "5.11492.2",
     "process_started": true,
+    "startup_fixed": true,
+    "app_ready_observed": true,
     "mcp_handshake": false,
-    "cleanup_confirmed": false,
-    "remaining_probe_processes": 1,
+    "cleanup_confirmed": true,
+    "remaining_probe_processes": 0,
     "existing_dsh_processes_unchanged": true,
-    "retry_disabled": true
+    "retries_without_login": 3,
+    "next_prerequisite": "User-authorized dedicated-profile login remains unverified",
+    "normal_desktop_exit": false
   },
   "design": {
     "status": "PASS",
@@ -54,14 +58,29 @@
   "os_isolation": "NOT_TESTED",
   "review": "AUTHOR_SELF_REVIEW_NOT_INDEPENDENT",
   "logs": {
-    "service_sha256": "cd06d90a4a434ddabae22f2975e4db8eebde3a522a7bede6abf906bf7ca89937",
-    "native_sha256": "e95a483e654c5ddfc46d653560c2f4c62b291c91891f9c60706e8818b9cbb0f4",
+    "service_sha256": "f0e863b9df49e1a9ade50835cff65772169323c21bea06b815d5ae95ad02a458",
+    "first_service_failure_sha256": "88cae4516a61bbe00fac7bcf384665a16b9b60fdb0c6f950643b51084335d3a2",
+    "native_sha256": "392b6c32ce6ab8dbde9894e708bf901d7e429abbae604771ee46d19b62e3acd6",
     "package_sha256": "77c06975809839528ad44681a225adfd36628db49898b4eac30815809a5f75dd",
     "design_sha256": "569329aca03afd4c83908b5854dcd29f2a4bb5c2d9b920e57905025504aafbcd",
-    "p0_sha256": "fc1ccb0f7e810d407b10e6d8a99b95a0b57f8f0d2876b1a2940bdd4f3612bf0a"
+    "p0_sha256": "37103baa268d6e713ebd6487944ce8447448029a7bd9124d797d4d5afac47139",
+    "known_folder_red_sha256": "b94eba84a1931ce8f1ce392de03efdb7ead5d4de0f6bf027622d420296c6ce19",
+    "known_folder_green_sha256": "c83f8449a1c9c3b0f76a3281103f1305efe62908a4388ab2126962c2ea4c1519",
+    "dsh_exit_red_sha256": "500e8a4a6aae712e390a4546ecdb901e5b11ca3ac02213d63ddd3ad6baf4b1b6",
+    "dsh_exit_green_sha256": "9d329256c6c64b0e9941f198523d61630eeb193fbf239738f24809b87d04d093"
   },
   "warnings": [
     "Node SQLite experimental warning remains visible.",
-    "32 synthetic passes do not qualify the real Desktop transport or lifetime."
-  ]
+    "37 synthetic Claude passes do not qualify real MCP transport or OS isolation.",
+    "Real Desktop listener and renderer warnings preserved locally.",
+    "DSH probe helper changed, production DSH controller unchanged; no extra real DSH execution."
+  ],
+  "first_full_run": {
+    "tests": 389,
+    "pass": 388,
+    "fail": 1,
+    "skip": 0,
+    "failure": "DSH acceptance permission rejection did not observe root exit; retained original failure log",
+    "response": "Reproduced close-versus-exit gap with detached synthetic pipe holder; separately record root exit and stream closure; no success while streams remain open"
+  }
 }
