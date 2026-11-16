@@ -1,7 +1,7 @@
 # W14 Codex app-server 接入（真实闭环已通过，生产资格未升）
 
 > 2026-11-16，Asia/Tokyo。基线 `4949a2f`（connect.md 交接提交），本条在隔离分支 `feat/claude-desktop-mcp-probe` 上实施。
-> **状态：REAL_CLIENT_CLOSED_LOOP_PASS + PASS_SYNTHETIC。** 已用本机固定 `codex.exe`（`0.167.0-alpha.3.2`）完成真实 initialize、真实原生 thread、真实一条 turn、真实一次平台只读工具往返（`task_get`）、1000 次纯只读进度、所属进程正常退出、撤权与关闭对账；原 12 个客户端进程前后不变。**模型是本地回环 Responses 桩**（无凭据、无外发、无计费），因此真实厂商模型 turn、已有桌面聊天附着、Windows 强制隔离、原生 UI 与完整 L1–L3 仍为 NOT_RUN。
+> **状态：REAL_CLIENT_CLOSED_LOOP_PASS（本地模型桩）+ 真实厂商模型支线 FAILED_AT_MODEL_TOOL_SELECTION（4 次尝试，预算内停止）。** 已用本机固定 `codex.exe`（`0.167.0-alpha.3.2`）完成真实 initialize、真实原生 thread、真实一条 turn、真实一次平台只读工具往返（`task_get`）、1000 次纯只读进度、所属进程正常退出、撤权与关闭对账；原 12 个客户端进程前后不变。厂商模型支线的 4 次真实 turn 全部**没有**调用平台工具（桥每次握手成功、`tool_calls=0`），平台验收逐次判 FAIL，没有把任何一次写成成功。
 
 Spec：connect.md §6（C1–C6）、[03 §4](03-agent-integration.md)、[09](09-review-closure-and-gates.md)、[12](12-protocol-closure-and-validation.md)、[W08](W08-ADAPTER-FOUNDATION.md)、[W11](W11-DSH-ACP-LIFECYCLE.md)、[W12](W12-DSH-SESSION-PREFLIGHT.md)、[W13](W13-CLAUDE-DESKTOP-MCP-PROBE.md)、根 AGENTS.md。
 
@@ -19,7 +19,7 @@ Spec：connect.md §6（C1–C6）、[03 §4](03-agent-integration.md)、[09](09
 | 纯只读进度 | **PASS**：1000 次读取，DB 写入 0 |
 | 关闭/退出 | **PASS**：exit 0、`forced=false`、`exit_observed=true`；原客户端进程 12→12 |
 | 撤权 | 合成回归覆盖（真实运行中未撤权） |
-| 真实厂商模型 turn | NOT_RUN（需要用户 provider 凭据复用授权与费用确认） |
+| 真实厂商模型调用平台工具 | **FAILED_AT_MODEL_TOOL_SELECTION**（4 次，见 §5.2；预算内停止） |
 | 已有桌面聊天附着 `attached_session` | NOT_RUN，且不以新 thread 冒充 |
 | Windows 强制隔离 / 原生 UI / 完整 L1–L3 | NOT_RUN / UNVERIFIED |
 
@@ -83,6 +83,23 @@ Spec：connect.md §6（C1–C6）、[03 §4](03-agent-integration.md)、[09](09
 
 首次实现与真实首跑暴露的真实缺陷（保留，不改成通过）：信封字段（`jsonrpc`、`protocolVersion`）与文档不符；`inProgress` 曾被误映射为 completed；`thread/start` 缺 `approvalPolicy` 会走人工审批；MCP 工具名形状被猜错两次（先扁平名被拒，再 namespace 名被接受）；task id 抽取曾命中无关 UUID 导致桥按范围拒绝（`tool_errors=1`）。以上均按根因修复并补回归。
 
+## 5.2 真实厂商模型支线（4 次尝试，预算内停止）
+
+操作者授权「继续接入，总费用 10 元以内」。使用其本机 CC Switch 回环路由（`127.0.0.1:15721`，provider 块复制进本次全新的隔离 home，凭据从不进入任何报告），发起了 4 次真实 turn：
+
+| 次 | tokens | 结果 |
+| --- | --- | --- |
+| 1 | 30,891 | turn completed；模型称 `agent-weave-probe.task_get` 不在可调用工具里，误调无关工具 |
+| 2 | 17,692 | 同上；模型称命名空间调用不可用，误调两次 |
+| 3 | 17,827 | 模型误调 agent-list 工具 |
+| 4 | 22,035 | 给出单行 `functions.exec` 代码后仍误调其他工具 |
+
+合计 88,445 tokens（按常见每百万 token 单价约 1 元量级，远低于 10 元上限；该 route 自身账单在本机不可观测）。**4 次都没有发生平台工具调用**：桥每次握手成功（`initialized=true`、`fault=null`），`tool_calls` 恒为 0。
+
+根因证据（来自客户端自己的 rollout，零成本获得）：该模型下客户端只暴露 **code 模式**工具面——命名空间仅 `functions`(exec/wait/request_user_input*)、`clock`(sleep)、`collaboration`(spawn_agent/…)，平台 MCP server 不作为独立命名空间出现；而同一客户端在模型无本地元数据时会直接暴露 `mcp__agent_weave_probe` 命名空间并成功调用（§5 的桩运行）。即：**工具可达路径变成 `functions.exec` 内的 `tools.mcp__agent_weave_probe.task_get`，而该模型在四次不同措辞下都没有走进去**。
+
+这不是平台缺陷：同一套平台代码、桥、grant、任务与服务在真实客户端上已产生真实的工具往返；每次失败都被平台自己的验收判为 FAIL，没有一次被记成成功。停止投入的理由是模型侧工具选择不稳定，继续加钱不改变结论。
+
 ## 6. 失败与未知的处理口径
 
 | 情形 | 记录 | 不得声称 |
@@ -97,7 +114,7 @@ Spec：connect.md §6（C1–C6）、[03 §4](03-agent-integration.md)、[09](09
 
 ## 7. 仍未完成（下一步入口）
 
-1. **真实厂商模型 turn**：需要用户授权复用本机 provider 配置与令牌副本（放进自有临时 home）以及费用未知确认。当前只有本地桩通过的记录，不能替代。
+1. **真实厂商模型的工具调用**：已按授权尝试 4 次（88,445 tokens），全部止于模型侧工具选择，见 §5.2。可选下一步：固定线程工具面（有开关即用，需先验证）、换用直接暴露 MCP 工具的路由、或把「模型是否调用平台工具」单列为行为资格项。
 2. **已有桌面聊天附着**（`attached_session`）：未实现，需另行验证；不以新 thread 冒充。
 3. **真实 turn/interrupt 与忙碌排队**：仅合成覆盖。
 4. **Windows 强制隔离、原生 UI、原生点击/视觉、完整 L1–L3**：UNVERIFIED。

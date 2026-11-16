@@ -112,11 +112,22 @@ const active = (state: CodexState) =>
   ["starting", "ready", "turning", "closing"].includes(state);
 /** The only instruction this module can ever send. The task id comes from the grant. */
 export function syntheticInstruction(taskId: string): string {
+  // One instruction, one tool, two real surfaces: a direct MCP function, or the
+  // client's code-mode orchestrator `functions.exec` whose `tools.*` holds the
+  // same MCP functions. The installed client picks the surface from the model
+  // metadata, so both are named and no third tool is offered.
   return (
-    "Call the agent-weave-probe tool task_get exactly once with task_id " +
+    "Use exactly one tool and nothing else. " +
+    "If you have the MCP tool mcp__agent_weave_probe.task_get, call it once with " +
+    '{ "task_id": "' +
     taskId +
-    ". Do not read project files, do not browse, do not call any other tool, " +
-    "do not retry. Reply with the returned task id and status."
+    '" }. ' +
+    "Otherwise use functions.exec once with exactly: " +
+    'return await tools.mcp__agent_weave_probe.task_get({ task_id: "' +
+    taskId +
+    '" }); ' +
+    "Then reply with the returned task id and status. Do not use clock, " +
+    "collaboration or any other tool."
   );
 }
 function requestOf(value: unknown, kind: "start" | "turn" | "revision") {
@@ -553,6 +564,7 @@ export class CodexRuntimeController {
       initialize_schema: r.data.initialize?.schema ?? null,
       instruction_profile: r.data.instruction_profile,
       last_agent_message: live?.last_agent_message ?? null,
+      token_usage: live?.token_usage ?? null,
       turn: r.data.turn
         ? {
             id_sha256: r.data.turn.id

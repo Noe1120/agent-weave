@@ -1,6 +1,11 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { createHash } from "node:crypto";
-import { createReadStream, appendFileSync } from "node:fs";
+import {
+  appendFileSync,
+  createReadStream,
+  existsSync,
+  readFileSync,
+} from "node:fs";
 import { lstat, mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import {
@@ -39,6 +44,8 @@ export interface CodexStatistics {
   turn_state: "none" | "running" | "completed" | "failed" | "interrupted";
   /** Last assistant message text, bounded; null until one is completed. */
   last_agent_message: string | null;
+  /** Token usage reported by the client for this thread; cost evidence only. */
+  token_usage: { total: number; input: number; output: number } | null;
 }
 export interface CodexExit {
   code: number | null;
@@ -157,6 +164,7 @@ export class CodexAppServer implements CodexHandle {
     last_method: null,
     turn_state: "none",
     last_agent_message: null,
+    token_usage: null,
   };
   private child: ChildProcessWithoutNullStreams;
   private resolveReady!: (value: CodexInitialize) => void;
@@ -433,6 +441,27 @@ export class CodexAppServer implements CodexHandle {
       else countOnce(this.statistics.unknown_notifications, "turn/completed");
       return;
     }
+    if (method === "thread/tokenUsage/updated") {
+      try {
+        const total = object(
+          object(object(frame.params ?? {}).tokenUsage).total,
+        );
+        const pick = (k: string) => {
+          const v: unknown = total[k];
+          return typeof v === "number" &&
+            Number.isSafeInteger(v) &&
+            v >= 0 &&
+            v <= 100000000
+            ? v
+            : null;
+        };
+        const out = pick("outputTokens"),
+          input = pick("inputTokens"),
+          sum = pick("totalTokens");
+        if (out !== null && input !== null && sum !== null)
+          this.statistics.token_usage = { total: sum, input, output: out };
+      } catch {}
+    }
     if (method === "item/completed") {
       let item;
       try {
@@ -557,38 +586,99 @@ interface CodexProfile {
   executable_sha256: string;
   model_provider?: { base_url: string; model: string };
   bridge?: { config_path: string; report_dir: string };
+  provider_reuse?: {
+    source_config: string;
+    provider_id: string;
+    sha256: string;
+  };
 }
 const loopback = (v: unknown): v is string =>
   typeof v === "string" &&
   /^http:\/\/127\.0\.0\.1:[1-9][0-9]{0,4}$/.test(v) &&
   Number(v.split(":").at(-1)) <= 65535;
+/** Same rule, but a path suffix is allowed for a provider base URL (/v1…). */
+const loopbackBase = (v: unknown): v is string =>
+  typeof v === "string" &&
+  /^http:\/\/127\.0\.0\.1:[1-9][0-9]{0,4}(\/[A-Za-z0-9._\-\/]{0,64})?$/.test(
+    v,
+  ) &&
+  Number(v.split(":")[2]?.split("/")[0] ?? 0) <= 65535;
+function tomlString(v: string) {
+  return JSON.stringify(v);
+}
+/** Read one `key = "value"` from a section of an operator-supplied TOML file. */
+export function tomlSectionValue(
+  text: string,
+  section: string | null,
+  key: string,
+): string | null {
+  let current: string | null = null;
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith("#")) continue;
+    const header = line.match(/^\[([^\]]+)\]$/);
+    if (header) {
+      current = header[1] ?? null;
+      continue;
+    }
+    if (current !== section) continue;
+    const kv = line.match(/^([A-Za-z0-9_.-]+)\s*=\s*(.*)$/);
+    if (!kv || kv[1] !== key) continue;
+    const value = (kv[2] ?? "").replace(/\s+#.*$/, "").trim();
+    const quoted = value.match(/^"(.*)"$/s) ?? value.match(/^'(.*)'$/s);
+    if (quoted) {
+      try {
+        return JSON.parse('"' + (quoted[1] ?? "") + '"');
+      } catch {
+        return null;
+      }
+    }
+    // Bare TOML scalars (booleans, integers) are returned verbatim.
+    return /^(true|false|-?[0-9]+(\.[0-9]+)?)$/.test(value) ? value : null;
+  }
+  return null;
+}
 /**
  * The isolated home configuration this platform writes for itself.
  *
- * Only three things can appear: a loopback model endpoint, the platform's own
- * stdio read bridge, and fixed non-secret defaults. No user configuration,
- * credential, plugin, marketplace or MCP server of the installed client is
- * copied. `bridge.command` is the running Node executable and `bridge.args` is
- * the platform's own compiled entry, both fixed by the trusted caller.
+ * Only three things can appear: a loopback model endpoint (a local stub, or the
+ * operator's own loopback provider when they authorized reuse), the platform's
+ * own stdio read bridge, and fixed non-secret defaults. No user plugin,
+ * marketplace, approval, sandbox or MCP entry of the installed client is copied.
+ * `bridge.command` is the running Node executable and `bridge.args` is the
+ * platform's own compiled entry, both fixed by the trusted caller.
  */
 export function codexHomeConfig(input: {
-  model_provider?: { base_url: string; model: string };
+  model_provider?: {
+    base_url: string;
+    model: string;
+    bearer_token?: string;
+    label?: string;
+  };
   bridge?: { command: string; args: string[] };
 }): string {
   const lines: string[] = [];
   if (input.model_provider) {
-    const { base_url, model } = input.model_provider;
-    contract(loopback(base_url) && label(model));
+    const { base_url, model, bearer_token, label: name } = input.model_provider;
+    contract(loopbackBase(base_url) && label(model));
+    const providerId = name ? "agent-weave-reuse" : "agent-weave-loopback";
+    const token = bearer_token ?? "synthetic-local-only";
+    contract(
+      typeof token === "string" && token.length > 0 && token.length <= 4096,
+    );
     lines.push(
-      "model = " + JSON.stringify(model),
-      'model_provider = "agent-weave-loopback"',
+      "model = " + tomlString(model),
+      "model_provider = " + tomlString(providerId),
       "",
-      "[model_providers.agent-weave-loopback]",
-      'name = "agent-weave loopback acceptance"',
-      "base_url = " + JSON.stringify(base_url),
+      "[model_providers." + providerId + "]",
+      "name = " + tomlString(name ?? "agent-weave loopback acceptance"),
+      "base_url = " + tomlString(base_url),
       'wire_api = "responses"',
       "requires_openai_auth = false",
-      'experimental_bearer_token = "synthetic-local-only"',
+      "experimental_bearer_token = " + tomlString(token),
+      // One turn must not fan out into provider-level retries: that is cost.
+      "request_max_retries = 0",
+      "stream_max_retries = 0",
     );
   }
   if (input.bridge) {
@@ -606,6 +696,42 @@ export function codexHomeConfig(input: {
   return lines.length ? lines.join("\n") + "\n" : "";
 }
 /**
+ * Copy only the provider block of an operator-authorized config into the fresh
+ * home. Rejects anything that is not a loopback Responses provider.
+ */
+function reuseProvider(reuse: CodexProfile["provider_reuse"]): {
+  base_url: string;
+  model: string;
+  bearer_token: string;
+  label: string;
+} {
+  contract(reuse);
+  const text = readFileSync(reuse.source_config, "utf8").replace(/^\uFEFF/, "");
+  const section = "model_providers." + reuse.provider_id;
+  const baseUrl = tomlSectionValue(text, section, "base_url");
+  const wire = tomlSectionValue(text, section, "wire_api");
+  const auth = tomlSectionValue(text, section, "requires_openai_auth");
+  const token = tomlSectionValue(text, section, "experimental_bearer_token");
+  const model = tomlSectionValue(text, null, "model");
+  const selected = tomlSectionValue(text, null, "model_provider");
+  contract(
+    loopbackBase(baseUrl) &&
+      wire === "responses" &&
+      auth === "false" &&
+      typeof token === "string" &&
+      token.length > 0 &&
+      token.length <= 4096 &&
+      label(model) &&
+      selected === reuse.provider_id,
+  );
+  return {
+    base_url: baseUrl,
+    model,
+    bearer_token: token,
+    label: "agent-weave provider reuse (loopback, operator-authorized)",
+  };
+}
+/**
  * Trusted controller configuration only. The launcher always creates a fresh
  * CODEX_HOME; when a loopback model provider or the platform bridge is
  * configured it writes only those entries into that fresh home. No user
@@ -620,7 +746,7 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
       "client_version",
       "executable_sha256",
     ],
-    optional = ["model_provider", "bridge"];
+    optional = ["model_provider", "bridge", "provider_reuse"];
   contract(
     required.every((k) => Object.hasOwn(o, k)) &&
       Object.keys(o).length <= required.length + optional.length &&
@@ -639,6 +765,19 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
       Object.keys(m).length === 2 && loopback(m.base_url) && label(m.model),
     );
   }
+  if (o.model_provider !== undefined && o.provider_reuse !== undefined)
+    contract(false);
+  if (o.provider_reuse !== undefined) {
+    const r = object(o.provider_reuse);
+    contract(
+      Object.keys(r).length === 2 &&
+        typeof r.source_config === "string" &&
+        isAbsolute(r.source_config) &&
+        existsSync(r.source_config) &&
+        typeof r.provider_id === "string" &&
+        /^[A-Za-z0-9_.-]{1,32}$/.test(r.provider_id),
+    );
+  }
   if (o.bridge !== undefined) {
     const b = object(o.bridge);
     contract(
@@ -655,6 +794,16 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
   if (p.bridge) {
     p.bridge.config_path = resolve(p.bridge.config_path);
     p.bridge.report_dir = resolve(p.bridge.report_dir);
+  }
+  if (p.provider_reuse) {
+    // The operator's config is read here only to pin its digest; the credential
+    // itself is read at launch, kept in memory, and never stored or reported.
+    const source = resolve(p.provider_reuse.source_config);
+    p.provider_reuse = {
+      source_config: source,
+      provider_id: p.provider_reuse.provider_id,
+      sha256: createHash("sha256").update(readFileSync(source)).digest("hex"),
+    };
   }
   const between = relative(p.installation_root, p.data_root);
   contract(
@@ -691,6 +840,10 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
         await unlinked(p.bridge.report_dir, false);
         await unlinked(bridgeEntry, true);
       }
+      // A reused provider block is validated before anything is created.
+      const modelProvider = p.provider_reuse
+        ? reuseProvider(p.provider_reuse)
+        : p.model_provider;
       if (!stillAuthorized())
         throw new AdapterFault("CODEX_AUTHORIZATION_CHANGED");
       await unlinked(p.data_root, false);
@@ -707,9 +860,9 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
       for (const d of Object.values(dirs)) await mkdir(d);
       const diagnostic = join(root, "stderr.log");
       await writeFile(diagnostic, "", { flag: "wx" });
-      if (p.model_provider || p.bridge) {
+      if (modelProvider || p.bridge) {
         const config = codexHomeConfig({
-          ...(p.model_provider ? { model_provider: p.model_provider } : {}),
+          ...(modelProvider ? { model_provider: modelProvider } : {}),
           ...(p.bridge
             ? {
                 bridge: {

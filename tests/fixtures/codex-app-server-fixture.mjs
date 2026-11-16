@@ -134,6 +134,16 @@ function onTurnStart(id) {
   later(() => notify("turn/started", { threadId, turn: { id: turnId } }), 5);
   later(
     () =>
+      notify("thread/tokenUsage/updated", {
+        threadId,
+        tokenUsage: {
+          total: { totalTokens: 120, inputTokens: 100, outputTokens: 20 },
+        },
+      }),
+    12,
+  );
+  later(
+    () =>
       notify("item/completed", {
         threadId,
         item: { type: "agentMessage", text: "synthetic reply" },

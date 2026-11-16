@@ -41,8 +41,8 @@
     "protocol": 11,
     "controller": 16,
     "read_connector": 4,
-    "launcher_config": 4,
-    "total": 35
+    "launcher_config": 7,
+    "total": 39
   },
   "commands": [
     {
@@ -55,7 +55,7 @@
       "command": "npm run verify",
       "status": "passed",
       "exit_code": 0,
-      "evidence": "474/474"
+      "evidence": "477/477"
     },
     {
       "command": "npm run test:native",
@@ -90,6 +90,12 @@
       "status": "passed",
       "exit_code": 0,
       "evidence": "REAL_CODEX_TOOL_ROUND_TRIP_PASS"
+    },
+    {
+      "command": "npm run test:codex:live -- --allow-codex-provider-reuse --provider-config <local> ... (4 attempts)",
+      "status": "failed",
+      "exit_code": 1,
+      "evidence": "turn completed but the model never called the platform tool; gate rejected every attempt"
     }
   ],
   "protocol_facts_from_client_schema": {
@@ -125,5 +131,15 @@
     "native UI and click acceptance"
   ],
   "author_self_review": true,
-  "independent_review": false
+  "independent_review": false,
+  "vendor_model_leg": {
+    "status": "FAILED_AT_MODEL_TOOL_SELECTION",
+    "authorization": "operator: continue the integration with total cost under 10 CNY",
+    "attempts": 4,
+    "total_tokens": 88445,
+    "bridge_connected_every_attempt": true,
+    "platform_tool_calls": 0,
+    "evidence": "evidence/codex/vendor-attempt-report.json",
+    "budget_status": "within limit; stopped after attempt 4"
+  }
 }

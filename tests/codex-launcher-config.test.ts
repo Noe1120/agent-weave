@@ -1,9 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { resolve } from "node:path";
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import {
   codexHomeConfig,
   officialCodexLauncher,
+  tomlSectionValue,
 } from "../packages/service/src/codex-app-server.ts";
 import { AdapterFault } from "../packages/service/src/adapter-contract.ts";
 
@@ -108,4 +111,119 @@ test("a valid profile yields a stable fingerprint that tracks the bridge", () =>
     },
   });
   assert.notEqual(withBridge.fingerprint, a.fingerprint);
+});
+
+test("only the requested provider key is read out of an operator config", () => {
+  const text = [
+    'model = "gpt-x"',
+    'model_provider = "custom"',
+    "disable_response_storage = true",
+    "[model_providers.custom]",
+    'name = "custom"',
+    'base_url = "http://127.0.0.1:15721/v1"',
+    'wire_api = "responses"',
+    'experimental_bearer_token = "local-only-token"',
+    "requires_openai_auth = false",
+    '[plugins."browser@openai-bundled"]',
+    "enabled = true",
+  ].join("\n");
+  assert.equal(
+    tomlSectionValue(text, "model_providers.custom", "base_url"),
+    "http://127.0.0.1:15721/v1",
+  );
+  assert.equal(
+    tomlSectionValue(
+      text,
+      "model_providers.custom",
+      "experimental_bearer_token",
+    ),
+    "local-only-token",
+  );
+  assert.equal(tomlSectionValue(text, null, "model"), "gpt-x");
+  // Bare TOML booleans are scalars too, not quoted strings.
+  assert.equal(
+    tomlSectionValue(text, "model_providers.custom", "requires_openai_auth"),
+    "false",
+  );
+  assert.equal(
+    tomlSectionValue(text, "model_providers.other", "base_url"),
+    null,
+  );
+  assert.equal(
+    tomlSectionValue(text, "model_providers.custom", "plugins"),
+    null,
+  );
+});
+test("a reused provider block must be a loopback Responses provider", () => {
+  const text = codexHomeConfig({
+    model_provider: {
+      base_url: "http://127.0.0.1:15721/v1",
+      model: "gpt-x",
+      bearer_token: "local-only-token",
+      label: "reuse",
+    },
+  });
+  assert.match(text, /model_provider = "agent-weave-reuse"/);
+  assert.match(text, /request_max_retries = 0/);
+  assert.match(text, /stream_max_retries = 0/);
+  assert.match(text, /experimental_bearer_token = "local-only-token"/);
+  assert.match(text, /base_url = "http:\/\/127\.0\.0\.1:15721\/v1"/);
+  for (const base_url of [
+    "https://api.openai.com/v1",
+    "http://10.0.0.1:15721/v1",
+    "http://localhost:15721/v1",
+    "http://127.0.0.1:99999/v1",
+  ])
+    assert.throws(
+      () =>
+        codexHomeConfig({
+          model_provider: { base_url, model: "gpt-x", bearer_token: "t" },
+        }),
+      (error: unknown) =>
+        error instanceof AdapterFault && error.code === "ADAPTER_CONTRACT",
+      base_url,
+    );
+});
+test("provider reuse is opt-in, exclusive with the local stub and needs a real file", () => {
+  const dir = mkdtempSync(join(tmpdir(), "codex-reuse-"));
+  const real = join(dir, "config.toml");
+  writeFileSync(real, 'model = "gpt-x"\nmodel_provider = "custom"\n', "utf8");
+  const a = officialCodexLauncher({
+    ...profile,
+    provider_reuse: { source_config: real, provider_id: "custom" },
+  });
+  const b = officialCodexLauncher({
+    ...profile,
+    provider_reuse: { source_config: real, provider_id: "custom" },
+  });
+  assert.equal(a.fingerprint, b.fingerprint);
+  // Different content means a different configuration fingerprint.
+  writeFileSync(real, 'model = "gpt-y"\nmodel_provider = "custom"\n', "utf8");
+  const c = officialCodexLauncher({
+    ...profile,
+    provider_reuse: { source_config: real, provider_id: "custom" },
+  });
+  assert.notEqual(c.fingerprint, a.fingerprint);
+  assert.throws(
+    () =>
+      officialCodexLauncher({
+        ...profile,
+        provider_reuse: { source_config: real, provider_id: "custom" },
+        model_provider: { base_url: "http://127.0.0.1:1", model: "m" },
+      }),
+    (error: unknown) =>
+      error instanceof AdapterFault && error.code === "ADAPTER_CONTRACT",
+  );
+  assert.throws(
+    () =>
+      officialCodexLauncher({
+        ...profile,
+        provider_reuse: {
+          source_config: join(dir, "missing.toml"),
+          provider_id: "custom",
+        },
+      }),
+    (error: unknown) =>
+      error instanceof AdapterFault && error.code === "ADAPTER_CONTRACT",
+  );
 });

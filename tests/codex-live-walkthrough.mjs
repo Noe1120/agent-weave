@@ -31,6 +31,8 @@ const { values } = parseArgs({
     "allow-codex-app-server-initialize": { type: "boolean" },
     "allow-codex-new-thread": { type: "boolean" },
     "allow-codex-synthetic-turn": { type: "boolean" },
+    "allow-codex-provider-reuse": { type: "boolean" },
+    "provider-config": { type: "string" },
     config: { type: "string" },
     output: { type: "string" },
   },
@@ -47,6 +49,23 @@ if (values["allow-codex-synthetic-turn"])
     true,
     "A turn needs its own thread authorization first",
   );
+if (values["allow-codex-provider-reuse"]) {
+  assert.equal(
+    values["allow-codex-new-thread"],
+    true,
+    "A vendor turn needs its own thread authorization first",
+  );
+  assert.equal(
+    values["allow-codex-synthetic-turn"],
+    true,
+    "A vendor turn is still one synthetic acceptance turn",
+  );
+  assert.ok(
+    values["provider-config"] && isAbsolute(values["provider-config"]),
+    "--provider-config must be an absolute path",
+  );
+}
+const vendorTurn = values["allow-codex-provider-reuse"] === true;
 assert.equal(process.platform, "win32");
 assert.ok(values.config && isAbsolute(values.config));
 assert.ok(values.output && isAbsolute(values.output));
@@ -128,6 +147,7 @@ try {
   let threadDigest = null;
   let turnState = null;
   let lastMessage = null;
+  let tokenUsage = null;
   let bridge = null;
   let toolCallSeen = null;
   let launcherFingerprint = null;
@@ -178,7 +198,19 @@ try {
       ...operator,
       bridge: { config_path: bridgeConfig, report_dir: reportDir },
     };
-    if (values["allow-codex-synthetic-turn"]) {
+    if (vendorTurn) {
+      // The operator's own loopback provider, read through a pinned provider block.
+      launcherInput.provider_reuse = {
+        source_config: values["provider-config"],
+        provider_id: "custom",
+      };
+      steps.push({
+        step: "provider_reuse",
+        provider_id: "custom",
+        kind: "operator-authorized loopback provider; exactly one turn",
+        cost: "unknown before the turn; token usage captured after it",
+      });
+    } else if (values["allow-codex-synthetic-turn"]) {
       // A local Responses-API stub: the only non-real participant.
       const portFile = out("mock-port.txt");
       mockState = out("mock-requests.jsonl");
@@ -194,7 +226,8 @@ try {
       const port = (await waitFor(portFile)).trim().replace("PORT=", "");
       launcherInput.model_provider = {
         base_url: `http://127.0.0.1:${port}`,
-        model: "agent-weave-mock",
+        // Only for a zero-cost tool-visibility probe of model-name gating.
+        model: process.env.MOCK_MODEL_NAME ?? "agent-weave-mock",
       };
       steps.push({
         step: "model_stub",
@@ -270,6 +303,7 @@ try {
       }
       turnState = view.turn?.state ?? "none";
       lastMessage = view.last_agent_message;
+      tokenUsage = view.token_usage ?? null;
       steps.push({
         step: "synthetic_turn",
         state: view.state,
@@ -337,6 +371,14 @@ try {
         "the platform read result never reached the model stub",
       );
       assert.equal(turnState, "completed", "the native turn did not complete");
+      if (vendorTurn) {
+        assert.ok(tokenUsage, "the client did not report token usage");
+        assert.ok(
+          tokenUsage.total > 0 && tokenUsage.total <= 200000,
+          "token usage is missing or implausible: " +
+            JSON.stringify(tokenUsage),
+        );
+      }
       assert.ok(
         lastMessage && lastMessage.includes(fixture.ids.task),
         "the native agent message did not carry the synthetic task id",
@@ -345,7 +387,7 @@ try {
         bridge.some((b) => b.tool_calls >= 1 && b.tool_errors === 0),
         "no bridge connection reported exactly the tool call",
       );
-    } else
+    } else if (!values["allow-codex-synthetic-turn"])
       assert.ok(
         bridge.every((b) => b.tool_calls === 0),
         "a thread-only run must not call a tool",
@@ -365,11 +407,13 @@ try {
   write("process-after.json", after);
   const unchanged = JSON.stringify(before) === JSON.stringify(after);
   report = {
-    status: values["allow-codex-synthetic-turn"]
-      ? "REAL_CODEX_TOOL_ROUND_TRIP_PASS"
-      : threadDigest
-        ? "REAL_CODEX_APP_SERVER_LIFECYCLE_PASS"
-        : "REAL_CODEX_APP_SERVER_INITIALIZE_PASS",
+    status: vendorTurn
+      ? "REAL_CODEX_VENDOR_TOOL_ROUND_TRIP_PASS"
+      : values["allow-codex-synthetic-turn"]
+        ? "REAL_CODEX_TOOL_ROUND_TRIP_PASS"
+        : threadDigest
+          ? "REAL_CODEX_APP_SERVER_LIFECYCLE_PASS"
+          : "REAL_CODEX_APP_SERVER_INITIALIZE_PASS",
     observed_at: new Date().toISOString(),
     platform_state:
       "synthetic isolated in-memory fixture; fresh CODEX_HOME per launch",
@@ -383,9 +427,12 @@ try {
       : null,
     native_agent_message_matches_task:
       lastMessage && fixture ? lastMessage.includes(fixture.ids.task) : null,
-    model: values["allow-codex-synthetic-turn"]
-      ? "local loopback Responses stub (the only non-real participant)"
-      : "not invoked",
+    model: vendorTurn
+      ? "operator loopback provider (real vendor route, exactly one turn)"
+      : values["allow-codex-synthetic-turn"]
+        ? "local loopback Responses stub (the only non-real participant)"
+        : "not invoked",
+    token_usage: tokenUsage,
     user_configuration_used: false,
     credentials_supplied: false,
     user_sessions_read: false,

@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "stage": "W14 codex vendor-model leg",
+  "observed_at": "2026-11-16T02:14:48.699Z",
+  "authorization": "operator asked to continue the integration with total cost under 10 CNY",
+  "provider_route": "operator's own loopback CC Switch route (127.0.0.1:15721), provider block copied into a fresh isolated CODEX_HOME; credential never read into any report",
+  "client": {
+    "cli_version": "0.167.0-alpha.3.2",
+    "model": "gpt-6.1-sol",
+    "platform_os": "windows"
+  },
+  "attempts": 4,
+  "total_tokens": 88445,
+  "cost": {
+    "basis": "the client's own thread_token_usage records from each isolated home",
+    "spent_tokens": 88445,
+    "money_estimate_cny": "well under the 10 CNY limit (order of 1 CNY at typical per-million-token pricing); the route's own billing is not observable from this machine",
+    "hourly_rate_unknown": true
+  },
+  "per_attempt": [
+    {
+      "attempt": 1,
+      "tokens": 30891,
+      "surfaces": [
+        "functions",
+        "clock",
+        "collaboration"
+      ],
+      "outcome": "no tool call; model reported task_get not among callable tools and called an unrelated sleep tool"
+    },
+    {
+      "attempt": 2,
+      "tokens": 17692,
+      "surfaces": [
+        "functions",
+        "clock",
+        "collaboration"
+      ],
+      "outcome": "no tool call; model reported the namespace call unavailable and called an unrelated tool twice"
+    },
+    {
+      "attempt": 3,
+      "tokens": 17827,
+      "surfaces": [
+        "functions",
+        "clock",
+        "collaboration"
+      ],
+      "outcome": "no tool call; model called the agent-list tool instead of the MCP tool"
+    },
+    {
+      "attempt": 4,
+      "tokens": 22035,
+      "surfaces": [
+        "functions",
+        "clock",
+        "collaboration"
+      ],
+      "outcome": "no tool call; model reported it called the wrong tool, with a one-line functions.exec instruction"
+    }
+  ],
+  "result": "FAILED_AT_MODEL_TOOL_SELECTION",
+  "what_worked_in_every_attempt": [
+    "real initialize",
+    "real native thread",
+    "real turn to completion",
+    "the platform stdio MCP bridge connected and completed its handshake (initialized=true, fault=null)",
+    "the isolated child exited 0 without force; the original 12 client processes were unchanged"
+  ],
+  "what_failed_in_every_attempt": [
+    "the model never invoked the platform tool, so bridge tool_calls stayed 0"
+  ],
+  "root_cause_evidence": {
+    "tool_surface": "with this model the client exposes only the code-mode surface: namespaces functions (exec/wait/request_user_input*), clock (sleep), collaboration (spawn_agent/…). The platform MCP server is not offered as its own namespace.",
+    "direct_surface_comparison": "with a model that has no client-side metadata (the local stub name), the same client offers the MCP server as its own namespace and the tool call succeeds",
+    "model_behavior": "the model chose clock/collaboration tools instead of functions.exec even when the instruction contained the exact one-line JavaScript",
+    "rejected_hypothesis": "the bridge was connected and its tools were listable via the MCP handshake in all four attempts"
+  },
+  "why_this_is_not_a_platform_defect": [
+    "the same platform code, bridge, grant, task and service produced a real tool round trip with this exact client (see real-attempt-report.json)",
+    "every attempt was recorded as FAILED by the platform's own gate; no fabricated success was accepted"
+  ],
+  "next_steps_without_spending": [
+    "pin the platform thread's tool surface if a supported switch exists (a probe with features.code_mode=false failed at the transport layer; not resolved)",
+    "or accept the code-mode surface and treat model tool selection as a behaviour qualification item",
+    "or use a provider/route whose model metadata exposes MCP tools directly"
+  ],
+  "budget_status": "within the 10 CNY limit; no further paid attempts made after attempt 4",
+  "author_self_review": true,
+  "independent_review": false
+}

@@ -59,7 +59,13 @@ test("real-shaped initialization, native thread, one turn and owned close", asyn
   assert.deepEqual(handle.statistics.unknown_notifications, [
     "turn/started",
     "item/completed",
+    "thread/tokenUsage/updated",
   ]);
+  assert.deepEqual(handle.statistics.token_usage, {
+    total: 120,
+    input: 100,
+    output: 20,
+  });
   assert.equal(handle.statistics.refused_server_requests, 0);
   assert.equal(handle.statistics.requests, 2);
   handle.close();

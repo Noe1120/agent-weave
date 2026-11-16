@@ -1,3 +1,11 @@
+# W14 Codex真实厂商模型支线 · 2026-11-16
+
+- 操作者授权继续接入并把费用控制在10元以内。经受控provider复用（复制本机CC Switch回环路由的provider块到全新隔离home，凭据不入报告）发起4次真实turn。
+- 4次turn均completed、桥均握手成功（initialized=true、fault=null），但**模型一次都没有调用平台工具**（tool_calls=0）。合计88,445 tokens，远低于预算上限，之后不再花钱。
+- 根因（取自客户端自己的rollout，零成本）：该模型下客户端只用code模式工具面（functions/clock/collaboration），MCP工具不在独立命名空间，只能经`functions.exec`的`tools.mcp__agent_weave_probe.task_get`调用；四次不同措辞（含单行JS）模型都误调其他工具。同一客户端在无模型元数据时直接暴露该命名空间并调用成功。
+- 平台侧未改动权限或验收口径：每次失败都被平台验收判FAIL，无一次记成成功。真实厂商模型工具调用记为FAILED_AT_MODEL_TOOL_SELECTION；桌面聊天附着、Windows隔离、UI、L1–L3仍NOT_RUN。
+- 新增：token用量投影（客户端`thread/tokenUsage/updated`→只读`token_usage`）、provider复用路径（四项必需+可选provider_reuse，TOML只取指定provider段、裸布尔支持、retries=0）、`--allow-codex-provider-reuse`入口；合成回归39项，全量477/477。
+
 # W14 Codex真实闭环 · 2026-11-16
 
 - 用本机固定`codex-cli 0.167.0-alpha.3.2`（`codex.exe` SHA-256已固定）完成真实initialize、真实原生thread（UUIDv7，平台只投影摘要）、一条真实turn、一次真实平台只读`task_get`往返：客户端经stdio MCP调用桥，平台HTTP服务返回`draft`，原生agent message复述同一任务ID与状态。
