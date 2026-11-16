@@ -112,22 +112,20 @@ const active = (state: CodexState) =>
   ["starting", "ready", "turning", "closing"].includes(state);
 /** The only instruction this module can ever send. The task id comes from the grant. */
 export function syntheticInstruction(taskId: string): string {
-  // One fixed instruction, no free text. It works whether the client exposes the
-  // MCP tool directly or only through its code-mode orchestrator: in code mode
-  // the model discovers the callable name inside \`tools\` instead of guessing it.
+  // Two real surfaces. In code mode the client's own `functions.exec` contract
+  // says nested tools are normalized identifiers, so the MCP call is
+  // `tools.mcp__<server>__<tool>` — not a dotted path and not an enumeration.
   return (
     "Read one platform task and report it. Use exactly one tool call. " +
-    "If the MCP tool mcp__agent_weave_probe__task_get is directly callable, " +
+    "If the MCP function mcp__agent_weave_probe__task_get is directly callable, " +
     'call it once with {"task_id":"' +
     taskId +
-    '"}. Otherwise use functions.exec once with exactly this code: ' +
-    "const names = Object.keys(tools); " +
-    "const key = names.find((k) => /task_get/.test(k)); " +
-    'if (!key) return "no task_get in " + names.join(","); ' +
-    'return await tools[key]({ task_id: "' +
+    '"}. ' +
+    "Otherwise call functions.exec exactly once with exactly this code: " +
+    'return await tools.mcp__agent_weave_probe__task_get({ task_id: "' +
     taskId +
     '" }); ' +
-    "Then reply with the returned task id and status. Do not use clock, " +
+    "Then reply with the returned task id and status. Do not call wait, sleep, " +
     "collaboration, shell or any other tool."
   );
 }

@@ -589,6 +589,7 @@ interface CodexProfile {
   provider_reuse?: {
     source_config: string;
     provider_id: string;
+    model?: string;
     sha256: string;
   };
 }
@@ -712,7 +713,7 @@ function reuseProvider(reuse: CodexProfile["provider_reuse"]): {
   const wire = tomlSectionValue(text, section, "wire_api");
   const auth = tomlSectionValue(text, section, "requires_openai_auth");
   const token = tomlSectionValue(text, section, "experimental_bearer_token");
-  const model = tomlSectionValue(text, null, "model");
+  const model = reuse.model ?? tomlSectionValue(text, null, "model");
   const selected = tomlSectionValue(text, null, "model_provider");
   contract(
     loopbackBase(baseUrl) &&
@@ -770,7 +771,12 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
   if (o.provider_reuse !== undefined) {
     const r = object(o.provider_reuse);
     contract(
-      Object.keys(r).length === 2 &&
+      Object.keys(r).length >= 2 &&
+        Object.keys(r).length <= 3 &&
+        Object.keys(r).every((k) =>
+          ["source_config", "provider_id", "model"].includes(k),
+        ) &&
+        (r.model === undefined || label(r.model)) &&
         typeof r.source_config === "string" &&
         isAbsolute(r.source_config) &&
         existsSync(r.source_config) &&
@@ -802,6 +808,7 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
     p.provider_reuse = {
       source_config: source,
       provider_id: p.provider_reuse.provider_id,
+      ...(p.provider_reuse.model ? { model: p.provider_reuse.model } : {}),
       sha256: createHash("sha256").update(readFileSync(source)).digest("hex"),
     };
   }

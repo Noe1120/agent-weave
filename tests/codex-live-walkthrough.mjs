@@ -33,6 +33,7 @@ const { values } = parseArgs({
     "allow-codex-synthetic-turn": { type: "boolean" },
     "allow-codex-provider-reuse": { type: "boolean" },
     "provider-config": { type: "string" },
+    "provider-model": { type: "string" },
     config: { type: "string" },
     output: { type: "string" },
   },
@@ -203,10 +204,14 @@ try {
       launcherInput.provider_reuse = {
         source_config: values["provider-config"],
         provider_id: "custom",
+        ...(values["provider-model"]
+          ? { model: values["provider-model"] }
+          : {}),
       };
       steps.push({
         step: "provider_reuse",
         provider_id: "custom",
+        model_override: values["provider-model"] ?? null,
         kind: "operator-authorized loopback provider; exactly one turn",
         cost: "unknown before the turn; token usage captured after it",
       });

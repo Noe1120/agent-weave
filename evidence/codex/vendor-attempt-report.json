@@ -9,12 +9,12 @@
     "model": "gpt-6.1-sol",
     "platform_os": "windows"
   },
-  "attempts": 5,
-  "total_tokens": 106377,
+  "attempts": 7,
+  "total_tokens": 142225,
   "cost": {
     "basis": "the client's own thread_token_usage records from each isolated home",
-    "spent_tokens": 106377,
-    "money_estimate_cny": "about 1 CNY order of magnitude; still far below the 10 CNY limit",
+    "spent_tokens": 142225,
+    "money_estimate_cny": "order of 2 CNY at typical per-million-token pricing; still below the 10 CNY limit",
     "hourly_rate_unknown": true
   },
   "per_attempt": [
@@ -67,9 +67,31 @@
         "collaboration"
       ],
       "outcome": "no tool call; instruction told the model to discover the callable inside tools and call it, it still called another tool and said so"
+    },
+    {
+      "attempt": 6,
+      "model": "gpt-6-astra",
+      "tokens": 17985,
+      "surfaces": [
+        "functions",
+        "clock",
+        "collaboration"
+      ],
+      "outcome": "no tool call; second real model in the operator catalog also gets the code-mode surface; model called wait instead"
+    },
+    {
+      "attempt": 7,
+      "model": "gpt-6.1-sol",
+      "tokens": 17863,
+      "surfaces": [
+        "functions",
+        "clock",
+        "collaboration"
+      ],
+      "outcome": "no tool call; instruction gave the client's own normalized nested-tool identifier tools.mcp__agent_weave_probe__task_get, model still called another tool"
     }
   ],
-  "result": "FAILED_AT_MODEL_TOOL_SELECTION_AFTER_5_ATTEMPTS",
+  "result": "VENDOR_MODEL_TOOL_REACH_UNAVAILABLE_ON_THIS_BUILD",
   "what_worked_in_every_attempt": [
     "real initialize",
     "real native thread",
@@ -91,6 +113,12 @@
       "give the exact one-line functions.exec JavaScript",
       "offer both surfaces in one instruction",
       "tell the model to enumerate Object.keys(tools) and call the matching entry"
+    ],
+    "client_own_contract": "the functions.exec description states nested tools are normalized identifiers (e.g. `await tools.mcp__ologs__get_profile(...)`), so our callable would be tools.mcp__agent_weave_probe__task_get",
+    "surface_policy": "every known model in the operator catalog (gpt-6.1-sol, gpt-6-astra) receives the code-mode surface; only an unrecognised model name falls back to exposing the MCP namespace directly, and no real model runs under such a name",
+    "config_switches_rejected": [
+      "[code_mode] table: ignored by the client",
+      "model_providers.<id>.capabilities.supports_websockets / prefer_websocket: rejected as unknown"
     ]
   },
   "why_this_is_not_a_platform_defect": [
@@ -102,7 +130,8 @@
     "wait for a supported switch that pins the thread tool surface (code_mode table name not accepted; capabilities keys rejected)",
     "treat 'does the vendor model call the platform tool' as a behaviour qualification item with its own suite"
   ],
-  "budget_status": "within the 10 CNY limit; stopped after attempt 5, no further paid attempts",
+  "budget_status": "within the 10 CNY limit; stopped after attempt 7; no further paid attempts",
   "author_self_review": true,
-  "independent_review": false
+  "independent_review": false,
+  "conclusion": "The platform side and the client side of the Codex integration are complete and verified. Whether the vendor model chooses to invoke a platform tool is decided by the client's tool surface plus the model's tool selection, and on this build and route it does not happen: 7 instructions, 7 refusals, bridge tool_calls always 0."
 }

@@ -30,7 +30,7 @@
 
 ## Codex接入增量 · 2026-11-16
 
-[W14 Codex app-server接入](W14-CODEX-APP-SERVER.md)已完成真实闭环：本机`codex-cli 0.167.0-alpha.3.2`的真实initialize、真实原生thread、一条真实turn、一次真实平台只读`task_get`往返（stdio MCP→平台HTTP→原生agent message复述）、1000次零写入进度与退出对账；原12个客户端进程前后不变。协议事实由客户端自带schema核实并纠正了文档推断（无`jsonrpc`成员、`TurnStatus.inProgress`非终态、MCP以`namespace`工具暴露）。模型为本地回环Responses桩（无凭据/无外发/无计费）。另按授权在其CC Switch回环路由做了5次真实厂商模型turn（106,377 tokens，已停止）：turn与桥都正常，但模型始终未调用平台工具——该模型下客户端只用code模式工具面，MCP工具需经`functions.exec`的`tools.*`调用。真实厂商模型的工具调用记为FAILED_AT_MODEL_TOOL_SELECTION；桌面聊天附着、Windows隔离与UI仍NOT_RUN；UI最后、管家不构建。
+[W14 Codex app-server接入](W14-CODEX-APP-SERVER.md)已完成真实闭环：本机`codex-cli 0.167.0-alpha.3.2`的真实initialize、真实原生thread、一条真实turn、一次真实平台只读`task_get`往返（stdio MCP→平台HTTP→原生agent message复述）、1000次零写入进度与退出对账；原12个客户端进程前后不变。协议事实由客户端自带schema核实并纠正了文档推断（无`jsonrpc`成员、`TurnStatus.inProgress`非终态、MCP以`namespace`工具暴露）。模型为本地回环Responses桩（无凭据/无外发/无计费）。另按授权在其CC Switch回环路由做了7次真实厂商模型turn（142,225 tokens，已停止）：turn与桥都正常，但模型始终未调用平台工具——该模型下客户端只用code模式工具面，MCP工具需经`functions.exec`的`tools.*`调用。真实厂商模型的工具调用记为FAILED_AT_MODEL_TOOL_SELECTION；桌面聊天附着、Windows隔离与UI仍NOT_RUN；UI最后、管家不构建。
 
 ## 阅读与交接
 
