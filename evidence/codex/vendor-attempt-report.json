@@ -131,7 +131,15 @@
     "config_switches_rejected": [
       "[code_mode] table: ignored by the client",
       "model_providers.<id>.capabilities.supports_websockets / prefer_websocket: rejected as unknown"
-    ]
+    ],
+    "five_way": {
+      "registration": "tools_list_requests=1 on the bridge",
+      "description_exposure": "exec nested-tools sentence present; top-level MCP namespace absent",
+      "call_encoding": "code-mode form tools.mcp__<server>__<tool>, unused in this attempt",
+      "route": "turn completed",
+      "model_selection": "the only function_call was functions.wait",
+      "evidence": "evidence/codex/vendor-tool-registration-2026-11-16.json"
+    }
   },
   "why_this_is_not_a_platform_defect": [
     "the same platform code, bridge, grant, task and service produced a real tool round trip with this exact client (see real-attempt-report.json)",
@@ -164,10 +172,17 @@
   "harness_fixes_this_round": [
     "vendor mode no longer reads the local stub's request log (the reported TypeError)",
     "every check is recorded instead of thrown, so the report, process post-check and cleanup summary are written on all paths",
-    "cleanup runs in finally and records each step, including bridge configuration removal"
+    "cleanup runs in finally and records each step, including bridge configuration removal",
+    "level_status and exit code follow the verdict",
+    "credential copy removed and residues scanned inside this attempt's own roots",
+    "launch refuses a drifted operator config before spawning"
   ],
   "not_claimed": [
     "the vendor-model tool round trip",
     "that Codex integration is fully complete"
-  ]
+  ],
+  "corrected_claims": {
+    "tool_surface_configurability": "an earlier note said the thread tool surface is not pinnable through documented config. That was based on `[code_mode]` (a wrong table name) and provider `capabilities.*`. With the exact keys, features.code_mode.enabled / direct_only_tool_namespaces / excluded_tool_namespaces are supported (evidence/codex/config-key-probe-2026-11-16.json); only mcp_servers.<id>.omit_tools_from is rejected.",
+    "still_not_tested": "whether direct_only_tool_namespaces makes the platform MCP namespace a direct tool for this model needs one authorized real turn (proposal in plan/W14 §7.1)"
+  }
 }

@@ -65,7 +65,9 @@
 
 第 8 次真实 vendor 运行的隔离 home rollout（客户端自己的记录，零成本提取，脱敏后存 `vendor-tool-surface-20261116.json`）显示：该模型收到的工具只有 `functions`/`clock`/`collaboration` 三个命名空间，**`mcp__agent_weave_probe` 未被声明**（`mcp_namespace_declared=false`）。`functions.exec` 的说明写明嵌套工具挂在 `tools` 上（例 `await tools.mcp__ologs__get_profile(...)`），因此平台工具只可能存在于 exec 内部。
 
-据此区分三种情况：平台桥问题被排除（同一桥在桩模式产生真实调用）；**app-server 未把 MCP 命名空间声明给该模型**成立；**模型也未进入 exec** 成立（5 种指令含客户端自己的规范化标识符都没触发）。`[code_mode]` 表与 provider `capabilities.*` 键都被该构建拒绝，工具面不可配置。
+五维区分（证据：`vendor-tool-registration-2026-11-16.json`）：**注册**成立（桥 `tools_list_requests=1`）；**说明暴露**部分成立（exec 说明写明嵌套工具，但顶层未声明 MCP 命名空间）；**调用编码**已知（直连形态已被桩证明，code 模式形态为 `tools.mcp__<server>__<tool>`）；**路由**正常（turn 完成）；**模型选择**失败（该轮 rollout 只有 `functions.wait`）。因此"顶层没有命名空间"不足以证明不可达。
+
+**配置可配置性的更正**：上一版据 `[code_mode]` 顶层表与 provider `capabilities.*` 被拒，写下"工具面不可配置"，这是错的。按准确键名重测（`config-key-probe-2026-11-16.json`）：`features.code_mode.{enabled,direct_only_tool_namespaces,excluded_tool_namespaces}` **是受支持字段**（`direct_only_tool_namespaces=["clock"]` 实测改变了工具面），只有 `mcp_servers.<id>.omit_tools_from` 不被接受。平台已把这三个字段接入受信配置并加回归，尚未用真实模型验证该配置。
 
 ## 5. 验证命令与结果
 
@@ -83,7 +85,7 @@
 
 ## 5.2 真实厂商模型支线（授权后 8 次尝试，预算内停止）
 
-操作者要求「继续接入，费用 10 元以内」。使用其本机 CC Switch 回环路由（provider 段复制进全新的隔离 home，凭据不入任何报告），发起 4 次真实 turn，合计 **160,090 tokens**（金额 UNKNOWN），全部 turn 完成、桥全部握手成功，但**一次都没有平台工具调用**。逐次结果与根因见 `vendor-attempt-report.json` 与 W14 §5.2。结论：该模型下客户端只提供 code 模式工具面，MCP 工具只能经 `functions.exec` 的 `tools.*` 调用，模型四次都没进入；同一客户端在无模型元数据时会直接暴露 `mcp__agent_weave_probe` 命名空间并调用成功。平台验收对每次尝试都判 FAIL，没有一次记成成功。预算未超，之后不再花钱。
+操作者要求「继续接入，费用 10 元以内」。使用其本机 CC Switch 回环路由（provider 段复制进全新的隔离 home，凭据不入任何报告），发起 4 次真实 turn，合计 **160,090 tokens**；**金额 UNKNOWN**（未观察到账单，因此也不主张“未超支”），全部 turn 完成、桥全部握手成功，但**一次都没有平台工具调用**。逐次结果与根因见 `vendor-attempt-report.json` 与 W14 §5.2。结论：该模型下客户端只提供 code 模式工具面，MCP 工具只能经 `functions.exec` 的 `tools.*` 调用，模型四次都没进入；同一客户端在无模型元数据时会直接暴露 `mcp__agent_weave_probe` 命名空间并调用成功。平台验收对每次尝试都判 FAIL，没有一次记成成功。预算未超，之后不再花钱。
 
 ## 6. 仍未完成（需要新的具体授权）
 

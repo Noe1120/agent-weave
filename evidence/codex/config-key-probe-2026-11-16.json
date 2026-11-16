@@ -1,0 +1,122 @@
+{
+  "schema": 2,
+  "observed_at": "2026-11-16T03:35:12.362Z",
+  "method": "one candidate block per run of `codex debug prompt-input`; exit code, the client's 'is ignoring' warning, and the resulting model-visible tool surface are recorded",
+  "client_version": "0.167.0-alpha.3.2",
+  "note": "prompt-input does not start MCP servers, so mcp_servers.<id>.omit_tools_from can only be checked for acceptance here; its MCP effect needs a live bridge.",
+  "results": [
+    {
+      "key": "baseline",
+      "exit_code": 0,
+      "recognized": true,
+      "ignored_warning": null,
+      "hard_error": null,
+      "surface": [
+        "namespace:functions(exec,wait,request_user_input,request_user_input_async)",
+        "namespace:clock(sleep)",
+        "namespace:collaboration(followup_task,interrupt_agent,list_agents,send_message,spawn_agent,wait_agent)",
+        "function:exec",
+        "function:wait",
+        "function:request_user_input",
+        "function:request_user_input_async",
+        "function:sleep",
+        "function:followup_task",
+        "function:interrupt_agent",
+        "function:list_agents",
+        "function:send_message",
+        "function:spawn_agent",
+        "function:wait_agent"
+      ]
+    },
+    {
+      "key": "features.code_mode.enabled",
+      "exit_code": 0,
+      "recognized": true,
+      "ignored_warning": null,
+      "hard_error": null,
+      "surface": [
+        "namespace:functions(exec,wait,request_user_input,request_user_input_async)",
+        "namespace:clock(sleep)",
+        "namespace:collaboration(followup_task,interrupt_agent,list_agents,send_message,spawn_agent,wait_agent)",
+        "function:exec",
+        "function:wait",
+        "function:request_user_input",
+        "function:request_user_input_async",
+        "function:sleep",
+        "function:followup_task",
+        "function:interrupt_agent",
+        "function:list_agents",
+        "function:send_message",
+        "function:spawn_agent",
+        "function:wait_agent"
+      ]
+    },
+    {
+      "key": "features.code_mode.direct_only_tool_namespaces",
+      "exit_code": 0,
+      "recognized": true,
+      "ignored_warning": null,
+      "hard_error": null,
+      "surface": [
+        "namespace:functions(exec,wait,request_user_input,request_user_input_async)",
+        "namespace:clock(curr_time,sleep)",
+        "namespace:collaboration(followup_task,interrupt_agent,list_agents,send_message,spawn_agent,wait_agent)",
+        "function:exec",
+        "function:wait",
+        "function:request_user_input",
+        "function:request_user_input_async",
+        "function:curr_time",
+        "function:sleep",
+        "function:followup_task",
+        "function:interrupt_agent",
+        "function:list_agents",
+        "function:send_message",
+        "function:spawn_agent",
+        "function:wait_agent"
+      ]
+    },
+    {
+      "key": "features.code_mode.excluded_tool_namespaces",
+      "exit_code": 0,
+      "recognized": true,
+      "ignored_warning": null,
+      "hard_error": null,
+      "surface": [
+        "namespace:functions(exec,wait,request_user_input,request_user_input_async)",
+        "namespace:clock(sleep)",
+        "namespace:collaboration(followup_task,interrupt_agent,list_agents,send_message,spawn_agent,wait_agent)",
+        "function:exec",
+        "function:wait",
+        "function:request_user_input",
+        "function:request_user_input_async",
+        "function:sleep",
+        "function:followup_task",
+        "function:interrupt_agent",
+        "function:list_agents",
+        "function:send_message",
+        "function:spawn_agent",
+        "function:wait_agent"
+      ]
+    },
+    {
+      "key": "mcp_servers.omit_tools_from",
+      "exit_code": 1,
+      "recognized": false,
+      "ignored_warning": null,
+      "hard_error": "Error: D:\\Users\\1\\Desktop\\team\\.runtime\\keycheck2-probe\\home\\config.toml:17:20: unknown variant `task_get`, expected one of `code_mode`, `deferred`, `direct`",
+      "surface": [
+        "(unparsed output)"
+      ]
+    },
+    {
+      "key": "control_unknown_key_in_code_mode_table",
+      "exit_code": 1,
+      "recognized": false,
+      "ignored_warning": null,
+      "hard_error": "Error: D:\\Users\\1\\Desktop\\team\\.runtime\\keycheck2-probe\\home\\config.toml:2:1: data did not match any variant of untagged enum FeatureToml",
+      "surface": [
+        "(unparsed output)"
+      ]
+    }
+  ]
+}

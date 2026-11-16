@@ -227,3 +227,52 @@ test("provider reuse is opt-in, exclusive with the local stub and needs a real f
       error instanceof AdapterFault && error.code === "ADAPTER_CONTRACT",
   );
 });
+
+test("the code-mode surface can be pinned with the client's own field names", () => {
+  const text = codexHomeConfig({
+    code_mode: {
+      enabled: true,
+      direct_only_tool_namespaces: ["mcp__agent_weave_probe"],
+      excluded_tool_namespaces: ["clock"],
+    },
+  });
+  assert.match(text, /^\[features\.code_mode\]$/m);
+  assert.match(text, /^enabled = true$/m);
+  assert.match(
+    text,
+    /^direct_only_tool_namespaces = \["mcp__agent_weave_probe"\]$/m,
+  );
+  assert.match(text, /^excluded_tool_namespaces = \["clock"\]$/m);
+  // Field names must match the fixed build exactly; the key probe recorded them.
+  for (const banned of ["[code_mode]", "omit_tools_from", "capabilities."])
+    assert.equal(text.includes(banned), false, banned);
+  for (const bad of [
+    { direct_only_tool_namespaces: ["not a name"] },
+    { direct_only_tool_namespaces: [""] },
+    { direct_only_tool_namespaces: ["a".repeat(65)] },
+    { excluded_tool_namespaces: Array.from({ length: 9 }, (_, i) => "ns" + i) },
+    { enabled: "yes" },
+  ] as unknown[])
+    assert.throws(
+      () => codexHomeConfig({ code_mode: bad as never }),
+      (error: unknown) =>
+        error instanceof AdapterFault && error.code === "ADAPTER_CONTRACT",
+      JSON.stringify(bad),
+    );
+});
+test("a changed operator configuration is refused at launch, not silently reused", () => {
+  const dir = mkdtempSync(join(tmpdir(), "codex-digest-"));
+  const source = join(dir, "config.toml");
+  writeFileSync(source, 'model = "gpt-x"\nmodel_provider = "custom"\n', "utf8");
+  const launcher = officialCodexLauncher({
+    ...profile,
+    provider_reuse: { source_config: source, provider_id: "custom" },
+  });
+  writeFileSync(source, 'model = "gpt-y"\nmodel_provider = "custom"\n', "utf8");
+  // The pinned digest no longer matches, so the launch must fail before spawning.
+  return assert.rejects(
+    () => launcher.launch(() => true),
+    (error: unknown) =>
+      error instanceof AdapterFault && error.code === "CODEX_CONFIG_CHANGED",
+  );
+});

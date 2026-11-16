@@ -23,6 +23,7 @@ import {
   readFileSync,
   readdirSync,
   rmSync,
+  statSync,
   writeFileSync,
 } from "node:fs";
 import { isAbsolute, join } from "node:path";
@@ -36,7 +37,10 @@ import {
   readMockRequests,
   readsMockRequests,
 } from "./codex-acceptance-plan.ts";
-import { officialCodexLauncher } from "../dist/packages/service/src/codex-app-server.js";
+import {
+  officialCodexLauncher,
+  tomlSectionValue,
+} from "../dist/packages/service/src/codex-app-server.js";
 import { CodexRuntimeController } from "../dist/packages/service/src/codex-runtime.js";
 import { createServer } from "../dist/packages/service/src/http.js";
 import { listenLoopback } from "../dist/packages/service/src/loopback-listener.js";
@@ -49,6 +53,7 @@ const { values } = parseArgs({
     "allow-codex-provider-reuse": { type: "boolean" },
     "provider-config": { type: "string" },
     "provider-model": { type: "string" },
+    "code-mode-direct": { type: "string" },
     config: { type: "string" },
     output: { type: "string" },
   },
@@ -76,6 +81,10 @@ if (values["allow-codex-provider-reuse"] && !values["provider-config"])
 if (process.platform !== "win32") throw new Error("Windows only");
 
 // Exclusive output folder: a rerun can never overwrite an earlier attempt.
+const operatorConfig = JSON.parse(
+  readFileSync(values.config, "utf8").replace(/^\uFEFF/, ""),
+);
+
 mkdirSync(values.output);
 const out = (name) => join(values.output, name);
 const write = (name, data) => {
@@ -177,9 +186,7 @@ try {
   write("process-before.json", before);
 
   // ---- Level 1: initialize only, straight through the fixed launcher ----
-  handle = await officialCodexLauncher(
-    JSON.parse(readFileSync(values.config, "utf8").replace(/^\uFEFF/, "")),
-  ).launch(() => true);
+  handle = await officialCodexLauncher(operatorConfig).launch(() => true);
   const initialize = await handle.ready;
   report.steps.push({
     step: "initialize",
@@ -244,15 +251,17 @@ try {
       { flag: "wx" },
     );
 
-    const operator = JSON.parse(
-      readFileSync(values.config, "utf8").replace(/^\uFEFF/, ""),
-    );
+    const operator = operatorConfig;
     const launcherInput = {
       ...operator,
       bridge: { config_path: bridgeConfig, report_dir: reportDir },
     };
     let modelKind = "none";
     if (mode === "vendor") {
+      if (values["code-mode-direct"])
+        launcherInput.code_mode = {
+          direct_only_tool_namespaces: [values["code-mode-direct"]],
+        };
       launcherInput.provider_reuse = {
         source_config: values["provider-config"],
         provider_id: "custom",
@@ -265,6 +274,7 @@ try {
         step: "provider_reuse",
         provider_id: "custom",
         model_override: values["provider-model"] ?? null,
+        code_mode_direct: values["code-mode-direct"] ?? null,
       });
     } else if (mode === "stub") {
       const portFile = out("mock-port.txt");
@@ -561,6 +571,99 @@ try {
     record("stop_model_stub", () => mock.kill());
     await new Promise((r) => setTimeout(r, 300));
   }
+  // Provider credential copy: remove it from the isolated home this attempt
+  // created, then prove no file under that root still carries the value.
+  const cleanupCredential = () => {
+    const result = {
+      homes_scanned: 0,
+      credential_copies_removed: 0,
+      token_hits_before: 0,
+      token_hits_after: 0,
+      skipped: [],
+    };
+    if (!values["provider-config"] || !existsSync(values["provider-config"]))
+      return result;
+    let token = null;
+    try {
+      token = tomlSectionValue(
+        readFileSync(values["provider-config"], "utf8").replace(/^\uFEFF/, ""),
+        "model_providers.custom",
+        "experimental_bearer_token",
+      );
+    } catch {
+      token = null;
+    }
+    if (!token || token.length < 8) {
+      result.skipped.push(
+        "operator token could not be located; nothing scanned",
+      );
+      return result;
+    }
+    const dataRoot = operatorConfig.data_root;
+    if (!dataRoot || !existsSync(dataRoot)) {
+      result.skipped.push("trusted data root unavailable");
+      return result;
+    }
+    const startedAt = Date.parse(report.started_at);
+    const scanStart = startedAt - 30000;
+    for (const entry of readdirSync(dataRoot, { withFileTypes: true })) {
+      if (!entry.isDirectory() || !entry.name.startsWith("codex-init-"))
+        continue;
+      const root = join(dataRoot, entry.name);
+      const mtime = statSync(root).mtimeMs;
+      // Ownership: only roots this attempt created, never an active or unknown one.
+      if (mtime < scanStart) continue;
+      result.homes_scanned++;
+      const configPath = join(root, "home", "config.toml");
+      const files = [];
+      const walk = (dir) => {
+        for (const item of readdirSync(dir, { withFileTypes: true })) {
+          const full = join(dir, item.name);
+          if (item.isDirectory()) walk(full);
+          else files.push(full);
+        }
+      };
+      walk(root);
+      const hits = files.filter((file) => {
+        try {
+          return readFileSync(file, "utf8").includes(token);
+        } catch {
+          return false;
+        }
+      });
+      result.token_hits_before += hits.length;
+      if (existsSync(configPath)) {
+        rmSync(configPath, { force: true });
+        result.credential_copies_removed++;
+      }
+      const after = files
+        .filter((file) => existsSync(file))
+        .filter((file) => {
+          try {
+            return readFileSync(file, "utf8").includes(token);
+          } catch {
+            return false;
+          }
+        });
+      result.token_hits_after += after.length;
+    }
+    return result;
+  };
+  try {
+    report.credential_cleanup = cleanupCredential();
+    cleanup.push({
+      step: "provider_credential_cleanup",
+      ok: report.credential_cleanup.token_hits_after === 0,
+      error: null,
+    });
+  } catch (error) {
+    report.credential_cleanup = { error: String(error?.message ?? error) };
+    cleanup.push({
+      step: "provider_credential_cleanup",
+      ok: false,
+      error: String(error?.message ?? error),
+    });
+  }
   if (bridgeConfig) {
     record("remove_bridge_configuration", () => {
       if (existsSync(bridgeConfig)) rmSync(bridgeConfig, { force: true });
@@ -603,7 +706,11 @@ try {
     facts.harnessError = "cleanup incomplete";
   report.finished_at = new Date().toISOString();
   report.status = acceptanceStatus(facts);
-  report.level_status = levelPassed(facts) ? "PASS" : "FAILED";
+  // A FAILED_* verdict is a level failure even when cleanup was clean.
+  report.level_status =
+    levelPassed(facts) && !report.status.startsWith("FAILED")
+      ? "PASS"
+      : "FAILED";
   write("report.json", report);
   process.exitCode = report.level_status === "PASS" ? 0 : 1;
   console.log(

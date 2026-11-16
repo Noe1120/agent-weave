@@ -1,75 +1,74 @@
 {
   "schema": 2,
-  "observed_at": "2026-11-16T03:12:22.758Z",
-  "stage": "W14 codex integration, implementation defects fixed and re-verified",
+  "observed_at": "2026-11-16T03:44:27.370Z",
+  "stage": "W14 codex integration, round 3: tool-surface keys, cleanup, evidence consistency",
   "qualification": "UNVERIFIED",
   "verdicts": {
     "platform_codex_integration": "PASS (client, protocol, bridge, platform service, lifecycle)",
     "local_model_stub_tool_round_trip": "PASS_REAL_CLIENT_WITH_LOCAL_MODEL_STUB",
     "vendor_model_tool_round_trip": "FAILED_AT_MODEL_TOOL_SELECTION",
-    "vendor_model_tool_reach_root_cause": "the client declares only code-mode namespaces to this model; the MCP namespace is not declared",
-    "codex_integration_fully_complete": false
+    "codex_integration_fully_complete": false,
+    "tool_surface_configurability": "supported via features.code_mode.{enabled,direct_only_tool_namespaces,excluded_tool_namespaces}; mcp_servers.<id>.omit_tools_from is not supported by this build"
   },
   "code_fixes_this_round": [
-    "per-turn identity in the transport: generation, native turn id, per-turn message and token usage, stale/foreign terminal events counted and ignored",
-    "the controller binds a platform turn to one transport generation and projects the persisted state, so a reader never sees completed before the store records it",
-    "an unknown turn blocks every new turn with CODEX_RECONCILIATION_REQUIRED; only a reconciled close then a rebuilt runtime may run again",
-    "the acceptance harness separates stub and vendor modes and never reads a missing stub log; it records checks instead of throwing and always writes the report, process post-check and cleanup summary",
-    "the turn deadline is fixed when the turn is accepted, not when the acknowledgement lands"
+    "features.code_mode surface pinning in codexHomeConfig + launcher (validated field names, regressions)",
+    "launch-time re-verification of the operator config digest (CODEX_CONFIG_CHANGED on drift)",
+    "credential copy removal and residue scan restricted to this attempt's own isolated roots",
+    "harness exit code and level_status now follow the verdict; vendor failure no longer exits 0"
   ],
   "commands": [
     {
       "date": "2026-11-16",
       "command": "node --test --test-concurrency=2 tests/codex-app-server.test.ts tests/codex-runtime.test.ts tests/codex-launcher-config.test.ts tests/codex-read-connector.test.ts tests/codex-acceptance-plan.test.ts",
       "exit_code": 0,
-      "tests": 54,
-      "pass": 54,
+      "tests": 56,
+      "pass": 56,
       "fail": 0,
       "skipped": 0,
-      "log": "evidence/codex/2026-11-16-synthetic/codex-group-2026-11-16.log"
+      "log": "evidence/codex/2026-11-16-synthetic/codex-group-r3.log"
     },
     {
       "date": "2026-11-16",
       "command": "npm run verify",
       "exit_code": 0,
-      "tests": 493,
-      "pass": 493,
+      "tests": 495,
+      "pass": 495,
       "fail": 0,
       "skipped": 0,
-      "log": "evidence/codex/2026-11-16-synthetic/verify-2026-11-16.log"
+      "log": "evidence/codex/2026-11-16-synthetic/verify-r3.log"
     },
     {
       "date": "2026-11-16",
       "command": "npm run test:native",
       "exit_code": 0,
       "evidence": "14/14 C# + 1 WPF static",
-      "log": "evidence/codex/2026-11-16-synthetic/native-2026-11-16.log"
+      "log": "evidence/codex/2026-11-16-synthetic/native-r3.log"
     },
     {
       "date": "2026-11-16",
       "command": "npm run test:native:package",
       "exit_code": 0,
       "evidence": "old 0.3.0 package 989 files PASS",
-      "log": "evidence/codex/2026-11-16-synthetic/package-2026-11-16.log"
+      "log": "evidence/codex/2026-11-16-synthetic/package-r3.log"
     },
     {
       "date": "2026-11-16",
       "command": "python plan/tools/test_p0_readiness.py -v",
       "exit_code": 0,
-      "log": "evidence/codex/2026-11-16-synthetic/p0-2026-11-16.log"
+      "log": "evidence/codex/2026-11-16-synthetic/p0-r3.log"
     },
     {
       "date": "2026-11-16",
       "command": "python plan/tools/verify_design.py --refresh-combined --write-report --refresh-manifest",
       "exit_code": 0,
-      "log": "evidence/codex/2026-11-16-synthetic/design-refresh-2026-11-16.log"
+      "log": "evidence/codex/2026-11-16-synthetic/design-r3a.log"
     },
     {
       "date": "2026-11-16",
       "command": "python plan/tools/verify_design.py",
       "exit_code": 0,
       "evidence": "document_checks PASS; AT 190 / CA 60 all NOT_RUN; file_count 52",
-      "log": "evidence/codex/2026-11-16-synthetic/design-verify-2026-11-16.log"
+      "log": "evidence/codex/2026-11-16-synthetic/design-r3c.log"
     }
   ],
   "real_acceptance": {
@@ -99,7 +98,7 @@
   "cost": {
     "vendor_attempts": 8,
     "tokens_total": 160090,
-    "money": "UNKNOWN (route billing not observable); no unit-price estimate claimed"
+    "money": "UNKNOWN (route billing not observable); no unit-price estimate and no claim that the budget was not exceeded"
   },
   "containment": {
     "user_configuration_used": false,
@@ -118,5 +117,38 @@
     "product acceptance (250 AT/CA)"
   ],
   "author_self_review": true,
-  "independent_review": false
+  "independent_review": false,
+  "zero_cost_findings": {
+    "config_key_probe": {
+      "evidence": "evidence/codex/config-key-probe-2026-11-16.json",
+      "supported": [
+        "features.code_mode.enabled",
+        "features.code_mode.direct_only_tool_namespaces",
+        "features.code_mode.excluded_tool_namespaces"
+      ],
+      "unsupported": [
+        "mcp_servers.<id>.omit_tools_from"
+      ],
+      "effect_observed": "direct_only_tool_namespaces = [\"clock\"] changed the surfaced clock namespace"
+    },
+    "five_way_distinction": {
+      "evidence": "evidence/codex/vendor-tool-registration-2026-11-16.json",
+      "registration": "bridge initialized with tools_list_requests=1",
+      "description_exposure": "exec states nested tools on `tools`; no top-level MCP namespace declared",
+      "call_encoding": "direct form proven in stub mode; code-mode form is tools.mcp__<server>__<tool>",
+      "route_compatibility": "vendor route completed the turn",
+      "model_selection": "the vendor turn's only function_call was functions.wait"
+    },
+    "credential_cleanup": {
+      "evidence": "this round's vendor probe run",
+      "token_hits_before": 1,
+      "credential_copies_removed": 1,
+      "token_hits_after": 0
+    }
+  },
+  "not_claimed": [
+    "vendor-model tool round trip",
+    "Codex integration as a whole",
+    "budget not exceeded"
+  ]
 }

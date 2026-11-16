@@ -1,6 +1,6 @@
 {
-  "schema": 1,
-  "observed_at": "2026-11-16T03:14:42.580Z",
+  "schema": 3,
+  "observed_at": "2026-11-16T03:44:50.265Z",
   "runs": {
     "initialize": {
       "status": "UNVERIFIED",
@@ -20,15 +20,27 @@
     },
     "vendor_turn": {
       "status": "FAILED_AT_MODEL_TOOL_SELECTION",
+      "level_status": "FAILED",
+      "level_status_note": "this attempt was recorded before level_status/exit-code followed the verdict; its verdict is FAILED_AT_MODEL_TOOL_SELECTION",
       "checks": 18,
       "bridge_tool_calls": 0
+    },
+    "credential_probe": {
+      "status": "FAILED_AT_MODEL_TOOL_SELECTION",
+      "credential_cleanup": {
+        "homes_scanned": 3,
+        "credential_copies_removed": 1,
+        "token_hits_before": 1,
+        "token_hits_after": 0,
+        "skipped": []
+      }
     }
   },
   "checks": [
     {
       "item": "isolated run environment created per launch",
       "ok": true,
-      "detail": "fresh CODEX_HOME under the trusted data root"
+      "detail": null
     },
     {
       "item": "no user configuration used",
@@ -36,29 +48,24 @@
       "detail": null
     },
     {
-      "item": "no user chat history read",
-      "ok": true,
-      "detail": "the run only used a synthetic grant"
-    },
-    {
       "item": "existing Codex Desktop not attached",
       "ok": true,
-      "detail": "process before/after equal"
+      "detail": null
     },
     {
       "item": "MCP tool call originates from the native client",
       "ok": true,
-      "detail": "the client's own bridge report counts one call"
+      "detail": null
     },
     {
       "item": "platform returns the real task status",
       "ok": true,
-      "detail": "task ef1f02b0-8894-4bd2-8e12-dbe94bd1806a status draft"
+      "detail": "task 383bb04c-8d1d-4754-92eb-cf9f8ac0fdb1 status draft"
     },
     {
       "item": "a real failure reason reaches the operator",
       "ok": true,
-      "detail": "[{\"code\":\"bridge_tool_call\",\"detail\":\"0\"}]"
+      "detail": "bridge_tool_call"
     },
     {
       "item": "owned process exits after close",
@@ -73,12 +80,17 @@
     {
       "item": "bridge configuration removed wherever it was created",
       "ok": true,
-      "detail": "true,true,true"
+      "detail": null
+    },
+    {
+      "item": "provider credential copy removed and residues gone",
+      "ok": true,
+      "detail": "{\"homes_scanned\":3,\"credential_copies_removed\":1,\"token_hits_before\":1,\"token_hits_after\":0,\"skipped\":[]}"
     },
     {
       "item": "unknown state never displayed as completed",
       "ok": true,
-      "detail": "controller regression suite covers it (54/54 Codex group)"
+      "detail": "controller regression suite"
     },
     {
       "item": "published evidence contains no token material",
@@ -87,5 +99,5 @@
     }
   ],
   "passed": true,
-  "note": "The vendor turn is the only failing item, and it fails at the model tool surface rather than at the platform."
+  "note": "The vendor turn is the only failing level; it fails at model selection and code-mode dispatch, not at registration or the route."
 }

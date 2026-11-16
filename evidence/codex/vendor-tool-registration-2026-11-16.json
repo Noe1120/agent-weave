@@ -1,0 +1,47 @@
+{
+  "schema": 2,
+  "observed_at": "2026-11-16T03:35:51.626Z",
+  "attempt_directory": "acc-vendor-20261116-120803",
+  "window": {
+    "started": "2026-11-16T03:08:04.024Z",
+    "finished": "2026-11-16T03:08:17.278Z"
+  },
+  "verdict": "FAILED_AT_MODEL_TOOL_SELECTION",
+  "registration": {
+    "bridge_connections": 1,
+    "bridge_initialized": [
+      true
+    ],
+    "bridge_tools_list_requests": [
+      1
+    ],
+    "bridge_tool_calls": [
+      0
+    ]
+  },
+  "description_exposure": {
+    "exec_states_nested_tools": true,
+    "exec_excerpt": "- All nested tools are available on the global `tools` object, for example `await tools.exec_command(...)`. Tool names are exposed as normalized JavaScript identifiers, for example `await tools.mcp__ologs__get_profile(..",
+    "top_level_mcp_namespace_declared": false
+  },
+  "model_selection": {
+    "function_calls": [
+      {
+        "home": "codex-init-mTPvzb",
+        "name": "wait",
+        "namespace": "functions",
+        "arguments": "{\"cell_id\":\"invalid\"}"
+      }
+    ]
+  },
+  "route": {
+    "turn_state": "completed",
+    "tokens": 17865
+  },
+  "interpretation": {
+    "registration": "the client connected the bridge and enumerated its tools (tools_list_requests>0), so registration and MCP discovery happened",
+    "exposure": "the client tells the model that nested tools exist on `tools` inside functions.exec, but never declares the MCP namespace or its tools at the top level",
+    "selection": "the rollout's function_call items show what the model actually invoked; none of them reached the bridge in this attempt",
+    "corrected_note": "an earlier extraction in this session accidentally read the local-stub run's rollout; this file was rebuilt from the vendor attempt's own time window"
+  }
+}

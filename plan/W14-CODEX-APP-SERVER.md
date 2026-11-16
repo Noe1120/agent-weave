@@ -95,7 +95,7 @@ Spec：connect.md §6（C1–C6）、[03 §4](03-agent-integration.md)、[09](09
 | 7 | 17,863 | 用客户端 `exec` 文档的规范化标识符 `tools.mcp__agent_weave_probe__task_get`，仍误调其他工具 |
 | 8 | 17,865 | 修复后的验收脚本：18 项检查、清理完整、进程不变；`bridge tool_calls=0` |
 
-合计 **160,090 tokens**。费用按客户端记录只报 token，金额为 **UNKNOWN**（该 route 的账单在本机不可观测，不做单价估算）。
+合计 **160,090 tokens**；**金额 UNKNOWN**（该 route 账单本机不可观测，因此既不换算金额，也不主张“预算未超”）。
 
 **第 8 次同时给出决定性证据**（取自客户端自己的隔离 home rollout，零成本）：该模型收到的工具只有三个命名空间 `functions`/`clock`/`collaboration`，`mcp__agent_weave_probe` **没有被声明**（`mcp_namespace_declared=false`）。`functions.exec` 的说明写明嵌套工具在 `tools` 对象上（例 `await tools.mcp__ologs__get_profile(...)`），也就是说平台工具只可能存在于 exec 内部，且不作为独立函数声明。
 
@@ -117,6 +117,38 @@ Spec：connect.md §6（C1–C6）、[03 §4](03-agent-integration.md)、[09](09
 | unknown 之后仍可用新 action_id 继续发 turn | 没有 unknown 门 | 新增 `CODEX_RECONCILIATION_REQUIRED`；只有「关闭并核对 exit_observed 后重建运行」才能继续；换 action/revision/控制器都不行 |
 | turn 超时截止点随 ack 之后计算 | 截止点放在 awaitTurn 内 | 在接受 turn 时固定截止点 |
 
+## 5.4 工具面配置的准确键名与五维区分（零成本）
+
+按准确键名重测（证据 `evidence/codex/config-key-probe-2026-11-16.json`，每次单独运行 `codex debug prompt-input`，看退出码、客户端的 "is ignoring" 警告与结果工具面）：
+
+| 键 | 结果 |
+| --- | --- |
+| `features.code_mode.enabled` | 接受（该模型本就在 code 模式，工具面不变） |
+| `features.code_mode.direct_only_tool_namespaces = ["clock"]` | 接受，且工具面**真的变化**（clock 里出现 `curr_time`） |
+| `features.code_mode.excluded_tool_namespaces` | 接受（本候选未观察到形态变化，仍属受支持字段） |
+| `mcp_servers.<id>.omit_tools_from` | **硬错误 unknown variant**，该构建不接受 |
+| 对照：`[features.code_mode]` 内未知字段 | 硬错误，说明该表字段集固定 |
+
+上一版据 `[code_mode]` 顶层表与 provider `capabilities.*` 被拒而断言"工具面不可配置"，**该断言错误，现更正**。平台已把这三个字段接入受信配置（`codeHomeConfig` 可选 `code_mode`、验收脚本 `--code-mode-direct`），字段经严格校验且有回归；**尚未用真实模型运行该配置**（需另行授权的一次 turn）。
+
+五维区分（证据 `evidence/codex/vendor-tool-registration-2026-11-16.json`，取自第 8 次 vendor 运行自己的时间窗）：
+
+| 维度 | 实测 | 说明 |
+| --- | --- | --- |
+| 工具注册 | 桥 `initialized=true`、`tools_list_requests=1` | 客户端连上并枚举了平台工具 |
+| 说明暴露 | exec 说明写明嵌套工具在 `tools`；顶层无 MCP 命名空间 | 说明存在，但未逐项声明 |
+| 调用编码 | 直连形态已被桩运行证明；code 模式形态 `tools.mcp__<server>__<tool>` | 规则已知，vendor 轮未使用 |
+| 路由兼容 | turn 完成、token 正常 | 路由可用 |
+| 模型选择 | 该轮只有 `functions.wait` | 失败点在此 |
+
+因此"顶层没有 MCP namespace"不足以证明不可达：注册与说明都成立，缺的是模型选择与 code 模式内的派发。
+
+## 5.5 凭据副本清理与启动前复验
+
+- 启动器在 `launch()` 最开始重算操作者配置 SHA-256 并与固定摘要比对，不一致即 `CODEX_CONFIG_CHANGED`（有回归）。
+- 验收脚本 `finally` 中只清理本次时间窗内、受信 data_root 下由本次运行创建的隔离目录：删除 `home/config.toml`（令牌副本），并前后各扫描一次令牌出现次数；不触碰活动或归属未知目录。
+- 实测：`token_hits_before=1 → credential_copies_removed=1 → token_hits_after=0`，隔离目录内已无 `config.toml`。
+
 ## 6. 失败与未知的处理口径
 
 | 情形 | 记录 | 不得声称 |
@@ -131,11 +163,25 @@ Spec：connect.md §6（C1–C6）、[03 §4](03-agent-integration.md)、[09](09
 
 ## 7. 仍未完成（下一步入口）
 
-1. **真实厂商模型的工具调用**：已按授权尝试 7 次（142,225 tokens），全部止于模型侧工具选择，见 §5.2。可选下一步：固定线程工具面（有开关即用，需先验证）、换用直接暴露 MCP 工具的路由、或把「模型是否调用平台工具」单列为行为资格项。
+1. **真实厂商模型的工具调用**：已按授权尝试 8 次（160,090 tokens，金额 UNKNOWN），止于「模型选择 + code 模式内派发」，见 §5.2/§5.4。**这不是单一技术路径问题**，至少四条候选：
+   a. 用平台已接入的 `features.code_mode.direct_only_tool_namespaces = ["mcp__agent_weave_probe"]` 让命名空间直连（代码与回归已就绪，需一次授权 turn 验证，见 §7.1）；
+   b. 客户端后续版本若提供逐项 MCP 工具声明或更强派发，重验；
+   c. 换一条会向该模型直接声明 MCP 工具的路由（需用户侧配置）；
+   d. 把「模型是否调用平台工具」作为独立行为资格项，按 suite 评定（当前记录为失败）。
 2. **已有桌面聊天附着**（`attached_session`）：未实现，需另行验证；不以新 thread 冒充。
 3. **真实 turn/interrupt 与忙碌排队**：仅合成覆盖。
 4. **Windows 强制隔离、原生 UI、原生点击/视觉、完整 L1–L3**：UNVERIFIED。
 5. **生产化**：凭据存储、邀请/受保护凭据、长期连接、外发策略、客户端升级后重验。
+
+## 7.1 待批准的单项实验提案（未执行）
+
+- **提案**：仅用一次真实 turn 验证 §7 方向 a——平台在隔离 home 写入 `[features.code_mode] direct_only_tool_namespaces = ["mcp__agent_weave_probe"]`，其余配置与路由不变。
+- **映射与影响范围**：不引入模型别名，不改用户全局配置，不改 CC Switch；只写进本次自有隔离 home，模型仍是 `gpt-6.1-sol`。
+- **预期观察**：该命名空间是否作为顶层声明出现；若出现且模型调用，桥应记录 `tool_calls=1`。两种结果都能直接回答能否直连。
+- **回滚**：删除该 `code_mode` 块即恢复当前行为；用户侧无需回滚。
+- **单次调用限制**：一条 turn、一条合成指令；provider `request_max_retries/stream_max_retries` 固定为 0，失败不重试、不追加 turn。
+- **费用控制**：按客户端记录 token；金额仍为 UNKNOWN（不做单价换算）。历史单次约 1.8 万 tokens，需操作者给出可接受的 token 上限后再执行。
+- **登记口径**：若成功，只登记为该配置下通过（PASS_REAL_VENDOR_TOOL_ROUND_TRIP @ code_mode.direct_only），不追认原配置已修复；若失败，按 FAILED_AT_MODEL_TOOL_SELECTION 记录并关闭该方向。
 
 ## 8. 证据索引
 
@@ -145,4 +191,13 @@ Spec：connect.md §6（C1–C6）、[03 §4](03-agent-integration.md)、[09](09
 
 ## 9. 完成判定
 
-W14 交付的是**真实客户端闭环（握手→原生 thread→一条 turn→一次平台只读工具往返→只读进度→关闭对账）**，模型为本地桩、无外发无计费。真实厂商模型、桌面聊天附着、强制隔离与 UI 仍未完成，不据此升级 L1–L3 或产品验收。
+W14 交付的是**真实客户端闭环（握手→原生 thread→一条 turn→一次平台只读工具往返→只读进度→关闭对账）**，模型为本地桩、无外发无计费；逐级验收各自独占目录，level_status=PASS。
+
+真实厂商模型的同一往返为 **FAILED_AT_MODEL_TOOL_SELECTION**：注册与说明成立，失败在模型选择与 code 模式派发（§5.4）。因此：
+
+- 平台 Codex 接入基础：**完成**；
+- 真实厂商模型工具调用：**未完成 / 阻塞**；
+- Codex 整体接入：**不能宣称完成**；
+- 桌面聊天附着、Windows 强制隔离、原生 UI 与完整 L1–L3：仍未完成。
+
+历史阶段的自述不因本轮修复被追认：前几轮里「7 次/4 次」「预算未超」等表述按当时证据写成，本轮统一为 8 次与「金额 UNKNOWN」，且不改变任何旧的失败记录。

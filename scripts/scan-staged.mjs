@@ -22,7 +22,9 @@ const staged = execFileSync(git, ["diff", "--cached", "--name-only", "-z"], {
   .filter(Boolean);
 
 if (staged.length === 0) {
-  console.log(JSON.stringify({ scanned: 0, failures: [], status: "PASS" }, null, 2));
+  console.log(
+    JSON.stringify({ scanned: 0, failures: [], status: "PASS" }, null, 2),
+  );
   process.exit(0);
 }
 const blob = (path) =>
@@ -40,11 +42,11 @@ const credentialPatterns = [
   { name: "jwt_like", pattern: /\beyJ[A-Za-z0-9_-]{16,}\.[A-Za-z0-9_-]{8,}/ },
   { name: "aws_key", pattern: /\bAKIA[0-9A-Z]{16}\b/ },
 ];
-const bearerAssignment =
-  /experimental_bearer_token\s*=\s*"([^"]*)"/g;
+const bearerAssignment = /experimental_bearer_token\s*=\s*"([^"]*)"/g;
 const allowedBearerValues = new Set([
   "synthetic-local-only",
   "not-a-real-credential",
+  "local-only-token",
 ]);
 
 // 2. Artifact types that must never be published.
@@ -87,7 +89,11 @@ for (const file of staged) {
     // a literal must be one of the synthetic labels.
     const interpolated = /[+$\`(]/.test(value);
     if (!interpolated && !allowedBearerValues.has(value))
-      fail("credential", file, "experimental_bearer_token is not a synthetic label");
+      fail(
+        "credential",
+        file,
+        "experimental_bearer_token is not a synthetic label",
+      );
   }
 
   if (!file.endsWith(".md")) continue;
@@ -102,8 +108,7 @@ for (const file of staged) {
     const relative = resolved.startsWith(repoRoot)
       ? resolved
       : join(repoRoot, file, "..", hashless);
-    if (!existsSync(relative))
-      fail("broken_link", file, target);
+    if (!existsSync(relative)) fail("broken_link", file, target);
   }
 }
 

@@ -686,6 +686,7 @@ interface CodexProfile {
   executable_sha256: string;
   model_provider?: { base_url: string; model: string };
   bridge?: { config_path: string; report_dir: string };
+  code_mode?: CodexCodeMode;
   provider_reuse?: {
     source_config: string;
     provider_id: string;
@@ -749,6 +750,16 @@ export function tomlSectionValue(
  * `bridge.command` is the running Node executable and `bridge.args` is the
  * platform's own compiled entry, both fixed by the trusted caller.
  */
+export interface CodexCodeMode {
+  enabled?: boolean;
+  direct_only_tool_namespaces?: string[];
+  excluded_tool_namespaces?: string[];
+}
+/** Namespace entries are client identifiers, never free text. */
+const namespaceName = (v: unknown): v is string =>
+  typeof v === "string" && /^[A-Za-z0-9_.:-]{1,64}$/.test(v);
+const namespaceList = (v: unknown): v is string[] =>
+  Array.isArray(v) && v.length <= 8 && v.every(namespaceName);
 export function codexHomeConfig(input: {
   model_provider?: {
     base_url: string;
@@ -757,6 +768,7 @@ export function codexHomeConfig(input: {
     label?: string;
   };
   bridge?: { command: string; args: string[] };
+  code_mode?: CodexCodeMode;
 }): string {
   const lines: string[] = [];
   if (input.model_provider) {
@@ -781,6 +793,35 @@ export function codexHomeConfig(input: {
       "request_max_retries = 0",
       "stream_max_retries = 0",
     );
+  }
+  if (input.code_mode) {
+    // The fixed build accepts exactly these three fields under this table;
+    // anything else is a hard configuration error (verified by the key probe).
+    const { enabled, direct_only_tool_namespaces, excluded_tool_namespaces } =
+      input.code_mode;
+    contract(
+      (enabled === undefined || typeof enabled === "boolean") &&
+        (direct_only_tool_namespaces === undefined ||
+          namespaceList(direct_only_tool_namespaces)) &&
+        (excluded_tool_namespaces === undefined ||
+          namespaceList(excluded_tool_namespaces)),
+    );
+    if (lines.length) lines.push("");
+    lines.push("[features.code_mode]");
+    if (enabled !== undefined)
+      lines.push("enabled = " + (enabled ? "true" : "false"));
+    if (direct_only_tool_namespaces)
+      lines.push(
+        "direct_only_tool_namespaces = [" +
+          direct_only_tool_namespaces.map((n) => JSON.stringify(n)).join(", ") +
+          "]",
+      );
+    if (excluded_tool_namespaces)
+      lines.push(
+        "excluded_tool_namespaces = [" +
+          excluded_tool_namespaces.map((n) => JSON.stringify(n)).join(", ") +
+          "]",
+      );
   }
   if (input.bridge) {
     const { command, args } = input.bridge;
@@ -847,7 +888,7 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
       "client_version",
       "executable_sha256",
     ],
-    optional = ["model_provider", "bridge", "provider_reuse"];
+    optional = ["model_provider", "bridge", "provider_reuse", "code_mode"];
   contract(
     required.every((k) => Object.hasOwn(o, k)) &&
       Object.keys(o).length <= required.length + optional.length &&
@@ -882,6 +923,24 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
         existsSync(r.source_config) &&
         typeof r.provider_id === "string" &&
         /^[A-Za-z0-9_.-]{1,32}$/.test(r.provider_id),
+    );
+  }
+  if (o.code_mode !== undefined) {
+    const m = object(o.code_mode);
+    contract(
+      Object.keys(m).length > 0 &&
+        Object.keys(m).every((k) =>
+          [
+            "enabled",
+            "direct_only_tool_namespaces",
+            "excluded_tool_namespaces",
+          ].includes(k),
+        ) &&
+        (m.enabled === undefined || typeof m.enabled === "boolean") &&
+        (m.direct_only_tool_namespaces === undefined ||
+          namespaceList(m.direct_only_tool_namespaces)) &&
+        (m.excluded_tool_namespaces === undefined ||
+          namespaceList(m.excluded_tool_namespaces)),
     );
   }
   if (o.bridge !== undefined) {
@@ -937,6 +996,16 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
     async launch(stillAuthorized: () => boolean) {
       if (!stillAuthorized())
         throw new AdapterFault("CODEX_AUTHORIZATION_CHANGED");
+      // A reused provider block is validated before anything is created, and the
+      // operator configuration must be byte-identical to what was pinned.
+      if (p.provider_reuse) {
+        const current = createHash("sha256")
+          .update(readFileSync(p.provider_reuse.source_config))
+          .digest("hex");
+        if (current !== p.provider_reuse.sha256)
+          throw new AdapterFault("CODEX_CONFIG_CHANGED");
+      }
+
       await unlinked(executable, true);
       if ((await hash(executable)) !== p.executable_sha256)
         throw new AdapterFault("CODEX_CONFIG_CHANGED");
@@ -947,7 +1016,6 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
         await unlinked(p.bridge.report_dir, false);
         await unlinked(bridgeEntry, true);
       }
-      // A reused provider block is validated before anything is created.
       const modelProvider = p.provider_reuse
         ? reuseProvider(p.provider_reuse)
         : p.model_provider;
@@ -970,6 +1038,7 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
       if (modelProvider || p.bridge) {
         const config = codexHomeConfig({
           ...(modelProvider ? { model_provider: modelProvider } : {}),
+          ...(p.code_mode ? { code_mode: p.code_mode } : {}),
           ...(p.bridge
             ? {
                 bridge: {
