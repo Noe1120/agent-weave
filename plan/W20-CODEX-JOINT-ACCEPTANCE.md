@@ -30,3 +30,7 @@ TDD验证默认拒绝、受限许可、过期/配置/任务不符、第二turn�
 用户另批一个独立原客户端实例、无模型thread/MCP退出诊断，不复用provider凭据。已执行：固定同exe，provider指向本地拒绝端点（请求0），仅initialize/thread/start。独立Windows观察器在退出前持有宿主及其实际MCP子进程句柄，记录桥exit1、宿主exit0，桥无EOF/无已保存fault；不是PID消失推断。原12进程保持，清理通过。真实桥异常收尾已复现，但具体厂商内部终止机制未取证；后续需设计明确的桥收尾协议与进程证明，不能把exit1算成功或删除EOF断言。
 
 原诊断脚本no_turn计数假设错误（初始化不计入statistics.requests）；用合成协议夹具红灯复现后修复，保存原诊断报告并说明，未追加真实运行。测试活跃报告读取又复现Windows rename竞争MCP_REPORT_WRITE/MCP_IO，改用协议屏障而不是重复读文件；诊断读取使用FileShare.Delete避免影响被观察方。原联合付费记录仍FAILED，任何新的真实客户端/模型复验需新授权。
+
+## unsubscribe候选验证
+
+用户另批一个无模型实例验证thread/unsubscribe。本次仅自有新thread，一次unsubscribe返回unsubscribed，观察10秒桥未退出；随后宿主exit0、桥exit1、EOF=false。0turn/0provider请求/0工具调用，清理和原实例保持通过。候选失败，不把unsubscribe自动接入生产close，不推断订阅解除保证MCP进程生命周期。诊断工具限tests，未新增生产通用RPC；以固定本地schema为字段依据。下一方向需重新明确桥生命周期所有权：平台可控stdio的自有桥监督器及排空/EOF/退出对账，先离线方案和合成反例，再独立授权实测；不继续堆叠关闭猜测或弱化证据门槛。

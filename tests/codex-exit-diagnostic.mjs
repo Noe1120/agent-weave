@@ -19,9 +19,20 @@ import {
   cleanCredentials,
   noModelThread,
 } from "./codex-joint-support.mjs";
+import { ownThreadProbe } from "./codex-unsubscribe-probe.mjs";
 
-assert.deepEqual(process.argv.slice(2), ["--allow-one-no-model-diagnostic"]);
-const root = resolve(".runtime/w20-exit/owned-once");
+const unsubscribeMode =
+  process.argv[2] === "--allow-one-unsubscribe-diagnostic";
+assert.deepEqual(process.argv.slice(2), [
+  unsubscribeMode
+    ? "--allow-one-unsubscribe-diagnostic"
+    : "--allow-one-no-model-diagnostic",
+]);
+const root = resolve(
+  unsubscribeMode
+    ? ".runtime/w20-unsubscribe/owned-once"
+    : ".runtime/w20-exit/owned-once",
+);
 assert.ok(
   !existsSync(root),
   "Exclusive diagnostic already exists; no automatic retry",
@@ -49,7 +60,9 @@ const until = async (fn) => {
   }
 };
 const report = {
-  kind: "NO_MODEL_MCP_EXIT_DIAGNOSTIC",
+  kind: unsubscribeMode
+    ? "NO_MODEL_UNSUBSCRIBE_DIAGNOSTIC"
+    : "NO_MODEL_MCP_EXIT_DIAGNOSTIC",
   checks: [],
   facts: {},
   started_at: new Date().toISOString(),
@@ -137,7 +150,8 @@ try {
   report.facts.launcher_fingerprint = launcher.fingerprint;
   handle = await launcher.launch(() => true);
   await handle.ready;
-  await handle.startThread(handle.workDirectory);
+  const probe = ownThreadProbe(handle);
+  await probe.start();
   // Permit rename while reading a live report on Windows; ordinary Node reads
   // can briefly deny delete-sharing and interfere with the bridge's atomic save.
   const bridgeReports = () =>
@@ -172,6 +186,20 @@ try {
   const hostWatch = await watch(parent[0].ProcessId, "host");
   const bridgeWatch = await watch(child.ProcessId, "bridge");
   report.facts.preclose_bridge = bridgeReports()[0];
+  if (unsubscribeMode) {
+    report.facts.unsubscribe_requested_at = new Date().toISOString();
+    report.facts.unsubscribe_status = await probe.unsubscribe();
+    check(
+      "unsubscribe_acknowledged",
+      report.facts.unsubscribe_status === "unsubscribed",
+    );
+    // Observe up to ten seconds without closing the host or forcing the bridge.
+    const deadline = Date.now() + 10000;
+    while (!existsSync(bridgeWatch.path) && Date.now() < deadline)
+      await pause(50);
+    report.facts.bridge_exited_before_host_close = existsSync(bridgeWatch.path);
+    report.facts.after_unsubscribe_bridge = bridgeReports()[0];
+  }
   report.facts.close_requested_at = new Date().toISOString();
   handle.close();
   const exit = await handle.closed;
@@ -192,7 +220,24 @@ try {
   report.facts.protocol_statistics = structuredClone(handle.statistics);
   check("host_exit", exit.code === 0 && exit.exit_observed && !exit.forced);
   check("bridge_exit_observed", report.facts.bridge_os_exit.exit_observed);
-  check("no_turn", noModelThread(handle.statistics, report.facts.final_bridge));
+  check(
+    "no_turn",
+    unsubscribeMode
+      ? handle.statistics.generation === 0 &&
+          handle.statistics.turn === null &&
+          handle.statistics.requests === 2 &&
+          handle.statistics.last_method === "thread/unsubscribe" &&
+          report.facts.final_bridge.tool_calls === 0
+      : noModelThread(handle.statistics, report.facts.final_bridge),
+  );
+  if (unsubscribeMode)
+    check(
+      "graceful_bridge_exit",
+      report.facts.bridge_exited_before_host_close &&
+        report.facts.bridge_os_exit.exit_code === 0 &&
+        report.facts.final_bridge.stdin_eof === true &&
+        report.facts.final_bridge.fault === null,
+    );
 } catch (error) {
   report.error = {
     name: error.name,

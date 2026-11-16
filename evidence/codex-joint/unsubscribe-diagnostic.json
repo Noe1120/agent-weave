@@ -1,0 +1,138 @@
+{
+  "kind": "NO_MODEL_UNSUBSCRIBE_DIAGNOSTIC",
+  "checks": [
+    {
+      "name": "bridge_initialized",
+      "passed": true
+    },
+    {
+      "name": "unsubscribe_acknowledged",
+      "passed": true
+    },
+    {
+      "name": "host_exit",
+      "passed": true
+    },
+    {
+      "name": "bridge_exit_observed",
+      "passed": true
+    },
+    {
+      "name": "no_turn",
+      "passed": true
+    },
+    {
+      "name": "graceful_bridge_exit",
+      "passed": false
+    },
+    {
+      "name": "no_provider_request",
+      "passed": true
+    },
+    {
+      "name": "cleanup",
+      "passed": true
+    },
+    {
+      "name": "original_processes_unchanged",
+      "passed": true
+    }
+  ],
+  "facts": {
+    "executable_sha256": "4b3286e35d7fe866c6b0eb3f07d7a4cdb5e96489576170dfd6b3a15aa1c67382",
+    "launcher_fingerprint": "2e7b2a88d40328ac01082948ce3411195fdfd6932dd3309b9de974763821e006",
+    "preclose_bridge": {
+      "schema": 1,
+      "target": "codex",
+      "initialize_requests": 1,
+      "initialized": true,
+      "tools_list_requests": 1,
+      "tool_calls": 0,
+      "tool_errors": 0,
+      "resources_list_requests": 0,
+      "prompts_list_requests": 0,
+      "roots_list_changed_notifications": 0,
+      "stdin_eof": false,
+      "fault": null
+    },
+    "unsubscribe_requested_at": "2026-11-16T10:55:59.312Z",
+    "unsubscribe_status": "unsubscribed",
+    "bridge_exited_before_host_close": false,
+    "after_unsubscribe_bridge": {
+      "schema": 1,
+      "target": "codex",
+      "initialize_requests": 1,
+      "initialized": true,
+      "tools_list_requests": 1,
+      "tool_calls": 0,
+      "tool_errors": 0,
+      "resources_list_requests": 0,
+      "prompts_list_requests": 0,
+      "roots_list_changed_notifications": 0,
+      "stdin_eof": false,
+      "fault": null
+    },
+    "close_requested_at": "2026-11-16T10:56:09.658Z",
+    "host_exit": {
+      "code": 0,
+      "forced": false,
+      "exit_observed": true,
+      "fault": null
+    },
+    "host_os_exit": {
+      "observed_at": "2026-11-16T10:56:09.7214627Z",
+      "started_at": "2026-11-16T10:55:55.4243874Z",
+      "exit_observed": true,
+      "exit_code": 0
+    },
+    "bridge_os_exit": {
+      "observed_at": "2026-11-16T10:56:09.6672332Z",
+      "started_at": "2026-11-16T10:55:55.7102594Z",
+      "exit_observed": true,
+      "exit_code": 1
+    },
+    "final_bridge": {
+      "schema": 1,
+      "target": "codex",
+      "initialize_requests": 1,
+      "initialized": true,
+      "tools_list_requests": 1,
+      "tool_calls": 0,
+      "tool_errors": 0,
+      "resources_list_requests": 0,
+      "prompts_list_requests": 0,
+      "roots_list_changed_notifications": 0,
+      "stdin_eof": false,
+      "fault": null
+    },
+    "protocol_statistics": {
+      "requests": 2,
+      "responses": 2,
+      "notifications": 4,
+      "unknown_notifications": [
+        "remoteControl/status/changed",
+        "thread/started",
+        "mcpServer/startupStatus/updated"
+      ],
+      "refused_server_requests": 0,
+      "last_method": "thread/unsubscribe",
+      "turn": null,
+      "turns_terminal": 0,
+      "generation": 0
+    },
+    "cleanup_host_exit": {
+      "code": 0,
+      "exit_observed": true,
+      "forced": false
+    },
+    "provider_sink_requests": 0,
+    "cleanup": {
+      "deleted": 2,
+      "scanned": 75,
+      "residual_files": 0
+    }
+  },
+  "started_at": "2026-11-16T10:55:54.468Z",
+  "finished_at": "2026-11-16T10:56:10.896Z",
+  "status": "DIAGNOSTIC_FAILED"
+}

@@ -171,6 +171,9 @@ qa-runtime/
 !/evidence/codex-joint/EXIT-DIAGNOSIS.md
 !/evidence/codex-joint/exit-diagnostic.json
 !/evidence/codex-joint/exit-verification.json
+!/evidence/codex-joint/UNSUBSCRIBE-DIAGNOSIS.md
+!/evidence/codex-joint/unsubscribe-diagnostic.json
+!/evidence/codex-joint/unsubscribe-verification.json
 !/evidence/codex/vendor-attempt-report.json
 !/evidence/codex/preflight/
 /evidence/codex/preflight/*

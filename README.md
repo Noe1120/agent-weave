@@ -1,5 +1,13 @@
 # Team · 原生 Windows 工作台
 
+## 最新验证 · thread/unsubscribe不能解决MCP收尾
+
+用户新批的单实例无模型实验已完成：对本次自有thread发送一次thread/unsubscribe，收到unsubscribed；随后观察10秒，桥未退出。再关闭宿主，宿主exit0/非强制，桥仍exit1、stdin_eof=false。无turn（generation0/turn=null）、无工具调用、本地provider请求0、未复用用户凭据。临时配置删除2份，75文件扫描零残留，原客户端清单不变。**该候选方案未通过，不合入生产关闭路径，不追认W20通过。**
+
+下一步不再盲试重复启动：需要明确是否采用平台持有MCP桥进程/stdio并协调排空、EOF和退出对账的方案；先离线设计与合成验证，再申请必要的真实实测。既有strict EOF/exit0门槛保留。证据见[unsubscribe验证](evidence/codex-joint/UNSUBSCRIBE-DIAGNOSIS.md)。README实时更新，HANDOFF冻结，管家不构建。
+
+本轮回归611/611，0失败/0跳过；原生14+1、旧包989文件、P0 13项、设计59文件/58摘要通过。生产关闭行为未改，候选失败记录完整保留。
+
 ## 最新诊断 · W20 MCP退出（无模型，已执行）
 
 本次新授权仅启动1个独立Codex实例并创建1个thread；没有prompt/turn、没有复用provider凭据。本地拒绝端点请求数0，MCP工具调用0。通过退出前持有Windows进程句柄观测：发出宿主stdin EOF后，**MCP桥exit 1（10:39:50.621Z），宿主exit 0（10:39:50.655Z）**，桥报告仍stdin_eof=false/fault=null，宿主非强制退出。这排除了“桥只是还没退出”解释，证明宿主正常退出不能代表MCP正常收尾；尚无厂商内部调用栈，不把exit1单独断言成具体TerminateProcess调用。

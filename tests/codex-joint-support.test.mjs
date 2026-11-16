@@ -17,6 +17,34 @@ import { createInterface } from "node:readline";
 import { once } from "node:events";
 import { resolve } from "node:path";
 
+test("diagnostic unsubscribe sends only its own fresh thread once, without a turn", async () => {
+  const { CodexAppServer } =
+    await import("../packages/service/src/codex-app-server.ts");
+  const { ownThreadProbe } = await import("./codex-unsubscribe-probe.mjs");
+  const child = spawn(
+    process.execPath,
+    [resolve("tests/fixtures/codex-app-server-fixture.mjs"), "success"],
+    { windowsHide: true, stdio: ["pipe", "pipe", "pipe"] },
+  );
+  const h = new CodexAppServer(child),
+    probe = ownThreadProbe(h);
+  try {
+    await h.ready;
+    await assert.rejects(probe.unsubscribe());
+    assert.equal(h.statistics.requests, 0);
+    await probe.start();
+    assert.equal(await probe.unsubscribe(), "unsubscribed");
+    assert.equal(h.statistics.requests, 2);
+    assert.equal(h.statistics.last_method, "thread/unsubscribe");
+    assert.equal(h.statistics.generation, 0);
+    await assert.rejects(probe.unsubscribe());
+    assert.equal(h.statistics.requests, 2);
+  } finally {
+    h.close();
+    await h.closed;
+  }
+});
+
 test("no-model diagnosis counts thread/start but not the separate initialize handshake", async () => {
   const { CodexAppServer } =
     await import("../packages/service/src/codex-app-server.ts");

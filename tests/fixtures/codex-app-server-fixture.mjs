@@ -238,6 +238,16 @@ createInterface({ input: process.stdin }).on("line", (text) => {
     return onTurnStart(frame.id);
   }
   if (frame.method === "turn/interrupt") return onInterrupt(frame.id);
+  if (frame.method === "thread/unsubscribe") {
+    if (
+      !threadStarted ||
+      frame.params?.threadId !== threadId ||
+      turnCount !== 0
+    )
+      return refuse(frame.id, -32602, "wrong diagnostic thread");
+    threadStarted = false;
+    return answer(frame.id, { status: "unsubscribed" });
+  }
   refuse(frame.id, -32601, "method not found");
 });
 
