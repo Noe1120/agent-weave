@@ -6,13 +6,14 @@
   "service": {
     "command": "npm run verify",
     "exit_code": 0,
-    "tests": 431,
-    "pass": 431,
+    "tests": 436,
+    "pass": 436,
     "fail": 0,
     "skip": 0,
-    "synthetic_claude_tests": 75,
+    "synthetic_claude_tests": 80,
     "compiled_smoke": "PASS",
-    "real_clients_started_by_verify": 0
+    "real_clients_started_by_verify": 0,
+    "test_file_concurrency": 2
   },
   "native": {
     "csharp_groups": 14,
@@ -26,7 +27,7 @@
     "rebuilt": false
   },
   "real_attempt": {
-    "count": 8,
+    "count": 11,
     "version": "5.11492.2",
     "process_started": true,
     "startup_fixed": true,
@@ -36,13 +37,15 @@
     "remaining_probe_processes": 0,
     "existing_dsh_processes_unchanged": true,
     "retries_without_login": 3,
-    "next_prerequisite": "One fresh-profile task already authorized, not sent; current user Desktop must exit normally before independent probe. Pin me live-state/provider metadata, never official login.",
-    "normal_desktop_exit": false,
+    "next_prerequisite": "Renewed specific one-task authorization and user Allow once participation; recheck original-client inventory empty immediately before launch",
+    "normal_desktop_exit": "Attempt11 ROOT_EXIT/exit0; no assistant stop, cause not attributed",
     "third_party_cc_switch": true,
-    "read_connector_discovery_attempts": 3,
+    "read_connector_discovery_attempts": 6,
     "real_tool_calls": 0,
     "me_route_at_previous_launches": "NOT_PINNED; transport-only evidence retained",
-    "latest_readonly_route_metadata": "me/proxy/attached confirmed; runtime upstream UNVERIFIED"
+    "latest_readonly_route_metadata": "me/proxy/attached confirmed; runtime upstream UNVERIFIED",
+    "user_task_prompts_sent": 2,
+    "latest_task_status": "NOT_COMPLETED; permission not approved and task connection notification fault"
   },
   "design": {
     "status": "PASS",
@@ -63,19 +66,19 @@
   "os_isolation": "NOT_TESTED",
   "review": "AUTHOR_SELF_REVIEW_NOT_INDEPENDENT",
   "logs": {
-    "service_sha256": "3ebdba62b1d86baf5c9734b4641c4cd48b6496257ebfd9669b220f957a331001",
+    "service_sha256": "098f9831eace079b9446379986c6b5f7f1c854d65baf64a9aea87aa61e8bcd1e",
     "first_service_failure_sha256": "b99858ceced0372ac68282012e8397391bbf6cf962218ce88a50f0f7169e238a",
-    "claude_sha256": "c2ad26148e3f8db17516b8575b733a301bc709b6a3efe45f5929c6965bc50a9e",
-    "native_sha256": "29cc4c5576b1d276567dd80df6fe32cc8b54ca32fcd32f4d7b0adb89dd0a562a",
+    "claude_sha256": "d7a402404a2878e0b1a4f41e0bdf18e9b687cea26b7d0db2c6d16e194ca18de6",
+    "native_sha256": "692bff2b04044e3fe0d1d123871d29a3e5c3da2cc88d286bdcec233cb7c43338",
     "package_sha256": "77c06975809839528ad44681a225adfd36628db49898b4eac30815809a5f75dd",
     "prelaunch_red_sha256": "8e9abacd6e9721d61162cfed66c5a52299ccf14cc5994fa289ec3134f5a38cf0",
     "prelaunch_green_sha256": "bd07a647241f3098e3bef24dce9424c5f0ffd08e2012f165f4fe903d8e30eec0",
-    "compiled_read_walkthrough_sha256": "9ee47ef68dc9afb3d29125a8a55f915d2580ae32b6bc1be46172bce9835e1076",
+    "compiled_read_walkthrough_sha256": "535fc39c9ce5639f539113ed799057c2bfac90070cfcd846cd43fb4957f768cc",
     "first_compiled_read_failure_sha256": "4d4043acca04d204e6d23a2b7a7350d095b979adfb8fb94d9189599533b07366",
-    "real_final_sha256": "5d1628b459dbc73937fe9239719a2360819a6225911da3c92e4967520514e134",
-    "preservation_sha256": "a27f7239262bbc7dbf08ae6693a905c429a56d572094c2b57aec4b26871ae82b",
+    "real_final_sha256": "ccf9bf85e79a5cb2bb9bdf1ff10ed0fa5839890dc88bce0458a096ebe1282ca5",
+    "preservation_sha256": "afaf54da532aed3c1002faf3130c6612684dcc3e306992c3fc31ed8b9ba12558",
     "design_sha256": "605484a3cc6ea6bccae941f02b9af0cbb792168b6418f6ef37451848502c7f72",
-    "p0_sha256": "0f70e437d5565baed1bf0ffdc25fdcd4eb238d31a05f615b16449fb44b5e1817",
+    "p0_sha256": "de143bf68e7b768d156f835e9e8ff6684f936656c49fbaf2bd2384add8995066",
     "dsh_failed_full_sha256": "253595bdda09cfdffe35b616b17dc2357de891dd6ec56f1a185916cb52415445",
     "runner_failed_full_sha256": "c8b92c82220c9b6f7713b9aea37ae6292765bace7776e2433c2b8ff46185d2b6",
     "dsh_stress_red_sha256": "074af41cc4518f9dc6e217fe919be9e8997e321eff385fa65022f700d16de04e",
@@ -91,15 +94,33 @@
     "me_route_red_sha256": "d8561c50204a5b34b8ebbdd81fd8c94c8a3aa63d146b69f08b947a3c8fe43d9d",
     "me_route_green_sha256": "d4d4e15c53fe8fd6d2779f51ef73c01bdce8aea76ff9ed62b3aa7f4a559733c9",
     "empty_route_red_sha256": "8b0740b0a7ea3928e061d602cf602f9fd6070841e4cfb5600edbfad8ee087e4f",
-    "empty_route_green_sha256": "17e10e450e148bae3ae03796b0d8e30d40170a39edbe838e921c8f3fac66ae61"
+    "empty_route_green_sha256": "17e10e450e148bae3ae03796b0d8e30d40170a39edbe838e921c8f3fac66ae61",
+    "historical_service_sha256": "3ebdba62b1d86baf5c9734b4641c4cd48b6496257ebfd9669b220f957a331001",
+    "historical_claude_sha256": "c2ad26148e3f8db17516b8575b733a301bc709b6a3efe45f5929c6965bc50a9e",
+    "historical_native_sha256": "29cc4c5576b1d276567dd80df6fe32cc8b54ca32fcd32f4d7b0adb89dd0a562a",
+    "historical_package_sha256": "77c06975809839528ad44681a225adfd36628db49898b4eac30815809a5f75dd",
+    "historical_compiled_read_walkthrough_sha256": "9ee47ef68dc9afb3d29125a8a55f915d2580ae32b6bc1be46172bce9835e1076",
+    "historical_real_final_sha256": "5d1628b459dbc73937fe9239719a2360819a6225911da3c92e4967520514e134",
+    "historical_preservation_sha256": "a27f7239262bbc7dbf08ae6693a905c429a56d572094c2b57aec4b26871ae82b",
+    "roots_red_sha256": "d7719a1ebd7c04e31bd142330e9bcc686f7798bfaa3069a5ebfdd8812dbf9413",
+    "roots_green_sha256": "ea34d7067ea1be986bc4298ceb919c98654be893312c55be7003e78b008a9ac6",
+    "multi_report_red_sha256": "9443b7e8bc814123d40c192ff588d293bc1f507ff31fd9a088d39b3e81b14e9b",
+    "multi_report_green_sha256": "92ff521978e6c3f24245ae65c59944c4a274d491f395f5524cf0bc3f3ee4ecb3",
+    "contention_stress_sha256": "a59416c3448d619cb746f8fb90f231d1db869b409407558ba08482eda902a055",
+    "bounded_stress_sha256": "f21f4e80e66135fbf118bb7cb006b12e8bfaefa66620e5fb0866792b376739d4",
+    "historical_design_sha256": "605484a3cc6ea6bccae941f02b9af0cbb792168b6418f6ef37451848502c7f72",
+    "historical_p0_sha256": "0f70e437d5565baed1bf0ffdc25fdcd4eb238d31a05f615b16449fb44b5e1817"
   },
   "warnings": [
     "Node SQLite experimental warning remains visible.",
     "Real Desktop tool discovery is not a model/tool execution, L1-L3 qualification or OS isolation.",
     "synthetic_only/provider_fingerprint are trusted acceptance declarations, not production data classification or provider egress enforcement.",
-    "No native window automation, model prompt, production config change or coordinator implementation.",
     "First compiled walkthrough expected ready after apply_plan; corrected to documented queued without changing production state machine; failed evidence retained.",
-    "Forced test Desktop cleanup is not graceful EOF; native network/file accesses not audited."
+    "Forced test Desktop cleanup is not graceful EOF; native network/file accesses not audited.",
+    "Two authorized synthetic user prompts sent in attempts10/11; no tool/service read. Original config/history unchanged.",
+    "Desktop automatic connection probes may bill; total requests and fees UNKNOWN.",
+    "Attempt11 exact rejected notification method not recorded; valid roots change compatibility fixed with synthetic regression only.",
+    "Original DSH monitor unknown failure exact cause not proven. Runner resource contention reproduced; bounded test scheduling preserves all cases/assertions and production deadlines."
   ],
   "first_full_run": {
     "tests": 415,
@@ -222,14 +243,106 @@
     "test_red": "gateway-only route formerly accepted",
     "test_green": "reject missing binding, wrong provider/direct/detached/name/model metadata drift; recheck before launch and redact copy on failure",
     "empty_profile_fallback": "REFUSED by real opt-in entry",
-    "new_real_launches_after_correction": 0,
+    "new_real_launches_after_correction": 3,
     "original_configurations_unchanged": 4,
     "history_read": false,
-    "source_scope": "acceptance helpers/tests/docs only",
-    "ui_task_prompt_sent": false,
+    "source_scope": "Acceptance helpers, MCP report/session compatibility, tests and documentation; no production provisioning",
+    "ui_task_prompt_sent": true,
     "user_instance_untouched": true,
     "fee": "UNKNOWN",
     "host_limit_ms": 600000,
     "default_discovery_limit_ms": 60000
+  },
+  "walkthrough_evidence_parent_regression": {
+    "first_default_run": "FAIL_ENOENT: evidence parent .runtime absent",
+    "root_cause": "Walkthrough created only leaf output directory; fresh worktree lacks parent. Earlier explicit output under existing evidence directory masked the defect.",
+    "red": {
+      "tests": 2,
+      "pass": 1,
+      "fail": 1
+    },
+    "green": {
+      "tests": 2,
+      "pass": 2,
+      "fail": 0
+    },
+    "fix": "Create parent recursively; retain nonrecursive exclusive attempt creation and existing-evidence refusal. No service/MCP validation changed.",
+    "command": "npm run test:claude:read:walkthrough",
+    "default_walkthrough": "PASS_SYNTHETIC; two connections,40 progress reads,EOF/reconnect/revocation,zero read-side DB mutations",
+    "native_clients_started": 0,
+    "model_calls": 0,
+    "first_failure_sha256": "f5b0d15beedc869aae525cee48ea70ce4eefb1cd398abceb7f771b1f41d726d5",
+    "red_sha256": "bf29b3f040bc2b12ccfbc4469a4d0fef6c3dbc92db065ebb10d32ea325915fe7",
+    "green_sha256": "27bdff42b2b7e313d5285ed32eb2c4555102efcf937c8ee8cdff00595bc8c356"
+  },
+  "historical_followup_failure": {
+    "command": "npm run verify",
+    "exit_code": 1,
+    "tests": 431,
+    "pass": 429,
+    "fail": 2,
+    "skip": 0,
+    "status": "FAIL_UNDER_INVESTIGATION; earlier431PASS retained as historical, not current success",
+    "failures": [
+      "DSH authorization-monitor synthetic runtime state unknown instead of closed",
+      "Runner success scenario reached complete/exit0 but retained TIMEOUT and failed state"
+    ],
+    "no_assertions_removed": true,
+    "log_sha256": "a1dbd1f030a5635a56e8d6a6915f723309b66bfc13c85c6ade995a05643081a1",
+    "context": "Run overlapped fresh Desktop UI acceptance; resource contention is a hypothesis, not confirmed root cause. Do not silently rerun to claim fixed."
+  },
+  "previous_service_verification_before_task_runtime": {
+    "command": "npm run verify",
+    "exit_code": 0,
+    "tests": 431,
+    "pass": 431,
+    "fail": 0,
+    "skip": 0,
+    "synthetic_claude_tests": 75,
+    "compiled_smoke": "PASS",
+    "real_clients_started_by_verify": 0
+  },
+  "latest_followup_verification": {
+    "command": "npm run verify",
+    "exit_code": 0,
+    "tests": 436,
+    "pass": 436,
+    "fail": 0,
+    "skip": 0,
+    "synthetic_claude_tests": 80,
+    "compiled_smoke": "PASS",
+    "real_clients_started_by_verify": 0,
+    "test_file_concurrency": 2,
+    "status": "PASS_SYNTHETIC; original DSH monitor failure exact trigger remains unconfirmed",
+    "log_sha256": "098f9831eace079b9446379986c6b5f7f1c854d65baf64a9aea87aa61e8bcd1e"
+  },
+  "diagnostic_report_ownership": {
+    "red": "3 tests:1fail/2pass",
+    "green": "19/19 connector tests",
+    "real_evidence": "Attempt11 distinct discovery and task connection reports",
+    "old_single_report": "Exclusive no-overwrite retained",
+    "invalid_directory": "Refused, visible exit1"
+  },
+  "roots_notification_compatibility": {
+    "red": "2tests:1fail/1pass; MCP_NOTIFICATION_INVALID on valid notification",
+    "green": "21/21 connector tests; ready-only notification no-op/counter then real authorized local HTTP read; no outbound roots request, extra scope or DB mutation",
+    "negative_cases": "Early/malformed/unknown/repeated-init still fail",
+    "runtime_attribution": "Static installed call chain and matching fault class; exact attempt11 method not captured; real acceptance pending"
+  },
+  "test_scheduling": {
+    "default_test_file_concurrency": 2,
+    "stress_all_at_once": {
+      "runs": 16,
+      "failed_runs": 16,
+      "failure": "Runner state observation timeout"
+    },
+    "bounded_two": {
+      "runs": 16,
+      "passed_runs": 16
+    },
+    "original_full_failure_not_erased": true,
+    "dsh_exact_root_cause": "UNCONFIRMED; safe state assertion diagnostics added only",
+    "production_timeouts_changed": false,
+    "tests_skipped_or_assertions_removed": false
   }
 }

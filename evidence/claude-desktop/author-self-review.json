@@ -11,7 +11,7 @@
       "result": "PASS_FOR_OWN_STOPPED_PROFILES"
     },
     {
-      "check": "All seven real attempts retain separate results and hashes; no rewrite of earlier failures",
+      "check": "All eleven real attempts retain separate results and hashes; earlier failures preserved",
       "result": "PASS"
     },
     {
@@ -61,10 +61,34 @@
     {
       "check": "Existing user Claude started after attempt8 cleanup",
       "result": "PRESERVED; no attach/restart/history access"
+    },
+    {
+      "check": "Automatic health probes are distinct from user prompts; broad400/404 model rejection label is not a proven gateway root cause",
+      "result": "CORRECTED; total inference count and fees UNKNOWN, no request/history tables read"
+    },
+    {
+      "check": "Fresh-workspace compiled walkthrough creates missing evidence parents while refusing an existing attempt directory",
+      "result": "PASS_RED_GREEN; two execution-based regressions, actual default walkthrough passed; no real client or model started"
+    },
+    {
+      "check": "Concurrent discovery/task report ownership; prior single-file overwrite rejection preserved",
+      "result": "PASS_RED_GREEN_AND_REAL_TWO_REPORTS_ATTEMPT11"
+    },
+    {
+      "check": "Valid roots notification then actual authorized HTTP read; no roots requests, scope expansion, DB mutations or metadata disclosure",
+      "result": "PASS_SYNTHETIC_RED_GREEN; exact attempt11 rejected method not captured; no new real acceptance"
+    },
+    {
+      "check": "Attempt11 permission user handoff ended with natural root exit; no hidden/vanished window to approve",
+      "result": "NOT_PASSED; no tool read; owned cleanup and370-file zero-token scan confirmed"
+    },
+    {
+      "check": "Test resource contention repeat experiment and bounded scheduling; assertions and production deadlines unchanged",
+      "result": "Runner contention supported (16 concurrent failures vs16 bounded passes); original DSH monitor exact failure remains unconfirmed; diagnostic assertion added"
     }
   ],
   "remaining_actions": [
-    "Previously authorized one fresh-profile synthetic UI task remains unsent. Existing user Claude must exit normally before the guarded independent launch; revalidate me route first. No official login.",
+    "No live approval window remains. Need specific renewed authorization for one synthetic task (previous one consumed), empty original-client inventory, and user participation for Allow once. Never take over original instance.",
     "Complete production provisioning/provider-bound disclosure and same-configuration Windows isolation before sensitive or writing access.",
     "Validate Desktop response states/cancel/recovery without unsupported hooks or client substitution."
   ],

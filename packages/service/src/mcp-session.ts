@@ -10,6 +10,7 @@ export class McpSession {
     tool_errors: 0,
     resources_list_requests: 0,
     prompts_list_requests: 0,
+    roots_list_changed_notifications: 0,
   };
   constructor(client: McpReadClient) {
     this.client = client;
@@ -44,6 +45,28 @@ export class McpSession {
         return null;
       }
       if (f.method === "notifications/cancelled") return null; // Bounded reads have no state-changing side effects.
+      if (
+        f.method === "notifications/roots/list_changed" &&
+        this.state === "ready"
+      ) {
+        const p = f.params;
+        if (
+          p !== undefined &&
+          (!p ||
+            typeof p !== "object" ||
+            Array.isArray(p) ||
+            Object.keys(p).some((k) => k !== "_meta") ||
+            ("_meta" in p &&
+              (!p._meta ||
+                typeof p._meta !== "object" ||
+                Array.isArray(p._meta))))
+        )
+          throw new Error("MCP_NOTIFICATION_INVALID");
+        // Client workspace changes cannot expand this connector's fixed resource scope.
+        // Acknowledge the notification without requesting roots or reading client files.
+        this.stats.roots_list_changed_notifications++;
+        return null;
+      }
       throw new Error("MCP_NOTIFICATION_INVALID");
     }
     if (!validId(f.id)) return error(-32600, "Invalid Request");

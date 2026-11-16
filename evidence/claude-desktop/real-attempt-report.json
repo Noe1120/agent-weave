@@ -3,7 +3,7 @@
   "date": "2026-11-16",
   "timezone": "Asia/Tokyo",
   "status": "REAL_CLAUDE_MCP_DISCOVERY_PASS_FULL_INTEGRATION_INCOMPLETE",
-  "attempts": 8,
+  "attempts": 11,
   "first_attempt_historical": {
     "schema": 1,
     "date": "2026-11-15",
@@ -354,6 +354,172 @@
       "copied_gateway_credential_redacted": true,
       "cost": "UNKNOWN",
       "total_client_background_model_requests": "UNKNOWN; no network audit"
+    },
+    {
+      "attempt": 9,
+      "status": "REAL_MCP_DISCOVERY_PASS_UI_TASK_NOT_SENT",
+      "observed_at": "2026-11-15T23:54:22.974Z",
+      "cleanup_confirmed": true,
+      "owned_root_exit_observed": true,
+      "job_empty": true,
+      "host_exit_code": 0,
+      "root_exit_code": 1,
+      "stop_reason": "CONTROLLER_STOP_AFTER_HISTORY_QUESTION",
+      "existing_clients_unchanged": true,
+      "mcp": {
+        "schema": 1,
+        "initialize_requests": 1,
+        "initialized": true,
+        "tools_list_requests": 1,
+        "tool_calls": 0,
+        "tool_errors": 0,
+        "resources_list_requests": 1,
+        "prompts_list_requests": 1,
+        "stdin_eof": false,
+        "fault": null
+      },
+      "prompts_sent": 0,
+      "service_reads": 0,
+      "cost": "UNKNOWN",
+      "me_route": "PINNED_PREFLIGHT_METADATA; runtime upstream not attested",
+      "ui_observation": {
+        "attempt": 9,
+        "user_original_exit_confirmed_before_launch": true,
+        "fresh_empty_profile": true,
+        "me_route_preflight_passed": true,
+        "gateway_visible": true,
+        "official_login_performed": false,
+        "user_history_read": false,
+        "original_configuration_hashes_unchanged": 4,
+        "original_profile_junction_targets_unchanged": true,
+        "model_unavailable_banner_seen": false,
+        "model_health_qualification": "UNKNOWN; absence of banner at observation is not inference success",
+        "ui_action": "One connector-menu click blocked by user-input detection; no confirmed click",
+        "prompt_typed": false,
+        "prompt_sent": false,
+        "stop_reason": "User asked why history absent; stopped only owned temporary instance",
+        "cleanup_confirmed": true,
+        "credential_scan": {
+          "at": "2026-11-15T23:55:38.386042+00:00",
+          "attempt": 9,
+          "scanned_files": 324,
+          "gateway_token_matches": 0,
+          "unread_files": 0,
+          "reparse_entries_not_followed": 0,
+          "scope": "Only stopped fresh attempt9 profile; no original history read"
+        },
+        "cost": "UNKNOWN"
+      }
+    },
+    {
+      "attempt": 10,
+      "status": "TASK_TOOL_UNAVAILABLE",
+      "observed_at": "2026-11-16T00:03:39.211Z",
+      "cleanup_confirmed": true,
+      "owned_root_exit_observed": true,
+      "job_empty": true,
+      "host_exit_code": 0,
+      "root_exit_code": 1,
+      "stop_reason": "CONTROLLER_STOP",
+      "existing_clients_unchanged": true,
+      "copied_gateway_credential_redacted": true,
+      "prompts_sent": 1,
+      "service_reads": 0,
+      "cost": "UNKNOWN",
+      "me_route": "PINNED_PREFLIGHT_METADATA; runtime upstream not attested",
+      "ui_observation": {
+        "at": "2026-11-16T00:03:38.113943+00:00",
+        "attempt": 10,
+        "gateway_visible": true,
+        "agent_weave_connector_menu_enabled": true,
+        "selected_model_display": "claude-haiku-5-5 Extended",
+        "user_prompts_sent": 1,
+        "reply_observed": true,
+        "reply": "The agent-weave-probe task_get tool is not available in this session, so I made no tool calls. I did not substitute the built-in TaskGet tool, because it is a different tool that would read from this session task list rather than the Agent Weave probe. No task_id or status was returned.",
+        "task_success": false,
+        "reason": "TOOL_UNAVAILABLE_REPORTED_BY_MODEL",
+        "cost": "UNKNOWN",
+        "history_read": false,
+        "original_config_modified": false,
+        "note": "MCP discovery/menu enablement is not tool availability in the native task runtime. No second prompt sent."
+      },
+      "raw_report_sha256": "a3ae15c3f50fcdcff1c39cf5d0530e5abdffecdbad14c634acfba470b5858e21",
+      "mcp": {
+        "schema": 1,
+        "initialize_requests": 1,
+        "initialized": true,
+        "tools_list_requests": 1,
+        "tool_calls": 0,
+        "tool_errors": 0,
+        "resources_list_requests": 1,
+        "prompts_list_requests": 1,
+        "stdin_eof": false,
+        "fault": null
+      }
+    },
+    {
+      "attempt": 11,
+      "status": "TOOL_PERMISSION_NOT_APPROVED_CONNECTION_FAULT",
+      "observed_at": "2026-11-16T00:14:10.681Z",
+      "cleanup_confirmed": true,
+      "owned_root_exit_observed": true,
+      "job_empty": true,
+      "host_exit_code": 0,
+      "root_exit_code": 0,
+      "stop_reason": "ROOT_EXIT",
+      "existing_clients_unchanged": true,
+      "copied_gateway_credential_redacted": true,
+      "prompts_sent": 1,
+      "service_reads": 0,
+      "cost": "UNKNOWN",
+      "me_route": "PINNED_PREFLIGHT_METADATA; runtime upstream not attested",
+      "ui_observation": {
+        "attempt": 11,
+        "observation_source": "Actual Computer Use observation before compaction; correlated with retained own host/MCP reports",
+        "fresh_profile": true,
+        "gateway_visible": true,
+        "user_prompts_sent": 1,
+        "tool_permission_visible": true,
+        "requested_tool": "agent-weave-probe/task_get",
+        "permission_scope": "Allow once",
+        "permission_clicked_by_assistant": false,
+        "permission_approval_observed": false,
+        "tool_calls": 0,
+        "service_reads": 0,
+        "task_success": false,
+        "owned_window_exit": "09:14:07 JST; ROOT_EXIT exit0; no assistant STOP instruction; user action not attributed",
+        "cost": "UNKNOWN",
+        "history_read": false
+      },
+      "raw_report_sha256": "ccf9bf85e79a5cb2bb9bdf1ff10ed0fa5839890dc88bce0458a096ebe1282ca5",
+      "mcp_connections": [
+        {
+          "connection": "connection-h9N6Xn",
+          "schema": 1,
+          "initialize_requests": 1,
+          "initialized": true,
+          "tools_list_requests": 1,
+          "tool_calls": 0,
+          "tool_errors": 0,
+          "resources_list_requests": 0,
+          "prompts_list_requests": 0,
+          "stdin_eof": false,
+          "fault": "MCP_NOTIFICATION_INVALID"
+        },
+        {
+          "connection": "connection-mrcmYn",
+          "schema": 1,
+          "initialize_requests": 1,
+          "initialized": true,
+          "tools_list_requests": 1,
+          "tool_calls": 0,
+          "tool_errors": 0,
+          "resources_list_requests": 1,
+          "prompts_list_requests": 1,
+          "stdin_eof": true,
+          "fault": null
+        }
+      ]
     }
   ],
   "findings": {
@@ -361,7 +527,7 @@
     "native_reproduction": "SHGetFolderPath(CSIDL_APPDATA) returns HRESULT 80070003 when fresh USERPROFILE lacks AppData/Roaming",
     "repair": "Create USERPROFILE/AppData/Roaming and AppData/Local and verify native resolved paths equal fresh environment values before launch",
     "lifetime_repair": "Retain actual root process handle; explicitly assign root to Job; observe root exit independently of pipe close; require Job empty and unchanged client inventories",
-    "latest_observation": "Attempt8 discovered MCP but no prompt/tool request sent; me routing was not pinned. Latest readonly configuration maps live-state proxy_route to me while legacy selectors disagree; runtime upstream unverified.",
+    "latest_observation": "Attempt10 task MCP report collision; attempt11 separate reports succeed, correct task_get permission appears, but not approved. Task connection fault MCP_NOTIFICATION_INVALID and zero tool/service reads. Owned window exited naturally before user could see it.",
     "mcp_connection_trigger": "Pinned client main-process IPC launches chat MCP only on a request from mainView; no internal IPC injection used",
     "attempt_4_historical_auth_observation": {
       "sign_in_cookie_present": false,
@@ -372,15 +538,19 @@
     "superseded_next_prerequisite": "User-owned authenticated session in a dedicated profile remains to be authorized and verified; login sufficiency is not established",
     "superseded_next_prerequisite_is_not_current": true,
     "root_cause_correction": "Blank independent profile omitted the actual third-party configuration; 3p Desktop resolves MCP preferences in LOCALAPPDATA/Claude-3p. No official login needed for the observed handshake.",
-    "next_prerequisite": "One fresh-profile synthetic UI task remains authorized and unconsumed. User-owned Desktop is now running; no restart/attachment allowed. Wait for user to exit normally, then revalidate me routing and client inventory before independent launch.",
-    "route_guard": "Require pinned me identity and live-state/provider metadata before preparation and immediately before launch; reject omitted route rather than fallback to empty official profile. This is preflight metadata, not live egress enforcement."
+    "next_prerequisite": "No live approval window remains. Need specific renewed authorization for one synthetic task (previous one consumed), empty original-client inventory, and user participation for Allow once. Never take over original instance.",
+    "route_guard": "Require pinned me identity and live-state/provider metadata before preparation and immediately before launch; reject omitted route rather than fallback to empty official profile. This is preflight metadata, not live egress enforcement.",
+    "automatic_probe_correction": "Pinned Desktop automatically performs a one-token inference health probe; broad400/404 mapping is not original-response evidence. Two later user prompts sent, fees/total inference UNKNOWN; no private request/history read.",
+    "followup_existing_instance_gate": "Attempt11 stopped and cleaned. Later original instance not touched; latest read-only inventory at2026-11-16T00:21Z empty. Must recheck immediately before any authorized launch.",
+    "report_collision": "Own attempt10 task runtime starts a second connector with the same --report; exclusive wx fails. New --report-dir creates a unique per-connection report without overwriting discovery evidence; attempt11 has two reports.",
+    "notification_compatibility": "Pinned task manager sends notifications/roots/list_changed when roots providers change. Reproduced valid notification rejection and fixed with validated ready-only no-op/counter; unknown/malformed notifications still fail. Actual rejected method in attempt11 was not captured; exact attribution and real fix acceptance remain unverified."
   },
   "scope": {
-    "model_calls": 0,
-    "prompts": 0,
+    "model_calls": null,
+    "prompts": 2,
     "login": false,
     "old_credentials": false,
-    "ui_clicks": "Attempted once in fresh attempt8; user-input detection prevented confirmed action",
+    "ui_clicks": "Actual fresh Desktop UI prompts in attempts10/11; permission not automated",
     "production_code_changed": true,
     "os_isolation": "NOT_TESTED",
     "network_audit": "NOT_PERFORMED",
@@ -389,7 +559,10 @@
     "production_adapter_enabled": false,
     "synthetic_read_connector_added": true,
     "private_history_read": false,
-    "model_call_count_scope": "User-authored task prompts only; Desktop background requests not audited"
+    "model_call_count_scope": "Two authorized user task prompts; total requests including background probes and fees UNKNOWN",
+    "user_task_prompts_sent": 2,
+    "background_inference_requests": "UNKNOWN",
+    "total_model_cost": "UNKNOWN"
   },
   "references": {
     "orca_commit": "af82fa8634e19c0376738ad636237aac847b2179",
@@ -425,9 +598,59 @@
         "unread_files": 0,
         "reparse_entries_not_followed": 0,
         "scope": "Only stopped fresh attempt8 profile using Windows extended-length paths; no original history"
+      },
+      {
+        "at": "2026-11-15T23:55:38.386042+00:00",
+        "attempt": 9,
+        "scanned_files": 324,
+        "gateway_token_matches": 0,
+        "unread_files": 0,
+        "reparse_entries_not_followed": 0,
+        "scope": "Only stopped fresh attempt9 profile; no original history read"
+      },
+      {
+        "at": "2026-11-16T00:09:53.026365+00:00",
+        "attempt": 10,
+        "scanned_files": 364,
+        "gateway_token_matches": 0,
+        "unread_files": 0,
+        "reparse_entries_not_followed": 0,
+        "scope": "Stopped owned attempt10 profile only; no original history"
+      },
+      {
+        "at": "2026-11-16T00:21:13.531Z",
+        "attempt": 11,
+        "scanned_files": 370,
+        "gateway_token_matches": 0,
+        "unread_files": 0,
+        "reparse_entries_not_followed": 0,
+        "scope": "Only stopped fresh attempt11 profile; no original history read"
       }
     ],
     "scope": "Exact gateway token scan within own stopped acceptance profiles only; no original history read",
-    "original_configuration_unchanged_at_route_correction": true
+    "original_configuration_unchanged_at_route_correction": true,
+    "latest_original_configurations": {
+      "at": "2026-11-16T00:21:15.365Z",
+      "original_configurations": [
+        {
+          "index": 1,
+          "unchanged": true
+        },
+        {
+          "index": 2,
+          "unchanged": true
+        },
+        {
+          "index": 3,
+          "unchanged": true
+        },
+        {
+          "index": 4,
+          "unchanged": true
+        }
+      ],
+      "live_route_metadata_unchanged": true,
+      "history_read": false
+    }
   }
 }

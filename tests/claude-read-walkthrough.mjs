@@ -12,6 +12,7 @@ const output = resolve(
   process.env.CLAUDE_READ_EVIDENCE ??
     ".runtime/claude-read-walkthrough-" + Date.now(),
 );
+mkdirSync(resolve(output, ".."), { recursive: true });
 mkdirSync(output);
 const f = fixture();
 const service = new CoreService(f.s, f.now);

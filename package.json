@@ -11,7 +11,7 @@
     "generate:check": "node scripts/generate-contracts.mjs --check",
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.build.json && node scripts/copy-assets.mjs",
-    "test": "node --test tests/*.test.ts",
+    "test": "node --test --test-concurrency=2 tests/*.test.ts",
     "verify": "npm run generate:check && npm run format:check && npm run typecheck && npm run check:web && npm test && npm run build && npm run test:smoke",
     "start": "node dist/packages/service/src/main.js",
     "test:smoke": "node tests/build-smoke.mjs",
@@ -38,7 +38,7 @@
     "test:dsh:session:live": "node tests/dsh-session-live.mjs",
     "test:claude": "node --test tests/claude*.test.ts",
     "test:claude:live": "node tests/claude-desktop-live.mjs",
-    "test:claude:read:walkthrough": "npm run build && node tests/claude-read-walkthrough.mjs"
+    "test:claude:read:walkthrough": "npm run build && node --test tests/claude-read-walkthrough.test.mjs && node tests/claude-read-walkthrough.mjs"
   },
   "dependencies": {
     "ajv": "8.20.0",

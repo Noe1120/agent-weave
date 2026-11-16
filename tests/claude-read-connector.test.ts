@@ -5,7 +5,7 @@ import { fixture, id } from "./helpers.ts";
 import { McpReadClient } from "../packages/service/src/mcp-read-client.ts";
 import { McpSession } from "../packages/service/src/mcp-session.ts";
 import { spawn } from "node:child_process";
-import { mkdtemp, writeFile, readFile } from "node:fs/promises";
+import { mkdtemp, writeFile, readFile, readdir } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { ExecutionFeed } from "../packages/service/src/workspace-feed.ts";
@@ -419,7 +419,11 @@ test("connector refuses redirects without forwarding its grant to another destin
   }
 });
 
-async function entry(config: unknown, bytes: string | Buffer) {
+async function entry(
+  config: unknown,
+  bytes: string | Buffer,
+  diagnostics?: { directory?: string; file?: string },
+) {
   const root = await mkdtemp(join(tmpdir(), "team-claude-read-entry-"));
   const configPath = join(root, "config.json"),
     reportPath = join(root, "report.json");
@@ -430,8 +434,9 @@ async function entry(config: unknown, bytes: string | Buffer) {
       resolve("packages/service/src/mcp-entry.ts"),
       "--config",
       configPath,
-      "--report",
-      reportPath,
+      ...(diagnostics?.directory
+        ? ["--report-dir", diagnostics.directory]
+        : ["--report", diagnostics?.file ?? reportPath]),
     ],
     { windowsHide: true, stdio: ["pipe", "pipe", "pipe"] },
   );
@@ -449,13 +454,200 @@ async function entry(config: unknown, bytes: string | Buffer) {
     code,
     stdout,
     stderr,
-    report: JSON.parse(await readFile(reportPath, "utf8")),
+    report: diagnostics ? null : JSON.parse(await readFile(reportPath, "utf8")),
   };
 }
 const init = frame(1, "initialize", {
   protocolVersion: "2025-06-18",
   capabilities: {},
   clientInfo: { name: "synthetic", version: "1" },
+});
+test("roots changes keep the fixed-scope stdio connection usable without requesting client files", async () => {
+  const x = await setup();
+  try {
+    x.config.egress.expires_at = new Date(Date.now() + 60000).toISOString();
+    const before = x.f.s.db.prepare("SELECT total_changes() AS n").get()!.n;
+    const r = await entry(
+      x.config,
+      [
+        {
+          ...init,
+          params: {
+            ...init.params,
+            capabilities: { roots: { listChanged: true } },
+          },
+        },
+        { jsonrpc: "2.0", method: "notifications/initialized" },
+        frame(2, "tools/list"),
+        { jsonrpc: "2.0", method: "notifications/roots/list_changed" },
+        {
+          jsonrpc: "2.0",
+          method: "notifications/roots/list_changed",
+          params: { _meta: { trace: "do-not-log-client-metadata" } },
+        },
+        frame(3, "tools/call", {
+          name: "task_get",
+          arguments: { task_id: x.f.ids.task },
+        }),
+        frame(4, "tools/call", {
+          name: "task_get",
+          arguments: { task_id: id() },
+        }),
+      ]
+        .map((f) => JSON.stringify(f) + "\n")
+        .join(""),
+    );
+    assert.equal(r.code, 0, r.stderr);
+    const responses = r.stdout
+      .trim()
+      .split("\n")
+      .map((s) => JSON.parse(s));
+    assert.deepEqual(
+      responses.map((f) => f.id),
+      [1, 2, 3, 4],
+    );
+    assert.ok(responses.every((f) => !("method" in f)));
+    assert.equal(
+      JSON.parse(responses[2].result.content[0].text).data.status,
+      "draft",
+    );
+    assert.equal(responses[3].result.isError, true);
+    assert.equal(responses[3].result.content[0].text, "MCP_SCOPE_DENIED");
+    assert.equal(r.report.roots_list_changed_notifications, 2);
+    assert.equal(r.report.stdin_eof, true);
+    assert.equal(r.report.fault, null);
+    assert.doesNotMatch(
+      JSON.stringify(r.report) + r.stdout,
+      /do-not-log-client-metadata/,
+    );
+    assert.equal(
+      x.f.s.db.prepare("SELECT total_changes() AS n").get()!.n,
+      before,
+    );
+  } finally {
+    await x.close();
+  }
+});
+test("roots notifications reject early or malformed frames without masking unknown or repeated initialization", async () => {
+  const x = await setup();
+  const notification = {
+    jsonrpc: "2.0",
+    method: "notifications/roots/list_changed",
+  };
+  try {
+    await assert.rejects(
+      x.session.receive(notification),
+      /MCP_NOTIFICATION_INVALID/,
+    );
+    await x.session.receive(init);
+    await assert.rejects(
+      x.session.receive(notification),
+      /MCP_NOTIFICATION_INVALID/,
+    );
+    await x.session.receive({
+      jsonrpc: "2.0",
+      method: "notifications/initialized",
+    });
+    for (const params of [
+      null,
+      [],
+      "invalid",
+      { roots: ["file:///private"] },
+      { _meta: [] },
+      { _meta: null },
+    ])
+      await assert.rejects(
+        x.session.receive({ ...notification, params }),
+        /MCP_NOTIFICATION_INVALID/,
+      );
+    for (const method of ["notifications/unknown", "notifications/initialized"])
+      await assert.rejects(
+        x.session.receive({ jsonrpc: "2.0", method }),
+        /MCP_NOTIFICATION_INVALID/,
+      );
+  } finally {
+    await x.close();
+  }
+});
+test("Desktop discovery and task MCP processes keep independent reports for the same configured directory", async () => {
+  const x = await setup();
+  const directory = await mkdtemp(join(tmpdir(), "team-claude-multi-report-"));
+  try {
+    x.config.egress.expires_at = new Date(Date.now() + 60000).toISOString();
+    const frames = [
+      init,
+      { jsonrpc: "2.0", method: "notifications/initialized" },
+    ];
+    const calls = [
+      frame(2, "tools/list"),
+      frame(2, "tools/call", {
+        name: "task_get",
+        arguments: { task_id: x.f.ids.task },
+      }),
+    ];
+    const results = await Promise.all(
+      calls.map((call) =>
+        entry(
+          x.config,
+          [...frames, call].map((f) => JSON.stringify(f) + "\n").join(""),
+          { directory },
+        ),
+      ),
+    );
+    for (const result of results) assert.equal(result.code, 0, result.stderr);
+    assert.equal(
+      JSON.parse(results[1]!.stdout.trim().split("\n").at(-1)!).result.isError,
+      false,
+    );
+    const directories = await readdir(directory);
+    assert.equal(directories.length, 2);
+    const reports = await Promise.all(
+      directories.map((d) =>
+        readFile(join(directory, d, "report.json"), "utf8").then((text) =>
+          JSON.parse(text),
+        ),
+      ),
+    );
+    assert.deepEqual(reports.map((r) => r.tool_calls).sort(), [0, 1]);
+    assert.deepEqual(reports.map((r) => r.tools_list_requests).sort(), [0, 1]);
+    assert.ok(
+      reports.every((r) => r.initialized && r.stdin_eof && r.fault === null),
+    );
+    assert.doesNotMatch(JSON.stringify(reports), new RegExp(x.f.token));
+  } finally {
+    await x.close();
+  }
+});
+test("single-file MCP diagnostics still refuse to overwrite an existing report", async () => {
+  const x = await setup();
+  const directory = await mkdtemp(
+    join(tmpdir(), "team-claude-report-exclusive-"),
+  );
+  const file = join(directory, "report.json");
+  try {
+    await writeFile(file, "preserve previous evidence");
+    const result = await entry(x.config, JSON.stringify(init) + "\n", { file });
+    assert.equal(result.code, 1);
+    assert.match(result.stderr, /MCP_REPORT_WRITE/);
+    assert.equal(await readFile(file, "utf8"), "preserve previous evidence");
+  } finally {
+    await x.close();
+  }
+});
+test("multi-process MCP diagnostics reject a missing report directory", async () => {
+  const x = await setup();
+  const directory = await mkdtemp(
+    join(tmpdir(), "team-claude-report-missing-"),
+  );
+  try {
+    const result = await entry(x.config, JSON.stringify(init) + "\n", {
+      directory: join(directory, "absent"),
+    });
+    assert.equal(result.code, 1);
+    assert.deepEqual(await readdir(directory), []);
+  } finally {
+    await x.close();
+  }
 });
 test("stdio connector handles real HTTP tool read followed by EOF with safe diagnostics", async () => {
   const x = await setup();

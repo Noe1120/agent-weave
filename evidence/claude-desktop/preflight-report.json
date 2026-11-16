@@ -33,6 +33,10 @@
     {
       "entry": ".vite/build/index.chunk-C8fqCNNh.js",
       "sha256": "afda8ae26d34cfadf3a640b9be3d51b6a2152aa3ac3a62c64c860d9ad3a800c8"
+    },
+    {
+      "entry": ".vite/build/index.chunk-C9EfQdUc.js",
+      "sha256": "ebb9127464a6e3ebfe78cbdfbdc247487348fb9c096f29c850b714339fb71998"
     }
   ],
   "findings": [
@@ -109,5 +113,42 @@
     "cc_switch_ui_verification": "NOT_COMPLETED; minimized/user-input detected; no configuration clicks",
     "existing_user_desktop": "RUNNING; not attached, restarted, closed or read",
     "previous_attribution_limitation": "Gateway discovery did not establish me route. Earlier evidence preserved without retroactive relabeling."
+  },
+  "followup_health_probe_analysis": {
+    "at": "2026-11-15T23:41:59.757514+00:00",
+    "static_entry": ".vite/build/index.chunk-C8fqCNNh.js",
+    "static_entry_sha256": "afda8ae26d34cfadf3a640b9be3d51b6a2152aa3ac3a62c64c860d9ad3a800c8",
+    "checks": {
+      "health_calls_probe_inference": true,
+      "health_probe_paid_origin": true,
+      "probe_posts_one_token": true,
+      "health_prefers_haiku": true,
+      "400_or_404_mapped_to_model_rejected": true
+    },
+    "own_attempt8_log_observation": "3P mode active; ConfigHealth state config_model_rejected; no user task prompt sent",
+    "interpretation": "The label can result from any400/404 response to automatic one-token gateway probe, not proof of official login or a missing model. Original response body was not retained in own bounded logs. Actual error cause remains unverified.",
+    "accounting_correction": "No user prompt does not mean zero background model requests or zero fees. Desktop automatically probes inference; no direct inference request was sent by this investigation.",
+    "model_catalog_observation": "GET loopback /claude-desktop/v1/models returned200 and4 IDs. sonnet alias differs from configured inferenceModels. Do not change config or treat catalog as inference success.",
+    "history_read": false,
+    "upstream_credentials_read": false,
+    "client_started": false,
+    "client_stopped": false,
+    "current_blocker": "Historical at that observation: original instance active. Later state is recorded separately; always recheck before launch."
+  },
+  "followup_model_catalog": {
+    "operation": "GET local gateway model metadata; no inference POST",
+    "status": 200,
+    "model_count": 4,
+    "response_sha256": "2dd6d8e38eab10972350d6f880c6065f6911b258fbf2e8d64c69ebda2d99d40c",
+    "inference_executed_by_diagnostic": false,
+    "private_history_read": false
+  },
+  "task_runtime_analysis": {
+    "date": "2026-11-16",
+    "report_collision": "Discovery and LocalMcpServerManager task connections have identical launch arguments; per-connection diagnostic ownership required",
+    "roots_notification": "registerRootsProvider -> notifyRootsChanged -> client.sendRootsListChanged; fixed-scope bridge must not request/read client roots",
+    "actual_attempt11_notification_method": "NOT_CAPTURED; static candidate plus deterministic regression, not confirmed exact wire frame",
+    "desktop_identity": "Native Desktop internally uses bundled task runtime; no independent CLI/SDK/API substitution or internal IPC injection performed",
+    "latest_readonly_inventory": "2026-11-16T00:21Z no Claude process; no launch/restart performed in this follow-up"
   }
 }

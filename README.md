@@ -145,10 +145,12 @@ W06/W07已提供开发态Broker、逻辑单写者、真实Git证据链和自有�
 
 ## Claude Desktop本地MCP与只读桥 · 2026-11-16
 
-官方Desktop 5.11492.2在独立第三方profile已完成本地MCP握手，不要求官方登录。累计八次尝试，第八次窗口仍未发送模型任务、工具调用为0；退出及测试凭据清除已核实。用户指定CC Switch的me＋路由模式，此前仅核对gateway不足以证明该路由；本轮已增加me路由配置校验，运行时上游和完整任务仍未验收。已有用户Claude实例不接管。
+官方Desktop 5.11492.2保持原客户端身份，不要求官方登录。累计十一轮真实尝试，本地MCP发现已通过，但真实工具读取仍为0。第十轮发送一条合成prompt后报告工具不可用，定位为发现连接与任务连接共用独占报告文件；已改为每连接独立报告，第十一轮证实两份报告均创建。第十一轮单独获准的一条prompt触发正确task_get授权框，但未批准，测试窗口于09:14:07（JST）自行退出；不能再要求用户点击已消失的窗口。任务连接另报MCP_NOTIFICATION_INVALID：已复现并修复合法roots变化通知被拒绝的问题，但该次实际通知方法未捕获，真实修复验收仍待完成。两个prompt的授权均已使用；新增真实任务需具体授权及用户亲自确认Allow once。CC Switch的me＋路由元数据继续固定，原配置/历史未改；费用与运行时上游仍未知，完整接入/Windows隔离/生产资格不升级，管家不构建。
 
 新增task_get、project_progress和可选message_poll，复用服务的grant/policy/run/ACL检查；任务投影是第七类resource/0.1只读投影。没有模型可指定的URL、token、project、shell或写工具。协议读取、撤权、分页、错误处理与编译后重连走查均通过；默认verify不启动原客户端。
 
-这是**合成验收专用桥，不是生产连接器或完整Claude任务接入**。配置中的synthetic_only/provider_fingerprint由可信验收者声明，尚未接入服务端的实际provider外发绑定、生产凭据配置和邀请流程，不可用于真实私密数据。真实Desktop只发现工具，tool_calls=0；完整消息往返、主动响应、窗口切换/最小化、取消恢复和Windows隔离均未通过。
+这是**合成验收专用桥，不是生产连接器或完整Claude任务接入**。配置中的synthetic_only/provider_fingerprint由可信验收者声明，尚未接入服务端的实际provider外发绑定、生产凭据配置和邀请流程，不可用于真实私密数据。真实Desktop已请求工具权限但尚未实际读取，tool_calls=0；完整消息往返、主动响应、窗口切换/最小化、取消恢复和Windows隔离均未通过。
 
 源码验证：npm run test:claude；编译走查：npm run test:claude:read:walkthrough。后者只建合成库并启动本项目stdio连接器，可用CLAUDE_READ_EVIDENCE指定不存在的新证据目录。真实Desktop入口须保留显式授权开关、固定安装/选中配置摘要与独立profile；不自动改写用户配置。详见[W13](plan/W13-CLAUDE-DESKTOP-MCP-PROBE.md)及[验证记录](evidence/claude-desktop/COMPLETION.md)。
+
+默认npm test使用两个测试文件并发，避免多个Git/.NET/子进程夹具争用资源；所有测试和失败断言仍运行，生产时限不变。并发实验与历史失败见W13验证汇总，不把测试排程当成产品负载资格。

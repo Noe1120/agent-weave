@@ -137,4 +137,4 @@ W03 已执行 Node 依赖锁定安装、本机确定性服务测试及编译冒�
 
 ## Claude Desktop本地MCP与只读桥 · 2026-11-16
 
-[W13](W13-CLAUDE-DESKTOP-MCP-PROBE.md)已完成MCP发现与合成只读桥，真实Desktop工具调用仍为0。用户明确指定CC Switch的me分组＋路由模式。2026-11-16只读复核发现live-state为proxy/attached，proxy_route匹配me；settings旧选择器仍为official、数据库is_current仍为cc7，二者不能替代活动路由证据。此前仅固定Desktop网关文件，未固定me，相关结论已收窄为MCP传输通过。第八次测试窗口发现MCP但未发送prompt、tool_calls=0，模型不可用提示未解决；测试实例退出与凭据清除已核实。现在第三方准备入口要求绑定路由目标、live-state及provider元数据摘要，并在启动前再次核对；这仍不是运行时provider外发证明。用户已授权一次独立窗口合成任务，不重复索取；当前已有用户Claude实例，不能接管或重启，下一次真实尝试尚未启动。 同配置Windows隔离和完整任务接入未完成；管家仍不构建。见[证据](../evidence/claude-desktop/COMPLETION.md)。
+[W13](W13-CLAUDE-DESKTOP-MCP-PROBE.md)：累计十一轮真实尝试，本地MCP发现已通过，但真实工具读取仍为0。第十轮发送一条合成prompt后报告工具不可用，定位为发现连接与任务连接共用独占报告文件；已改为每连接独立报告，第十一轮证实两份报告均创建。第十一轮单独获准的一条prompt触发正确task_get授权框，但未批准，测试窗口于09:14:07（JST）自行退出；不能再要求用户点击已消失的窗口。任务连接另报MCP_NOTIFICATION_INVALID：已复现并修复合法roots变化通知被拒绝的问题，但该次实际通知方法未捕获，真实修复验收仍待完成。两个prompt的授权均已使用；新增真实任务需具体授权及用户亲自确认Allow once。CC Switch的me＋路由元数据继续固定，原配置/历史未改；费用与运行时上游仍未知，完整接入/Windows隔离/生产资格不升级，管家不构建。 见[证据](../evidence/claude-desktop/COMPLETION.md)。

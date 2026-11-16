@@ -364,7 +364,7 @@ test("authorization monitoring closes a revoked runtime without any progress rea
   f.s.updateGrant(f.g);
   await once(child, "close", { signal: AbortSignal.timeout(5000) });
   const row = f.s.getResource<{ state: string; fault: string }>(f.binding);
-  assert.equal(row?.data.state, "closed");
+  assert.equal(row?.data.state, "closed", JSON.stringify(row?.data));
   assert.equal(row?.data.fault, "DSH_AUTHORIZATION_CHANGED");
   assert.equal(f.launched(), 1);
 });

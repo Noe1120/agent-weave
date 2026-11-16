@@ -1,6 +1,12 @@
-import { lstatSync, readFileSync, writeFileSync, renameSync } from "node:fs";
+import {
+  lstatSync,
+  readFileSync,
+  writeFileSync,
+  renameSync,
+  mkdtempSync,
+} from "node:fs";
 import { parseArgs } from "node:util";
-import { isAbsolute } from "node:path";
+import { isAbsolute, join } from "node:path";
 import { once } from "node:events";
 import { McpReadClient } from "./mcp-read-client.ts";
 import { McpSession } from "./mcp-session.ts";
@@ -8,31 +14,38 @@ import { McpSession } from "./mcp-session.ts";
 // A fixed-scope stdio client of the existing local service. Never opens its DB,
 // starts Desktop, calls a model or accepts credentials/URLs through MCP arguments.
 const { values } = parseArgs({
-  options: { config: { type: "string" }, report: { type: "string" } },
+  options: {
+    config: { type: "string" },
+    report: { type: "string" },
+    "report-dir": { type: "string" },
+  },
   strict: true,
 });
 let session: McpSession | undefined;
+let report = values.report;
 let eof = false,
   fault: string | null = null,
   reportCreated = false;
 function save() {
-  if (!values.report) return;
+  if (!report) return;
   if (!reportCreated) {
-    writeFileSync(values.report, "", { flag: "wx" });
+    writeFileSync(report, "", { flag: "wx" });
     reportCreated = true;
   }
   writeFileSync(
-    values.report + ".tmp",
+    report + ".tmp",
     JSON.stringify({ schema: 1, ...session?.stats, stdin_eof: eof, fault }) +
       "\n",
   );
-  renameSync(values.report + ".tmp", values.report);
+  renameSync(report + ".tmp", report);
 }
 try {
   if (
     !values.config ||
     !isAbsolute(values.config) ||
-    (values.report && !isAbsolute(values.report))
+    (values.report && !isAbsolute(values.report)) ||
+    (values["report-dir"] && !isAbsolute(values["report-dir"])) ||
+    (values.report && values["report-dir"])
   )
     throw new Error("MCP_CONFIG");
   const s = lstatSync(values.config);
@@ -45,6 +58,17 @@ try {
     throw new Error("MCP_CONFIG");
   }
   session = new McpSession(new McpReadClient(config));
+  if (values["report-dir"]) {
+    const directory = lstatSync(values["report-dir"]);
+    if (!directory.isDirectory() || directory.isSymbolicLink())
+      throw new Error("MCP_CONFIG");
+    // Desktop may launch separate discovery and task connections with identical arguments.
+    // Keep exclusive ownership of each report instead of overwriting another process's evidence.
+    report = join(
+      mkdtempSync(join(values["report-dir"], "connection-")),
+      "report.json",
+    );
+  }
   save();
   process.stdout.on("error", () =>
     process.stdin.destroy(new Error("MCP_STDOUT")),
