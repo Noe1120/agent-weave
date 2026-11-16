@@ -9,6 +9,47 @@ import type { Grant } from "../packages/service/src/domain.ts";
 import { tempWorkspace } from "./temp.ts";
 import { Store } from "../packages/service/src/store.ts";
 
+test("owner reinvite fences the old task grant without starting or granting a new task", async () => {
+  const f = await setup();
+  try {
+    const old = f.issue(),
+      task = f.s.getResource(f.ids.task),
+      run = f.s.getRun(f.ids.run);
+    const replacement = f.registry.reinvite(f.owner.token, f.owner.csrf, {
+      project_id: f.ids.project,
+      connection_id: f.connection.connection_id,
+      expected_revision: "2",
+      expected_member_revision: "1",
+      configuration_fingerprint: "a".repeat(64),
+      action_id: randomUUID(),
+    });
+    assert.throws(
+      () =>
+        f.service.readResource(old.token, f.ids.project, "task", f.ids.task),
+      /NOT_FOUND_OR_DENIED/,
+    );
+    const next = f.registry.redeem(replacement.invitation_token, {
+      connection_id: replacement.connection_id,
+      action_id: randomUUID(),
+      configuration_fingerprint: "a".repeat(64),
+    });
+    assert.throws(
+      () =>
+        f.service.readResource(
+          next.connection_token,
+          f.ids.project,
+          "task",
+          f.ids.task,
+        ),
+      /UNAUTHENTICATED/,
+    );
+    assert.deepEqual(f.s.getResource(f.ids.task), task);
+    assert.deepEqual(f.s.getRun(f.ids.run), run);
+  } finally {
+    f.close();
+  }
+});
+
 test("removing connection metadata cannot downgrade an already guarded grant", async () => {
   const f = await setup();
   try {

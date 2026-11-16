@@ -1,5 +1,7 @@
 # 02 数据、状态与接口契约
 
+> W18：主人显式reinvite采用旧登记/成员双CAS，在单事务内撤销旧登记并签发新pending邀请；失败回滚，同action只重取有效pending邀请，不续旧task grant。只读登记原因和替代关系不暴露秘密，不把registered当在线。见[W18](W18-CONNECTION-REINVITE.md)。
+
 > 2026-11-16 W17：可信进程内签发连接约束的单任务只读 grant，复用既有 policy/run/resource ACL，不自动扩权；每次授权重新检查登记/成员/配置和新鲜会话观测，失联后不得自动复活。只允许合成数据，默认无进程内验证器（含重启）时拒绝；不增加公共签发入口或迁移。设计与验证范围见 [W17](W17-CONNECTION-TASK-ACCESS.md)。
 
 > 2026-11-16 W16：成员连接登记子阶段使用现有 resources/OwnerAuth，无迁移。邀请只可兑换固定成员/配置的登记凭据；登记凭据只可读取自身状态，不能用于 execution_grant、runtime_control、消息或任务读取。主人 Cookie/CSRF 与邀请/连接 Bearer 分离，邀请单次兑换与 CAS 撤销均在事务中完成。成员 revision、有效期和签名键变化使旧登记失效；registered 不等于原客户端在线。详见 [W16](W16-CONNECTION-REGISTRATION.md)。

@@ -89,6 +89,405 @@ async function setup(t: TestContext) {
 const bearer = (token: string) => ({ authorization: "Bearer " + token });
 const invitePath = "/v1/console/connections/invite";
 const redeemPath = "/v1/connections/redeem";
+const reinvitePath = "/v1/console/connections/reinvite";
+
+test("replacement receipt survives reopen but expiry cannot silently renew its invitation", () => {
+  const temp = tempWorkspace();
+  let store = new Store(temp.db),
+    time = Date.now();
+  try {
+    let w = new WorkspaceService(store, () => time),
+      registry = new ConnectionRegistry(w);
+    const owner = w.auth.pair(w.auth.newPairing().code);
+    const command = (kind: string, args: Record<string, unknown>) =>
+      w.command(owner.token, owner.csrf, {
+        kind,
+        action_id: randomUUID(),
+        ...args,
+      }) as any;
+    const project = command("create_project", {
+      name: "Reopen",
+      description: "",
+    });
+    const member = command("add_member", {
+      project_id: project.id,
+      client: "codex",
+      name: "Codex",
+      role: "read",
+    });
+    const first = registry.invite(owner.token, owner.csrf, {
+      project_id: project.id,
+      member_id: member.id,
+      expected_member_revision: "1",
+      action_id: randomUUID(),
+      configuration_fingerprint: "a".repeat(64),
+    });
+    const q = {
+      project_id: project.id,
+      connection_id: first.connection_id,
+      expected_revision: "1",
+      expected_member_revision: "1",
+      action_id: randomUUID(),
+      configuration_fingerprint: "b".repeat(64),
+    };
+    const replacement = registry.reinvite(owner.token, owner.csrf, q);
+    store.close();
+    store = new Store(temp.db);
+    w = new WorkspaceService(store, () => time);
+    registry = new ConnectionRegistry(w);
+    assert.deepEqual(
+      registry.reinvite(owner.token, owner.csrf, q),
+      replacement,
+    );
+    assert.throws(
+      () =>
+        registry.redeem(first.invitation_token, {
+          connection_id: first.connection_id,
+          action_id: randomUUID(),
+          configuration_fingerprint: "a".repeat(64),
+        }),
+      /CONNECTION_CREDENTIAL_INVALID/,
+    );
+    time += 600000;
+    assert.throws(
+      () => registry.reinvite(owner.token, owner.csrf, q),
+      /INVITATION_NOT_PENDING/,
+    );
+    const next = registry.reinvite(owner.token, owner.csrf, {
+      ...q,
+      connection_id: replacement.connection_id,
+      action_id: randomUUID(),
+    });
+    assert.notEqual(next.connection_id, replacement.connection_id);
+    assert.equal(next.state, "pending");
+  } finally {
+    store.close();
+    temp.dispose();
+  }
+});
+
+for (const scenario of [
+  "csrf",
+  "owner",
+  "origin",
+  "bearer",
+  "fields",
+  "project",
+  "connection_revision",
+  "member_revision",
+  "inactive",
+  "action_collision",
+])
+  test(`reinvite ${scenario} rejection preserves original registration`, async (t) => {
+    const f = await setup(t),
+      e = await enroll(f);
+    const q = {
+      project_id: f.project.id,
+      connection_id: e.connection.connection_id,
+      expected_revision: "2",
+      expected_member_revision: "1",
+      configuration_fingerprint: "b".repeat(64),
+      action_id: randomUUID(),
+    };
+    let headers: Record<string, string> = f.owner,
+      expected = 409;
+    if (scenario === "csrf") {
+      headers = { cookie: f.owner.cookie };
+      expected = 403;
+    }
+    if (scenario === "owner") {
+      headers = {};
+      expected = 401;
+    }
+    if (scenario === "origin") {
+      headers = { ...f.owner, origin: "https://attacker.invalid" };
+      expected = 403;
+    }
+    if (scenario === "bearer") {
+      headers = { ...f.owner, ...bearer(e.connection.connection_token) };
+      expected = 400;
+    }
+    if (scenario === "fields") {
+      Object.assign(q, { member_id: f.member.id });
+      expected = 400;
+    }
+    if (scenario === "project") {
+      q.project_id = randomUUID();
+      expected = 404;
+    }
+    if (scenario === "connection_revision") q.expected_revision = "1";
+    if (scenario === "member_revision") q.expected_member_revision = "2";
+    if (scenario === "inactive")
+      f.command("set_member_state", {
+        project_id: f.project.id,
+        member_id: f.member.id,
+        expected_revision: "1",
+        state: "inactive",
+      });
+    if (scenario === "action_collision")
+      q.action_id = f.store.getResource<any>(
+        e.connection.connection_id,
+      )!.data.invite_action;
+    const before = f.store.getResource(e.connection.connection_id);
+    assert.equal((await f.call(reinvitePath, q, headers)).status, expected);
+    assert.deepEqual(f.store.getResource(e.connection.connection_id), before);
+    assert.equal(
+      f.store.db
+        .prepare(
+          "SELECT count(*) n FROM resources WHERE kind='connection_registration'",
+        )
+        .get()!.n,
+      1,
+    );
+  });
+
+test("competing reinvites have one winner and payload changes cannot reuse its action", async (t) => {
+  const f = await setup(t),
+    e = await enroll(f);
+  const q = {
+    project_id: f.project.id,
+    connection_id: e.connection.connection_id,
+    expected_revision: "2",
+    expected_member_revision: "1",
+    configuration_fingerprint: "b".repeat(64),
+    action_id: randomUUID(),
+  };
+  const results = await Promise.all([
+    f.call(reinvitePath, q),
+    f.call(reinvitePath, { ...q, action_id: randomUUID() }),
+  ]);
+  assert.deepEqual(results.map((r) => r.status).sort(), [200, 409]);
+  if (results[0]!.status === 200) {
+    assert.equal(
+      (
+        await f.call(reinvitePath, {
+          ...q,
+          configuration_fingerprint: "c".repeat(64),
+        })
+      ).status,
+      409,
+    );
+    assert.equal(
+      (
+        await f.call(invitePath, {
+          ...f.request(),
+          action_id: q.action_id,
+          configuration_fingerprint: q.configuration_fingerprint,
+        })
+      ).status,
+      409,
+    );
+  }
+  assert.equal(
+    f.store.db
+      .prepare(
+        "SELECT count(*) n FROM resources WHERE kind='connection_registration'",
+      )
+      .get()!.n,
+    2,
+  );
+});
+
+test("failed replacement insert rolls back revocation, then the same request can succeed", async (t) => {
+  const f = await setup(t),
+    e = await enroll(f);
+  const registry = new ConnectionRegistry(f.w),
+    owner = f.w.auth.pair(f.w.auth.newPairing().code);
+  const q = {
+    project_id: f.project.id,
+    connection_id: e.connection.connection_id,
+    expected_revision: "2",
+    expected_member_revision: "1",
+    configuration_fingerprint: "b".repeat(64),
+    action_id: randomUUID(),
+  };
+  f.store.db.exec(
+    "CREATE TEMP TRIGGER reject_invite BEFORE INSERT ON resources WHEN NEW.kind='connection_registration' BEGIN SELECT RAISE(ABORT,'SYNTHETIC_STORAGE_FAILURE'); END;",
+  );
+  assert.throws(
+    () => registry.reinvite(owner.token, owner.csrf, q),
+    /SYNTHETIC_STORAGE_FAILURE/,
+  );
+  assert.equal(
+    registry.read(e.connection.connection_token, e.connection.connection_id)
+      .state,
+    "registered",
+  );
+  assert.equal(f.store.getResource(e.connection.connection_id)!.revision, "2");
+  f.store.db.exec("DROP TRIGGER reject_invite");
+  assert.equal(registry.reinvite(owner.token, owner.csrf, q).state, "pending");
+});
+
+test("member updates require fresh consent, while an existing replacement cannot be displaced", async (t) => {
+  const f = await setup(t),
+    e = await enroll(f);
+  f.command("update_member", {
+    project_id: f.project.id,
+    member_id: f.member.id,
+    expected_revision: "1",
+    name: "Codex",
+    role: "updated",
+  });
+  const q = {
+    project_id: f.project.id,
+    connection_id: e.connection.connection_id,
+    expected_revision: "2",
+    expected_member_revision: "1",
+    configuration_fingerprint: "b".repeat(64),
+    action_id: randomUUID(),
+  };
+  assert.equal((await f.call(reinvitePath, q)).status, 409);
+  q.expected_member_revision = "2";
+  const another = await f.call(invitePath, {
+    ...f.request(),
+    expected_member_revision: "2",
+  });
+  assert.equal(another.status, 200);
+  assert.equal((await f.call(reinvitePath, q)).status, 409);
+  assert.equal(
+    f.store.getResource<any>(q.connection_id)!.data.state,
+    "registered",
+  );
+  await f.call("/v1/console/connections/revoke", {
+    project_id: f.project.id,
+    connection_id: another.body.data.connection_id,
+    expected_revision: "1",
+    action_id: randomUUID(),
+  });
+  assert.equal((await f.call(reinvitePath, q)).status, 200);
+});
+
+test("owner can atomically replace registration and retry without reviving old credentials", async (t) => {
+  const f = await setup(t),
+    e = await enroll(f);
+  const q = {
+    project_id: f.project.id,
+    connection_id: e.connection.connection_id,
+    expected_revision: "2",
+    expected_member_revision: "1",
+    configuration_fingerprint: "b".repeat(64),
+    action_id: randomUUID(),
+  };
+  const replacement = await f.call(reinvitePath, q);
+  assert.equal(replacement.status, 200);
+  assert.equal(replacement.body.data.reason, "INVITATION_PENDING");
+  assert.equal(replacement.body.data.replaces_connection_id, q.connection_id);
+  assert.notEqual(replacement.body.data.connection_id, q.connection_id);
+  const changes = f.store.db.prepare("SELECT total_changes() n").get()!.n;
+  assert.deepEqual((await f.call(reinvitePath, q)).body, replacement.body);
+  assert.equal(
+    f.store.db.prepare("SELECT total_changes() n").get()!.n,
+    changes,
+  );
+  assert.equal(
+    (
+      await f.call(
+        `/v1/connections/${q.connection_id}`,
+        undefined,
+        bearer(e.connection.connection_token),
+      )
+    ).status,
+    401,
+  );
+  assert.equal(
+    (await f.call(redeemPath, e.q, bearer(e.invitation.invitation_token)))
+      .status,
+    401,
+  );
+  const list = await f.call(`/v1/console/projects/${f.project.id}/connections`);
+  const old = list.body.data.find(
+    (x: any) => x.connection_id === q.connection_id,
+  );
+  assert.equal(old.reason, "REPLACED");
+  assert.equal(
+    old.replaced_by_connection_id,
+    replacement.body.data.connection_id,
+  );
+  assert.ok(!JSON.stringify(list.body).includes("token"));
+  assert.equal(
+    (await f.call(reinvitePath, { ...q, action_id: randomUUID() })).status,
+    409,
+  );
+  const redeemed = await f.call(
+    redeemPath,
+    {
+      connection_id: replacement.body.data.connection_id,
+      action_id: randomUUID(),
+      configuration_fingerprint: "b".repeat(64),
+    },
+    bearer(replacement.body.data.invitation_token),
+  );
+  assert.equal(redeemed.status, 200);
+  assert.equal(redeemed.body.data.reason, "REGISTERED_NOT_CONNECTED");
+  assert.equal(
+    f.store.grantForToken(redeemed.body.data.connection_token),
+    undefined,
+  );
+  assert.equal((await f.call(reinvitePath, q)).status, 409);
+});
+
+for (const [scenario, reason] of [
+  ["pending", "INVITATION_PENDING"],
+  ["registered", "REGISTERED_NOT_CONNECTED"],
+  ["invite_expired", "INVITATION_EXPIRED"],
+  ["expired", "CREDENTIAL_EXPIRED"],
+  ["member", "MEMBER_CHANGED"],
+  ["inactive", "MEMBER_UNAVAILABLE"],
+  ["key", "SIGNING_KEY_CHANGED"],
+  ["revoked", "REVOKED"],
+])
+  test(`owner read-only diagnosis explains ${scenario}`, async (t) => {
+    const f = await setup(t);
+    const pending = scenario === "pending" || scenario === "invite_expired";
+    const c = pending
+      ? (await f.call(invitePath, f.request())).body.data
+      : (await enroll(f)).connection;
+    if (scenario === "invite_expired") f.advance(600000);
+    if (scenario === "expired") f.advance(8 * 3600000);
+    if (scenario === "member")
+      f.command("update_member", {
+        project_id: f.project.id,
+        member_id: f.member.id,
+        expected_revision: "1",
+        name: "Codex",
+        role: "changed",
+      });
+    if (scenario === "inactive")
+      f.command("set_member_state", {
+        project_id: f.project.id,
+        member_id: f.member.id,
+        expected_revision: "1",
+        state: "inactive",
+      });
+    if (scenario === "key")
+      f.store.db
+        .prepare("UPDATE console_secrets SET value=?")
+        .run("b".repeat(64));
+    if (scenario === "revoked")
+      await f.call("/v1/console/connections/revoke", {
+        project_id: f.project.id,
+        connection_id: c.connection_id,
+        action_id: randomUUID(),
+        expected_revision: "2",
+      });
+    // Owner sessions also expire after eight hours; obtain a new session, not a bypass.
+    const owner = f.w.auth.pair(f.w.auth.newPairing().code);
+    const before = f.store.db.prepare("SELECT total_changes() n").get()!.n;
+    for (let i = 0; i < 10; i++) {
+      const r = await f.call(
+        `/v1/console/projects/${f.project.id}/connections`,
+        undefined,
+        { cookie: `team_owner=${owner.token}` },
+      );
+      assert.equal(r.status, 200);
+      assert.equal(r.body.data[0].reason, reason);
+      assert.equal(r.body.data[0].runtime_state, "not_connected");
+    }
+    assert.equal(
+      f.store.db.prepare("SELECT total_changes() n").get()!.n,
+      before,
+    );
+  });
 
 test("pending invite expiry is read-only and a replacement cannot revive the old invite", async (t) => {
   const f = await setup(t);

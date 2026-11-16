@@ -97,10 +97,15 @@ export async function handleWorkspace(
     w.auth.authorize(token, typeof csrf === "string" ? csrf : "");
     if (
       path === "/v1/console/connections/invite" ||
+      path === "/v1/console/connections/reinvite" ||
       path === "/v1/console/connections/revoke"
     ) {
       const connections = new ConnectionRegistry(w);
-      const operation = path.endsWith("/invite") ? "invite" : "revoke";
+      const operation = path.endsWith("/invite")
+        ? "invite"
+        : path.endsWith("/reinvite")
+          ? "reinvite"
+          : "revoke";
       result(
         res,
         connections[operation](

@@ -1457,6 +1457,7 @@
     "W15-RUNTIME-GATEWAY.md",
     "W16-CONNECTION-REGISTRATION.md",
     "W17-CONNECTION-TASK-ACCESS.md",
+    "W18-CONNECTION-REINVITE.md",
     "WINDOWS-ISOLATION-DECISION.md",
     "contracts/core.schema.json",
     "contracts/error-mapping.json",

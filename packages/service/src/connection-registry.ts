@@ -22,6 +22,10 @@ interface Registration {
   connection_hash: string | null;
   revoke_action: string | null;
   revoke_payload: string | null;
+  replaces_connection_id?: string;
+  replaced_by_connection_id?: string;
+  replacement_action?: string;
+  replacement_payload?: string;
 }
 const kind = "connection_registration";
 function fields(value: unknown, keys: string[]): Record<string, unknown> {
@@ -85,6 +89,22 @@ export class ConnectionRegistry {
       return "expired";
     return r.data.state;
   }
+  private reason(r: Resource<Registration>) {
+    if (r.data.replaced_by_connection_id) return "REPLACED";
+    if (r.data.state === "revoked") return "REVOKED";
+    const m = this.member(r.project_id, r.data.member_id);
+    if (!m || m.state !== "active") return "MEMBER_UNAVAILABLE";
+    if (m.revision !== r.data.member_revision || m.client !== r.data.target)
+      return "MEMBER_CHANGED";
+    if (this.keyDigest() !== r.data.key_digest) return "SIGNING_KEY_CHANGED";
+    if (this.state(r) === "expired")
+      return r.data.state === "pending"
+        ? "INVITATION_EXPIRED"
+        : "CREDENTIAL_EXPIRED";
+    return r.data.state === "pending"
+      ? "INVITATION_PENDING"
+      : "REGISTERED_NOT_CONNECTED";
+  }
   private view(r: Resource<Registration>) {
     return {
       connection_id: r.id,
@@ -93,6 +113,9 @@ export class ConnectionRegistry {
       target: r.data.target,
       revision: r.revision,
       state: this.state(r),
+      reason: this.reason(r),
+      replaces_connection_id: r.data.replaces_connection_id ?? null,
+      replaced_by_connection_id: r.data.replaced_by_connection_id ?? null,
       configuration_fingerprint: r.data.configuration_fingerprint,
       created_at: new Date(r.data.created_at).toISOString(),
       expires_at: new Date(r.data.expires).toISOString(),
@@ -118,78 +141,155 @@ export class ConnectionRegistry {
       !fingerprint(q.configuration_fingerprint)
     )
       reject(400, "INVALID_REQUEST");
-    const project = q.project_id,
-      member = q.member_id,
-      action = q.action_id,
-      fp = q.configuration_fingerprint;
     return this.w.store.transaction(() => {
       this.w.auth.authorize(owner, csrf);
-      const m = this.member(project, member);
-      if (!m) reject(404, "NOT_FOUND_OR_DENIED");
-      if (m.state !== "active") reject(409, "MEMBER_INACTIVE");
-      if (m.revision !== q.expected_member_revision)
-        reject(409, "REVISION_CONFLICT");
+      return this.createInvite(q);
+    });
+  }
+  private createInvite(q: Record<string, unknown>) {
+    const project = q.project_id as string,
+      member = q.member_id as string,
+      action = q.action_id as string,
+      fp = q.configuration_fingerprint as string;
+
+    const m = this.member(project, member);
+    if (!m) reject(404, "NOT_FOUND_OR_DENIED");
+    if (m.state !== "active") reject(409, "MEMBER_INACTIVE");
+    if (m.revision !== q.expected_member_revision)
+      reject(409, "REVISION_CONFLICT");
+    const payload = canonical(q);
+    const old = this.w.store.db
+      .prepare(
+        "SELECT id FROM resources WHERE kind=? AND json_extract(data,'$.invite_action')=?",
+      )
+      .get(kind, action);
+    if (old) {
+      const r = this.load(String(old.id))!;
+      if (r.data.replaces_connection_id) reject(409, "ACTION_PAYLOAD_CONFLICT");
+      if (r.data.invite_payload !== payload)
+        reject(409, "ACTION_PAYLOAD_CONFLICT");
+      if (this.state(r) !== "pending") reject(409, "INVITATION_NOT_PENDING");
+      return {
+        ...this.view(r),
+        invitation_token: this.credential(r, "invite"),
+      };
+    }
+    const existing = this.w.store.db
+      .prepare(
+        "SELECT id FROM resources WHERE kind=? AND project_id=? AND json_extract(data,'$.member_id')=?",
+      )
+      .all(kind, project, member);
+    if (
+      existing.some((row) =>
+        ["pending", "registered"].includes(
+          this.state(this.load(String(row.id))!),
+        ),
+      )
+    )
+      reject(409, "CONNECTION_EXISTS");
+    const now = this.w.now();
+    const r: Resource<Registration> = {
+      id: randomUUID(),
+      project_id: project,
+      kind,
+      revision: "1",
+      domain: project + ":connections",
+      acl: [],
+      dependencies: [],
+      data: {
+        member_id: member,
+        member_revision: m.revision,
+        target: m.client,
+        configuration_fingerprint: fp,
+        state: "pending",
+        created_at: now,
+        invite_expires: now + 600000,
+        expires: now + 8 * 3600000,
+        key_digest: this.keyDigest()!,
+        invite_action: action,
+        invite_payload: payload,
+        invite_hash: "",
+        redeem_action: null,
+        connection_hash: null,
+        revoke_action: null,
+        revoke_payload: null,
+      },
+    };
+    const token = this.credential(r, "invite");
+    r.data.invite_hash = digest(token);
+    this.w.store.putResource(r);
+    return { ...this.view(r), invitation_token: token };
+  }
+  reinvite(owner: string, csrf: string, value: unknown) {
+    this.w.auth.authorize(owner, csrf);
+    const q = fields(value, [
+      "project_id",
+      "connection_id",
+      "expected_revision",
+      "expected_member_revision",
+      "configuration_fingerprint",
+      "action_id",
+    ]);
+    if (
+      !uuid(q.project_id) ||
+      !uuid(q.connection_id) ||
+      !uuid(q.action_id) ||
+      !revision(q.expected_revision) ||
+      !revision(q.expected_member_revision) ||
+      !fingerprint(q.configuration_fingerprint)
+    )
+      reject(400, "INVALID_REQUEST");
+    return this.w.store.transaction(() => {
+      this.w.auth.authorize(owner, csrf);
+      const old = this.load(q.connection_id as string);
+      if (!old || old.project_id !== q.project_id)
+        reject(404, "NOT_FOUND_OR_DENIED");
       const payload = canonical(q);
-      const old = this.w.store.db
-        .prepare(
-          "SELECT id FROM resources WHERE kind=? AND json_extract(data,'$.invite_action')=?",
-        )
-        .get(kind, action);
-      if (old) {
-        const r = this.load(String(old.id))!;
-        if (r.data.invite_payload !== payload)
+      if (old.data.replacement_action === q.action_id) {
+        if (old.data.replacement_payload !== payload)
           reject(409, "ACTION_PAYLOAD_CONFLICT");
-        if (this.state(r) !== "pending") reject(409, "INVITATION_NOT_PENDING");
+        const replacement = this.load(old.data.replaced_by_connection_id!);
+        if (!replacement || this.state(replacement) !== "pending")
+          reject(409, "INVITATION_NOT_PENDING");
         return {
-          ...this.view(r),
-          invitation_token: this.credential(r, "invite"),
+          ...this.view(replacement),
+          invitation_token: this.credential(replacement, "invite"),
         };
       }
-      const existing = this.w.store.db
-        .prepare(
-          "SELECT id FROM resources WHERE kind=? AND project_id=? AND json_extract(data,'$.member_id')=?",
-        )
-        .all(kind, project, member);
+      if (old.data.replaced_by_connection_id)
+        reject(409, "CONNECTION_ALREADY_REPLACED");
+      if (old.revision !== q.expected_revision)
+        reject(409, "REVISION_CONFLICT");
+      // A replacement may not reuse an ordinary invite action or another replacement's action.
       if (
-        existing.some((row) =>
-          ["pending", "registered"].includes(
-            this.state(this.load(String(row.id))!),
-          ),
-        )
+        this.w.store.db
+          .prepare(
+            "SELECT id FROM resources WHERE kind=? AND json_extract(data,'$.invite_action')=?",
+          )
+          .get(kind, q.action_id as string)
       )
-        reject(409, "CONNECTION_EXISTS");
-      const now = this.w.now();
-      const r: Resource<Registration> = {
-        id: randomUUID(),
-        project_id: project,
-        kind,
-        revision: "1",
-        domain: project + ":connections",
-        acl: [],
-        dependencies: [],
-        data: {
-          member_id: member,
-          member_revision: m.revision,
-          target: m.client,
-          configuration_fingerprint: fp,
-          state: "pending",
-          created_at: now,
-          invite_expires: now + 600000,
-          expires: now + 8 * 3600000,
-          key_digest: this.keyDigest()!,
-          invite_action: action,
-          invite_payload: payload,
-          invite_hash: "",
-          redeem_action: null,
-          connection_hash: null,
-          revoke_action: null,
-          revoke_payload: null,
-        },
+        reject(409, "ACTION_PAYLOAD_CONFLICT");
+      old.data.state = "revoked";
+      old.revision = nextRevision(old.revision);
+      this.w.store.putResource(old);
+      const invitation = this.createInvite({
+        project_id: q.project_id,
+        member_id: old.data.member_id,
+        expected_member_revision: q.expected_member_revision,
+        configuration_fingerprint: q.configuration_fingerprint,
+        action_id: q.action_id,
+      });
+      const replacement = this.load(invitation.connection_id)!;
+      replacement.data.replaces_connection_id = old.id;
+      old.data.replaced_by_connection_id = replacement.id;
+      old.data.replacement_action = q.action_id as string;
+      old.data.replacement_payload = payload;
+      this.w.store.putResource(replacement);
+      this.w.store.putResource(old);
+      return {
+        ...this.view(replacement),
+        invitation_token: invitation.invitation_token,
       };
-      const token = this.credential(r, "invite");
-      r.data.invite_hash = digest(token);
-      this.w.store.putResource(r);
-      return { ...this.view(r), invitation_token: token };
     });
   }
   redeem(token: string, value: unknown) {
