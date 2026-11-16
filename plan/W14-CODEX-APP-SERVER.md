@@ -1,7 +1,7 @@
 # W14 Codex app-server 接入（真实闭环已通过，生产资格未升）
 
 > 2026-11-16，Asia/Tokyo。基线 `4949a2f`（connect.md 交接提交），本条在隔离分支 `feat/claude-desktop-mcp-probe` 上实施。
-> **状态：平台 Codex 接入基础＝完成（真实客户端、协议、MCP 桥、平台服务、生命周期）；本地模型桩工具往返＝PASS_REAL_CLIENT_WITH_LOCAL_MODEL_STUB；真实厂商模型工具往返＝FAILED_AT_MODEL_TOOL_SELECTION（8 次尝试，160,090 tokens，预算内停止）——不能宣称 Codex 全部接入完成。** 已用本机固定 `codex.exe`（`0.167.0-alpha.3.2`）完成真实 initialize、真实原生 thread、真实一条 turn、真实一次平台只读工具往返（`task_get`）、1000 次纯只读进度、所属进程正常退出、撤权与关闭对账；原 12 个客户端进程前后不变。厂商模型支线的 4 次真实 turn 全部**没有**调用平台工具（桥每次握手成功、`tool_calls=0`），平台验收逐次判 FAIL，没有把任何一次写成成功。
+> **状态（本阶段）：该固定配置下的真实单任务只读接入阶段通过** —— 官方 Codex `0.167.0-alpha.3.2` + 真实现有模型 `gpt-6.1-sol` + 独立隔离 home + 平台受限 MCP 工具，在 `[features.code_mode] direct_only_tool_namespaces = ["mcp__agent_weave_probe"]` 下完成一次真实 `task_get` 往返（桥 `tool_calls=1`、`tool_errors=0`、turn `completed`、原生回复含同一 task ID 与真实 `draft`、22,331 tokens、exit 0 非强制、原 12 个客户端进程不变、凭据副本已清除）。**这不是整个 Codex 产品接入完成**：桌面聊天附着、Windows 强制隔离、原生 UI、完整 L1–L3、250 项产品验收仍未完成；撤权在本次付费运行内未执行，改由同一 harness 的零成本运行验证。
 
 Spec：connect.md §6（C1–C6）、[03 §4](03-agent-integration.md)、[09](09-review-closure-and-gates.md)、[12](12-protocol-closure-and-validation.md)、[W08](W08-ADAPTER-FOUNDATION.md)、[W11](W11-DSH-ACP-LIFECYCLE.md)、[W12](W12-DSH-SESSION-PREFLIGHT.md)、[W13](W13-CLAUDE-DESKTOP-MCP-PROBE.md)、根 AGENTS.md。
 
@@ -107,6 +107,21 @@ Spec：connect.md §6（C1–C6）、[03 §4](03-agent-integration.md)、[09](09
 
 因此本构建与本研究 route 下，真实厂商模型的平台工具往返做不到；不能把第 3 种情况写成「平台完成」。
 
+## 5.2.1 本阶段通过的固定配置（真实模型，一次 turn）
+
+| 项 | 记录 |
+| --- | --- |
+| 配置 | `[features.code_mode] direct_only_tool_namespaces = ["mcp__agent_weave_probe"]`，写进本次全新隔离 home，其余不变 |
+| 模型/路由 | `gpt-6.1-sol` ＋ 操作者既有 CC Switch 回环路由（不改 CC Switch、不加别名） |
+| 桥 | `initialized=true`、`tools_list_requests=1`、`tool_calls=1`、`tool_errors=0` |
+| 原生 | turn `completed`，原生 turn id 存在；最终回复 = 同一 task ID + `draft` |
+| 用量 | 22,331 tokens（阈值 30,000，未触发中断；金额 UNKNOWN） |
+| 退出 | exit 0、`forced=false`、`exit_observed=true`；原 12 个客户端进程不变 |
+| 清理 | provider 令牌副本 `token_hits_before=1 → removed=2 → after=0`；bridge 配置删除 |
+| 撤权 | **本次付费运行未执行**（授权仅一次 turn）；由同一 harness 的零成本 stub 运行验证：`GRANT_REVOKED` → `closing` → `closed` 且 exit 0 非强制 |
+
+证据：`evidence/codex/real-vendor-directonly-2026-11-16.json`（`PASS_REAL_VENDOR_TOOL_ROUND_TRIP`，18 项检查，0 失败）。
+
 ## 5.3 本轮修复的实现缺陷
 
 | 缺陷 | 根因 | 修复与回归 |
@@ -116,6 +131,15 @@ Spec：connect.md §6（C1–C6）、[03 §4](03-agent-integration.md)、[09](09
 | 读数先于持久化显示 completed，导致 turn 与 BUSY 门竞态 | 投影用实时事实覆盖持久状态 | 投影只认持久状态；实时事实仅用于确认同一 generation |
 | unknown 之后仍可用新 action_id 继续发 turn | 没有 unknown 门 | 新增 `CODEX_RECONCILIATION_REQUIRED`；只有「关闭并核对 exit_observed 后重建运行」才能继续；换 action/revision/控制器都不行 |
 | turn 超时截止点随 ack 之后计算 | 截止点放在 awaitTurn 内 | 在接受 turn 时固定截止点 |
+
+## 5.3.1 本阶段付费运行前的预检缺陷
+
+预检（`evidence/codex/preflight-code-mode-2026-11-16.json`）发现：只设置 `code_mode` 而不设 provider/bridge 时，启动器的 home 配置写入门条件**漏掉了 code_mode**，该块会被静默丢弃。已修复为 `modelProvider || p.bridge || p.code_mode`，复跑预检后隔离 home 中确实出现：
+
+```toml
+[features.code_mode]
+direct_only_tool_namespaces = ["mcp__agent_weave_probe"]
+```
 
 ## 5.4 工具面配置的准确键名与五维区分（零成本）
 
@@ -163,7 +187,7 @@ Spec：connect.md §6（C1–C6）、[03 §4](03-agent-integration.md)、[09](09
 
 ## 7. 仍未完成（下一步入口）
 
-1. **真实厂商模型的工具调用**：已按授权尝试 8 次（160,090 tokens，金额 UNKNOWN），止于「模型选择 + code 模式内派发」，见 §5.2/§5.4。**这不是单一技术路径问题**，至少四条候选：
+1. **真实厂商模型的工具调用**：历史 8 次失败（160,090 tokens）后，本阶段以 §5.2.1 的固定配置**通过一次真实往返**（22,331 tokens）。累计 9 次尝试、182,421 tokens、金额 UNKNOWN。仍未证明的是其他配置/版本下的可重复性，候选方向：
    a. 用平台已接入的 `features.code_mode.direct_only_tool_namespaces = ["mcp__agent_weave_probe"]` 让命名空间直连（代码与回归已就绪，需一次授权 turn 验证，见 §7.1）；
    b. 客户端后续版本若提供逐项 MCP 工具声明或更强派发，重验；
    c. 换一条会向该模型直接声明 MCP 工具的路由（需用户侧配置）；
@@ -196,7 +220,7 @@ W14 交付的是**真实客户端闭环（握手→原生 thread→一条 turn�
 真实厂商模型的同一往返为 **FAILED_AT_MODEL_TOOL_SELECTION**：注册与说明成立，失败在模型选择与 code 模式派发（§5.4）。因此：
 
 - 平台 Codex 接入基础：**完成**；
-- 真实厂商模型工具调用：**未完成 / 阻塞**；
+- 真实厂商模型工具调用：**在 §5.2.1 的固定配置下通过一次真实往返**（历史默认配置仍为失败，不得追认原配置已修复）；
 - Codex 整体接入：**不能宣称完成**；
 - 桌面聊天附着、Windows 强制隔离、原生 UI 与完整 L1–L3：仍未完成。
 

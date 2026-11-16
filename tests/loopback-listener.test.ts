@@ -117,3 +117,79 @@ test("automatic binding exhausts collisions visibly without publishing a listene
     await new Promise<void>((r) => blocker.close(() => r()));
   }
 });
+
+test("a reserved or excluded automatic port is retried instead of failing the run", async () => {
+  // Windows can refuse an automatic port with EACCES when Hyper-V/WinNAT has
+  // excluded it. The listener must treat that like a collision, not as fatal.
+  const attempted: number[] = [];
+  let attempts = 0;
+  const fake = {
+    listen(port: number, _host: string) {
+      attempted.push(port);
+      attempts++;
+      setImmediate(() => {
+        if (attempts === 1)
+          this.emit(
+            "error",
+            Object.assign(new Error("denied"), { code: "EACCES" }),
+          );
+        else this.emit("listening");
+      });
+      return this;
+    },
+    once(event: string, handler: (error?: unknown) => void) {
+      (this.handlers[event] ??= []).push(handler);
+      return this;
+    },
+    off(event: string, handler: (error?: unknown) => void) {
+      this.handlers[event] = (this.handlers[event] ?? []).filter(
+        (h) => h !== handler,
+      );
+      return this;
+    },
+    emit(event: string, payload?: unknown) {
+      for (const handler of [...(this.handlers[event] ?? [])]) handler(payload);
+      return true;
+    },
+    handlers: {} as Record<string, ((error?: unknown) => void)[]>,
+  };
+  await listenLoopback(fake as never);
+  assert.equal(attempts, 2, "the first refusal must be retried");
+  assert.notEqual(
+    attempted[0],
+    attempted[1],
+    "the retry must pick another port",
+  );
+});
+test("a refused fixed port is reported, not retried", async () => {
+  const fake = {
+    listen() {
+      setImmediate(() =>
+        this.emit(
+          "error",
+          Object.assign(new Error("denied"), { code: "EACCES" }),
+        ),
+      );
+      return this;
+    },
+    once(event: string, handler: (error?: unknown) => void) {
+      (this.handlers[event] ??= []).push(handler);
+      return this;
+    },
+    off(event: string, handler: (error?: unknown) => void) {
+      this.handlers[event] = (this.handlers[event] ?? []).filter(
+        (h) => h !== handler,
+      );
+      return this;
+    },
+    emit(event: string, payload?: unknown) {
+      for (const handler of [...(this.handlers[event] ?? [])]) handler(payload);
+      return true;
+    },
+    handlers: {} as Record<string, ((error?: unknown) => void)[]>,
+  };
+  await assert.rejects(
+    () => listenLoopback(fake as never, 45678),
+    (error: unknown) => (error as { code?: string }).code === "EACCES",
+  );
+});

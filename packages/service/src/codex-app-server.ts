@@ -1035,7 +1035,7 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
       for (const d of Object.values(dirs)) await mkdir(d);
       const diagnostic = join(root, "stderr.log");
       await writeFile(diagnostic, "", { flag: "wx" });
-      if (modelProvider || p.bridge) {
+      if (modelProvider || p.bridge || p.code_mode) {
         const config = codexHomeConfig({
           ...(modelProvider ? { model_provider: modelProvider } : {}),
           ...(p.code_mode ? { code_mode: p.code_mode } : {}),

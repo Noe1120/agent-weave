@@ -1,14 +1,15 @@
 {
   "schema": 2,
-  "observed_at": "2026-11-16T03:44:27.370Z",
-  "stage": "W14 codex integration, round 3: tool-surface keys, cleanup, evidence consistency",
+  "observed_at": "2026-11-16T04:07:23.736Z",
+  "stage": "W14 codex stage: real single-task read-only round trip under a fixed code-mode configuration",
   "qualification": "UNVERIFIED",
   "verdicts": {
     "platform_codex_integration": "PASS (client, protocol, bridge, platform service, lifecycle)",
     "local_model_stub_tool_round_trip": "PASS_REAL_CLIENT_WITH_LOCAL_MODEL_STUB",
-    "vendor_model_tool_round_trip": "FAILED_AT_MODEL_TOOL_SELECTION",
+    "vendor_model_tool_round_trip": "PASS_REAL_VENDOR_TOOL_ROUND_TRIP (fixed configuration: features.code_mode.direct_only_tool_namespaces)",
     "codex_integration_fully_complete": false,
-    "tool_surface_configurability": "supported via features.code_mode.{enabled,direct_only_tool_namespaces,excluded_tool_namespaces}; mcp_servers.<id>.omit_tools_from is not supported by this build"
+    "tool_surface_configurability": "supported via features.code_mode.{enabled,direct_only_tool_namespaces,excluded_tool_namespaces}; mcp_servers.<id>.omit_tools_from is not supported by this build",
+    "stage": "该固定配置下的真实单任务只读接入阶段通过"
   },
   "code_fixes_this_round": [
     "features.code_mode surface pinning in codexHomeConfig + launcher (validated field names, regressions)",
@@ -25,50 +26,51 @@
       "pass": 56,
       "fail": 0,
       "skipped": 0,
-      "log": "evidence/codex/2026-11-16-synthetic/codex-group-r3.log"
+      "log": "evidence/codex/2026-11-16-synthetic/codex-group-final2.log"
     },
     {
       "date": "2026-11-16",
       "command": "npm run verify",
       "exit_code": 0,
-      "tests": 495,
-      "pass": 495,
+      "tests": 497,
+      "pass": 497,
       "fail": 0,
       "skipped": 0,
-      "log": "evidence/codex/2026-11-16-synthetic/verify-r3.log"
+      "log": "evidence/codex/2026-11-16-synthetic/verify-final3.log"
     },
     {
       "date": "2026-11-16",
       "command": "npm run test:native",
       "exit_code": 0,
       "evidence": "14/14 C# + 1 WPF static",
-      "log": "evidence/codex/2026-11-16-synthetic/native-r3.log"
+      "log": "evidence/codex/2026-11-16-synthetic/native-final.log"
     },
     {
       "date": "2026-11-16",
       "command": "npm run test:native:package",
       "exit_code": 0,
       "evidence": "old 0.3.0 package 989 files PASS",
-      "log": "evidence/codex/2026-11-16-synthetic/package-r3.log"
+      "log": "evidence/codex/2026-11-16-synthetic/package-final.log"
     },
     {
       "date": "2026-11-16",
       "command": "python plan/tools/test_p0_readiness.py -v",
       "exit_code": 0,
-      "log": "evidence/codex/2026-11-16-synthetic/p0-r3.log"
+      "log": "evidence/codex/2026-11-16-synthetic/p0-final.log"
     },
     {
       "date": "2026-11-16",
-      "command": "python plan/tools/verify_design.py --refresh-combined --write-report --refresh-manifest",
+      "command": "python plan/tools/verify_design.py --refresh-combined --write-report (+ --refresh-manifest)",
       "exit_code": 0,
-      "log": "evidence/codex/2026-11-16-synthetic/design-r3a.log"
+      "evidence": "derived files refreshed; the first step only reports the stale manifest, the final read-only run reports no failures",
+      "log": "evidence/codex/2026-11-16-synthetic/design-final2-c.log"
     },
     {
       "date": "2026-11-16",
       "command": "python plan/tools/verify_design.py",
       "exit_code": 0,
-      "evidence": "document_checks PASS; AT 190 / CA 60 all NOT_RUN; file_count 52",
-      "log": "evidence/codex/2026-11-16-synthetic/design-r3c.log"
+      "evidence": "document_checks PASS; AT 190 / CA 60 all NOT_RUN",
+      "log": "evidence/codex/2026-11-16-synthetic/design-final2-c.log"
     }
   ],
   "real_acceptance": {
@@ -83,22 +85,35 @@
     "stub_turn": {
       "level_status": "PASS",
       "status": "PASS_REAL_CLIENT_WITH_LOCAL_MODEL_STUB",
-      "checks": 19,
-      "bridge_tool_calls": 1,
-      "bridge_tool_errors": 0
+      "checks": 21
     },
-    "vendor_turn": {
+    "vendor_turn_default_configuration": {
       "level_status": "FAILED",
       "status": "FAILED_AT_MODEL_TOOL_SELECTION",
       "checks": 18,
       "bridge_tool_calls": 0,
       "tokens": 17865
+    },
+    "vendor_turn_fixed_configuration": {
+      "level_status": "PASS",
+      "status": "PASS_REAL_VENDOR_TOOL_ROUND_TRIP",
+      "checks": 18,
+      "bridge_tool_calls": 1,
+      "bridge_tool_errors": 0,
+      "tokens": 22331,
+      "evidence": "evidence/codex/real-vendor-directonly-2026-11-16.json",
+      "configuration": "features.code_mode direct_only_tool_namespaces = [\"mcp__agent_weave_probe\"]"
+    },
+    "revocation": {
+      "exercised_in_paid_run": false,
+      "zero_cost_verification": "GRANT_REVOKED on read, state closing, then closed with exit_observed and forced=false"
     }
   },
   "cost": {
-    "vendor_attempts": 8,
-    "tokens_total": 160090,
-    "money": "UNKNOWN (route billing not observable); no unit-price estimate and no claim that the budget was not exceeded"
+    "vendor_attempts": 9,
+    "tokens_total": 182421,
+    "this_stage_turn_tokens": 22331,
+    "money": "UNKNOWN"
   },
   "containment": {
     "user_configuration_used": false,
@@ -147,8 +162,32 @@
     }
   },
   "not_claimed": [
-    "vendor-model tool round trip",
-    "Codex integration as a whole",
+    "whole-product Codex integration",
+    "revocation inside the paid run",
     "budget not exceeded"
+  ],
+  "vendor_leg": {
+    "attempts_total": 9,
+    "failures": 8,
+    "successes": 1,
+    "tokens_total": 182421,
+    "money": "UNKNOWN",
+    "passing_configuration": "features.code_mode direct_only_tool_namespaces = [\"mcp__agent_weave_probe\"]",
+    "evidence": "evidence/codex/real-vendor-directonly-2026-11-16.json",
+    "not_proven": [
+      "revocation inside the paid run itself (verified zero-cost in the same harness)",
+      "that the original configuration was already working (it was not)"
+    ]
+  },
+  "preflight_defect_found": {
+    "defect": "the launcher dropped the code_mode block when no provider or bridge was configured (write gate)",
+    "evidence": "evidence/codex/preflight-code-mode-2026-11-16.json",
+    "fix": "the home-config write gate now includes code_mode; the preflight after the fix shows the exact block in a fresh home"
+  },
+  "defects_fixed_this_round": [
+    "home-config write gate dropped the code_mode block when no provider or bridge was configured (found by the preflight)",
+    "the loopback listener treated a reserved/excluded automatic port (EACCES) as fatal; it now retries, with two regressions",
+    "the harness now revokes the synthetic grant, proves reads are denied, and requires a confirmed exit afterwards",
+    "running token usage is monitored against a threshold (soft stop, documented as such)"
   ]
 }

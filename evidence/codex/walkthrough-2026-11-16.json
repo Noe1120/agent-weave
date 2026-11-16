@@ -1,39 +1,28 @@
 {
-  "schema": 3,
-  "observed_at": "2026-11-16T03:44:50.265Z",
+  "schema": 4,
+  "observed_at": "2026-11-16T04:07:30.559Z",
   "runs": {
     "initialize": {
       "status": "UNVERIFIED",
       "level_status": "PASS",
       "checks": 4
     },
-    "thread": {
-      "status": "UNVERIFIED",
-      "level_status": "PASS",
-      "checks": 14
-    },
     "stub_turn": {
       "status": "PASS_REAL_CLIENT_WITH_LOCAL_MODEL_STUB",
       "level_status": "PASS",
-      "checks": 19,
-      "bridge_tool_calls": 1
+      "checks": 19
     },
-    "vendor_turn": {
-      "status": "FAILED_AT_MODEL_TOOL_SELECTION",
-      "level_status": "FAILED",
-      "level_status_note": "this attempt was recorded before level_status/exit-code followed the verdict; its verdict is FAILED_AT_MODEL_TOOL_SELECTION",
+    "revocation_zero_cost": {
+      "status": "PASS_REAL_CLIENT_WITH_LOCAL_MODEL_STUB",
+      "level_status": "PASS",
+      "checks": 21
+    },
+    "vendor_turn_paid": {
+      "status": "PASS_REAL_VENDOR_TOOL_ROUND_TRIP",
+      "level_status": "PASS",
       "checks": 18,
-      "bridge_tool_calls": 0
-    },
-    "credential_probe": {
-      "status": "FAILED_AT_MODEL_TOOL_SELECTION",
-      "credential_cleanup": {
-        "homes_scanned": 3,
-        "credential_copies_removed": 1,
-        "token_hits_before": 1,
-        "token_hits_after": 0,
-        "skipped": []
-      }
+      "tokens": 22331,
+      "bridge_tool_calls": 1
     }
   },
   "checks": [
@@ -55,17 +44,27 @@
     {
       "item": "MCP tool call originates from the native client",
       "ok": true,
-      "detail": null
+      "detail": "1"
     },
     {
       "item": "platform returns the real task status",
       "ok": true,
-      "detail": "task 383bb04c-8d1d-4754-92eb-cf9f8ac0fdb1 status draft"
+      "detail": "Task ID: `3165fe7e-960a-4d6d-b380-59f5a4337663`  \nStatus: `draft`"
     },
     {
-      "item": "a real failure reason reaches the operator",
+      "item": "native reply carries the same task id",
       "ok": true,
-      "detail": "bridge_tool_call"
+      "detail": null
+    },
+    {
+      "item": "turn completed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "item": "read-only progress produced no writes",
+      "ok": true,
+      "detail": null
     },
     {
       "item": "owned process exits after close",
@@ -78,14 +77,19 @@
       "detail": null
     },
     {
-      "item": "bridge configuration removed wherever it was created",
+      "item": "revocation denies reads and stops the owned process",
       "ok": true,
-      "detail": null
+      "detail": "{\"step\":\"revocation\",\"read\":\"GRANT_REVOKED\",\"state_after\":\"closing\",\"stopped\":true,\"exit\":null}"
     },
     {
       "item": "provider credential copy removed and residues gone",
       "ok": true,
-      "detail": "{\"homes_scanned\":3,\"credential_copies_removed\":1,\"token_hits_before\":1,\"token_hits_after\":0,\"skipped\":[]}"
+      "detail": "{\"homes_scanned\":4,\"credential_copies_removed\":2,\"token_hits_before\":1,\"token_hits_after\":0,\"skipped\":[]}"
+    },
+    {
+      "item": "no stub evidence in the vendor run",
+      "ok": true,
+      "detail": "bridge-reports/*/report.json"
     },
     {
       "item": "unknown state never displayed as completed",
@@ -99,5 +103,5 @@
     }
   ],
   "passed": true,
-  "note": "The vendor turn is the only failing level; it fails at model selection and code-mode dispatch, not at registration or the route."
+  "note": "Revocation was not exercised inside the single paid run; it is verified by the same harness on the stub run listed here."
 }

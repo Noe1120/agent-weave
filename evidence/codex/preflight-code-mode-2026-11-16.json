@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "observed_at": "2026-11-16T03:59:36.449Z",
+  "note": "zero-cost preflight after fixing the write gate: the launcher writes the exact code-mode block into a fresh isolated home; no turn was sent",
+  "fingerprint": "a145f35e8c8907ee4891d05f35240256fbe4a83a2dcc15b8f7cdc8ea43415f62",
+  "codex_home_created": true,
+  "has_table": true,
+  "has_direct_only": true,
+  "block": [
+    "[features.code_mode]",
+    "direct_only_tool_namespaces = [\"mcp__agent_weave_probe\"]"
+  ],
+  "config_bytes": 78,
+  "exit_code": 0,
+  "exit_observed": true
+}

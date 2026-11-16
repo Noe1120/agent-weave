@@ -54,6 +54,7 @@ const { values } = parseArgs({
     "provider-config": { type: "string" },
     "provider-model": { type: "string" },
     "code-mode-direct": { type: "string" },
+    "token-threshold": { type: "string" },
     config: { type: "string" },
     output: { type: "string" },
   },
@@ -374,6 +375,11 @@ try {
         task_id: fixture.ids.task,
       });
       const deadline = Date.now() + 150000;
+      // Running-usage guard: the client reports usage while the turn runs, so a
+      // threshold can stop this owned turn. Reporting can lag, so this is a
+      // monitor, not a hard cap, and the report says so.
+      const threshold = Number(values["token-threshold"] ?? 30000);
+      let interruptedAt = null;
       for (;;) {
         view = controller.read(
           fixture.token,
@@ -381,9 +387,41 @@ try {
           fixture.binding,
         );
         if (!view.turn || view.turn.state !== "requested") break;
+        if (
+          interruptedAt === null &&
+          Number.isFinite(threshold) &&
+          (view.token_usage?.total ?? 0) >= threshold
+        ) {
+          interruptedAt = view.token_usage?.total ?? null;
+          report.steps.push({
+            step: "token_threshold",
+            tokens: interruptedAt,
+            action: "interrupt this owned turn",
+            limit_is_soft: true,
+          });
+          try {
+            await controller.interrupt(fixture.token, {
+              project_id: fixture.ids.project,
+              runtime_id: fixture.binding,
+              action_id: id(),
+              expected_revision: view.revision,
+            });
+          } catch (error) {
+            report.steps.push({
+              step: "token_threshold_interrupt_failed",
+              error: String(error?.message ?? error),
+            });
+          }
+        }
         if (Date.now() > deadline) break;
         await new Promise((r) => setTimeout(r, 250));
       }
+      report.steps.push({
+        step: "token_monitor",
+        threshold: Number.isFinite(threshold) ? threshold : null,
+        interrupted_at: interruptedAt,
+        note: "usage reporting can lag; stopping may still be billed after this point",
+      });
       facts.turnState = view.turn?.state ?? "none";
       facts.agentMessage = view.last_agent_message ?? null;
       facts.tokenUsageTotal = view.token_usage?.total ?? null;
@@ -406,22 +444,73 @@ try {
         check("turn_reports_token_usage", (facts.tokenUsageTotal ?? 0) > 0);
     }
 
-    view = controller.read(fixture.token, fixture.ids.project, fixture.binding);
-    await controller.close(fixture.token, {
-      project_id: fixture.ids.project,
-      runtime_id: fixture.binding,
-      action_id: id(),
-      expected_revision: view.revision,
-    });
-    view = controller.read(fixture.token, fixture.ids.project, fixture.binding);
+    // Revocation: the platform must refuse reads and stop its own process.
+    const revoke = {
+      step: "revocation",
+      read: null,
+      state_after: null,
+      stopped: false,
+    };
+    try {
+      fixture.g.state = "revoked";
+      fixture.s.updateGrant(fixture.g);
+      try {
+        controller.read(fixture.token, fixture.ids.project, fixture.binding);
+        revoke.read = "still_allowed";
+      } catch (error) {
+        revoke.read = String(error?.code ?? error?.message ?? error);
+      }
+      controller.reconcileAuthorization();
+      // The grant is revoked, so controller.read is denied by design; observe the
+      // persisted projection and the owned process, not the token path.
+      const persisted = () =>
+        fixture.s.getResource(fixture.binding)?.data ?? null;
+      const deadlineRevoke = Date.now() + 25000;
+      while (Date.now() < deadlineRevoke) {
+        const data = persisted();
+        if (
+          data &&
+          (data.state === "closing" || data.state === "closed" || data.exit)
+        ) {
+          revoke.stopped = true;
+          break;
+        }
+        await new Promise((r) => setTimeout(r, 200));
+      }
+      const settled = persisted();
+      revoke.state_after = settled?.state ?? null;
+      revoke.exit = clone(settled?.exit ?? null);
+    } catch (error) {
+      revoke.error = String(error?.message ?? error);
+    }
+    report.steps.push(revoke);
+    check(
+      "revocation_refuses_reads",
+      revoke.read !== null && revoke.read !== "still_allowed",
+      revoke.read,
+    );
+    check(
+      "revocation_stops_owned_process",
+      revoke.stopped === true,
+      revoke.state_after,
+    );
+
+    // Wait for the stop to reach a confirmed exit before judging it.
+    const closeDeadline = Date.now() + 25000;
+    let final = fixture.s.getResource(fixture.binding)?.data ?? null;
+    while (Date.now() < closeDeadline) {
+      final = fixture.s.getResource(fixture.binding)?.data ?? null;
+      if (final?.state === "closed" && final?.exit) break;
+      await new Promise((r) => setTimeout(r, 250));
+    }
     report.steps.push({
-      step: "close",
-      state: view.state,
-      exit: clone(view.exit),
+      step: "close_after_revocation",
+      state: final?.state ?? null,
+      exit: clone(final?.exit ?? null),
     });
-    check("close_state", view.state === "closed", view.state);
-    check("close_exit_observed", view.exit?.exit_observed === true);
-    check("close_not_forced", view.exit?.forced === false);
+    check("close_state", final?.state === "closed", final?.state ?? null);
+    check("close_exit_observed", final?.exit?.exit_observed === true);
+    check("close_not_forced", final?.exit?.forced === false);
   }
 
   // ---- Evidence from the real client's own bridge connections ----

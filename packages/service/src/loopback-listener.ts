@@ -28,12 +28,12 @@ export async function listenLoopback(server: Server, port = 0): Promise<void> {
       });
       return;
     } catch (error) {
-      if (
-        port !== 0 ||
-        (error as NodeJS.ErrnoException).code !== "EADDRINUSE" ||
-        attempt === 31
-      )
-        throw error;
+      const code = (error as NodeJS.ErrnoException).code;
+      // Windows can refuse a port that Hyper-V/WinNAT reserved or excluded, and
+      // an ephemeral port can be taken between the pick and the bind. Both are
+      // "try another automatic port"; a fixed port and every other error are not.
+      const retryable = code === "EADDRINUSE" || code === "EACCES";
+      if (port !== 0 || !retryable || attempt === 31) throw error;
     }
   }
 }

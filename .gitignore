@@ -141,6 +141,8 @@ qa-runtime/
 !/evidence/codex/walkthrough-2026-11-16.json
 !/evidence/codex/vendor-tool-surface-20261116.json
 !/evidence/codex/config-key-probe-2026-11-16.json
+!/evidence/codex/real-vendor-directonly-2026-11-16.json
+!/evidence/codex/preflight-code-mode-2026-11-16.json
 !/evidence/codex/vendor-tool-registration-2026-11-16.json
 !/evidence/codex/vendor-attempt-report.json
 !/evidence/codex/preflight/

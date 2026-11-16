@@ -13,7 +13,8 @@
 | 1000 次纯只读进度 | PASS（DB 写入 0） |
 | 所属进程退出与对账 | PASS（exit 0、`forced=false`、`exit_observed=true`） |
 | 原客户端进程 | 12 → 12，未变 |
-| 真实厂商模型 turn | **FAILED_AT_MODEL_TOOL_SELECTION**（8 次，160,090 tokens，金额 UNKNOWN） |
+| 真实厂商模型 turn（历史默认配置） | **FAILED_AT_MODEL_TOOL_SELECTION**（8 次，160,090 tokens，金额 UNKNOWN） |
+| 真实厂商模型 turn（本阶段固定配置 `direct_only_tool_namespaces`） | **PASS_REAL_VENDOR_TOOL_ROUND_TRIP**（1 次，22,331 tokens，18 项检查，0 失败） |
 | 已有桌面聊天附着（`attached_session`） | NOT_RUN |
 | Windows 强制隔离 / 原生 UI / 完整 L1–L3 | NOT_RUN / UNVERIFIED |
 
