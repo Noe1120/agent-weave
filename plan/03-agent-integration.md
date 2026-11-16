@@ -80,7 +80,7 @@ GO 条件：固定版本下通过测试；如果产品要作为对外生产服�
 
 本轮由客户端自带schema核实并纠正了此前的文档推断：信封无`jsonrpc`成员；`initialize`响应为`{codexHome,platformFamily,platformOs,userAgent}`（无`protocolVersion`）；`TurnStatus`含`inProgress`且非终态；MCP每个server收成一个`namespace`工具`mcp__<server>`，调用须带`namespace`，扁平名被拒。空home无provider时真实turn会诚实失败（默认端点不可达，退避重试后`failed`）。
 
-模型为本地回环Responses桩（无凭据、无外发、无计费）。此后按操作者授权（总费用10元以内）用其CC Switch回环路由发起4次真实厂商模型turn：turn均完成、桥均握手成功，但模型一次也没有调用平台工具（合计88,445 tokens，已停止）。根因在客户端对该模型启用code模式工具面（仅`functions/clock/collaboration`，MCP工具只能在`functions.exec`的`tools.*`里调用），模型四次不同措辞下都未进入该路径；同一客户端在无模型元数据时会直接暴露`mcp__agent_weave_probe`并调用成功。**真实厂商模型的工具调用记为FAILED_AT_MODEL_TOOL_SELECTION；已有桌面聊天附着、Windows强制隔离、原生UI与完整L1–L3仍NOT_RUN**；独立新thread不等于桌面聊天附着；原客户端实例未被启动、附着或改写。
+模型为本地回环Responses桩（无凭据、无外发、无计费）。此后按操作者授权（总费用10元以内）用其CC Switch回环路由发起5次真实厂商模型turn：turn均完成、桥均握手成功，但模型一次也没有调用平台工具（合计106,377 tokens，已停止）。根因在客户端对该模型启用code模式工具面（仅`functions/clock/collaboration`，MCP工具只能在`functions.exec`的`tools.*`里调用），模型四次不同措辞下都未进入该路径；同一客户端在无模型元数据时会直接暴露`mcp__agent_weave_probe`并调用成功。**真实厂商模型的工具调用记为FAILED_AT_MODEL_TOOL_SELECTION；已有桌面聊天附着、Windows强制隔离、原生UI与完整L1–L3仍NOT_RUN**；独立新thread不等于桌面聊天附着；原客户端实例未被启动、附着或改写。
 
 ## 5. Claude Desktop
 
