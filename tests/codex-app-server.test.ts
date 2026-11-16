@@ -7,6 +7,8 @@ import { CodexAppServer } from "../packages/service/src/codex-app-server.ts";
 import { AdapterFault } from "../packages/service/src/adapter-contract.ts";
 
 // Every case below runs the synthetic fixture, never the installed Codex client.
+// Envelope shapes follow the JSON Schema the fixed CLI generates
+// (`codex app-server generate-json-schema`): no `jsonrpc` member.
 function start(
   mode: string,
   options: { requestMs?: number; closeMs?: number } = {},
@@ -31,26 +33,26 @@ async function code(promise: Promise<unknown>) {
     return (error as AdapterFault).code;
   }
 }
-test("candidate initialization, native thread, one turn and owned close", async () => {
+test("real-shaped initialization, native thread, one turn and owned close", async () => {
   const { handle } = start("success");
   const hello = await handle.ready;
-  assert.equal(hello.schema, "candidate/1");
-  assert.equal(hello.protocol_version, "0.135.0");
-  assert.equal(hello.user_agent, "codex_cli_rs/0.135.0 (synthetic fixture)");
-  assert.deepEqual(hello.declared, {
-    approvals: true,
-    request_user_input: true,
-    interrupt: true,
-  });
+  assert.equal(hello.schema, "codex-app-server/v1");
+  assert.equal(
+    hello.user_agent,
+    "codex_cli_rs/0.167.0-alpha.3.2 (synthetic fixture)",
+  );
+  assert.equal(hello.codex_home, "C:\\Users\\synthetic\\.codex");
+  assert.equal(hello.platform_family, "windows");
+  assert.equal(hello.platform_os, "windows");
   assert.equal(hello.unrecognized_fields, 0);
   assert.equal(handle.status.state, "ready");
   const thread = await handle.startThread(resolve("tests/fixtures"));
-  assert.equal(thread, "11111111-1111-4111-8111-111111111111");
+  assert.equal(thread, "01930000-0000-7000-8000-00000000aaaa");
   const turn = await handle.startTurn(
     thread,
     "synthetic acceptance instruction",
   );
-  assert.equal(turn, "22222222-2222-4222-8222-222222222222");
+  assert.equal(turn, "01930000-0000-7000-8000-00000000bbbb");
   await new Promise((r) => setTimeout(r, 120));
   assert.equal(handle.statistics.turn_state, "completed");
   assert.ok(handle.statistics.notifications >= 3);
@@ -66,19 +68,24 @@ test("candidate initialization, native thread, one turn and owned close", async 
   assert.equal(exit.exit_observed, true);
   assert.equal(exit.forced, false);
   assert.equal(exit.fault, null);
+  // initialize, initialized, thread/start, turn/start
   assert.equal(exit.frames_out, 4);
   assert.equal(handle.status.state, "closed");
 });
-test("a documented frame without the jsonrpc member is accepted", async () => {
-  const { handle } = start("no-jsonrpc");
-  const hello = await handle.ready;
-  assert.equal(hello.protocol_version, "0.135.0");
-  handle.close();
-  const exit = await handle.closed;
+test("a tolerated jsonrpc member is accepted, a wrong one fails closed", async () => {
+  const tolerated = start("with-jsonrpc");
+  const hello = await tolerated.handle.ready;
+  assert.equal(hello.platform_os, "windows");
+  tolerated.handle.close();
+  const exit = await tolerated.handle.closed;
   assert.equal(exit.fault, null);
-  assert.equal(exit.exit_observed, true);
+
+  const rejected = start("bad-jsonrpc");
+  assert.equal(await code(rejected.handle.ready), "CODEX_PROTOCOL");
+  await rejected.handle.closed;
+  assert.notEqual(rejected.handle.status.state, "ready");
 });
-test("duplicate, unsolicited, malformed and under-encoded frames fail closed", async () => {
+test("duplicate, unsolicited, wrong id, malformed and under-encoded frames fail closed", async () => {
   const malformed: [string, string][] = [
     ["duplicate", "CODEX_PROTOCOL"],
     ["unsolicited", "CODEX_PROTOCOL"],
@@ -107,11 +114,10 @@ test("initialize rejection is reported as an adapter fault, not as ready", async
   await unauthenticated.handle.closed;
 });
 test("bounded stdout, frame and stderr limits terminate the transport", async () => {
-  const bounded: [string, string][] = [
+  for (const [mode, expected] of [
     ["oversized", "CODEX_FRAME_LIMIT"],
     ["stderr-flood", "CODEX_STDERR_LIMIT"],
-  ];
-  for (const [mode, expected] of bounded) {
+  ] as [string, string][]) {
     const { handle } = start(mode);
     // The offending frame arrives after a valid initialize reply, so the
     // terminated transport, not the ready promise, carries the fault.
@@ -151,8 +157,7 @@ test("timeouts, disconnection and thread/turn rejections stay distinct", async (
   const turnHang = start("turn-hang", { requestMs: 400 });
   await turnHang.handle.ready;
   const accepted = await turnHang.handle.startThread(resolve("tests/fixtures"));
-  // The turn request is acknowledged; a missing turn/completed must stay "none"
-  // instead of being promoted to a completed turn.
+  // The turn request is acknowledged; a missing terminal event must stay "none".
   await turnHang.handle.startTurn(accepted, "synthetic");
   assert.equal(turnHang.handle.statistics.turn_state, "none");
   turnHang.handle.close();
@@ -178,6 +183,24 @@ test("an unacknowledged turn stays unknown and is never reported complete", asyn
   );
   assert.equal(handle.statistics.turn_state, "none");
 });
+test("only the real terminal TurnStatus values move the projection", async () => {
+  const inProgress = start("turn-inprogress");
+  await inProgress.handle.ready;
+  const t1 = await inProgress.handle.startThread(resolve("tests/fixtures"));
+  await inProgress.handle.startTurn(t1, "synthetic");
+  await new Promise((r) => setTimeout(r, 120));
+  // inProgress is not terminal: a non-terminal status must never read completed.
+  assert.equal(inProgress.handle.statistics.turn_state, "running");
+  inProgress.handle.close();
+
+  const failed = start("turn-fail");
+  await failed.handle.ready;
+  const t2 = await failed.handle.startThread(resolve("tests/fixtures"));
+  await failed.handle.startTurn(t2, "synthetic");
+  await new Promise((r) => setTimeout(r, 120));
+  assert.equal(failed.handle.statistics.turn_state, "failed");
+  failed.handle.close();
+});
 test("no turn, generic request or approval path exists before initialization", async () => {
   const { handle } = start("hang", { requestMs: 5000 });
   assert.equal(
@@ -196,7 +219,9 @@ test("only the four fixed client methods exist in the transport source", () => {
   );
   const sent = new Set(
     [
-      ...source.matchAll(/(?:method:\s*"|request\(")([a-z]+(?:\/[a-z]+)?)/g),
+      ...source.matchAll(
+        /(?:method:\s*"|this\.request\(")([a-z]+(?:\/[a-z]+)?)/g,
+      ),
     ].map((m) => m[1]),
   );
   assert.deepEqual([...sent].sort(), [
@@ -214,4 +239,6 @@ test("only the four fixed client methods exist in the transport source", () => {
     "process/spawn",
   ])
     assert.equal(source.includes(banned), false, banned);
+  // The real envelope has no jsonrpc member; the transport must not emit one.
+  assert.equal(source.includes('jsonrpc: "2.0"'), false);
 });

@@ -1,0 +1,194 @@
+{
+  "schema": 1,
+  "derived_from": "codex app-server generate-json-schema --out <dir> --experimental (exit 0)",
+  "client_version": "0.167.0-alpha.3.2",
+  "generated_at": "2026-11-16T01:52:49.185Z",
+  "generated_by": "the fixed CLI itself; this file only records what it produced",
+  "file_count": 47,
+  "envelope": {
+    "jsonrpc_member": "absent in this build's own schemas",
+    "request": [
+      "id",
+      "method",
+      "params",
+      "trace"
+    ],
+    "response": [
+      "id",
+      "result"
+    ],
+    "error": [
+      "error",
+      "id"
+    ],
+    "notification": [
+      "method",
+      "params"
+    ],
+    "request_id": "string | int64"
+  },
+  "initialize": {
+    "params_required": [
+      "clientInfo"
+    ],
+    "params_properties": [
+      "capabilities",
+      "clientInfo"
+    ],
+    "capability_keys": [
+      "experimentalApi",
+      "explicitGatewayOauth",
+      "extensions",
+      "mcpServerOpenaiFormElicitation",
+      "optOutNotificationMethods",
+      "requestAttestation",
+      "requiredHumanApproval"
+    ],
+    "response_required": [
+      "codexHome",
+      "platformFamily",
+      "platformOs",
+      "userAgent"
+    ],
+    "response_properties": [
+      "codexHome",
+      "platformFamily",
+      "platformOs",
+      "userAgent"
+    ]
+  },
+  "thread_start": {
+    "params_properties": [
+      "allowProviderModelFallback",
+      "approvalPolicy",
+      "approvalsReviewer",
+      "baseInstructions",
+      "config",
+      "cwd",
+      "daybreakEnabled",
+      "developerInstructions",
+      "dynamicTools",
+      "environments",
+      "ephemeral",
+      "experimentalRawEvents",
+      "historyMode",
+      "mockExperimentalField",
+      "model",
+      "modelProvider",
+      "multiAgentMode",
+      "permissions",
+      "personality",
+      "projectId",
+      "runtimeWorkspaceRoots",
+      "sandbox",
+      "selectedCapabilityRoots",
+      "serviceName",
+      "serviceTier",
+      "sessionStartSource",
+      "threadSource"
+    ],
+    "response_required": [
+      "approvalPolicy",
+      "approvalsReviewer",
+      "cwd",
+      "model",
+      "modelProvider",
+      "sandbox",
+      "thread"
+    ],
+    "thread_required": [
+      "cliVersion",
+      "createdAt",
+      "cwd",
+      "ephemeral",
+      "id",
+      "modelProvider",
+      "preview",
+      "projectId",
+      "sessionId",
+      "source",
+      "status",
+      "turns",
+      "updatedAt"
+    ]
+  },
+  "turn_start": {
+    "params_required": [
+      "input",
+      "threadId"
+    ],
+    "input": {
+      "items": {
+        "$ref": "#/definitions/UserInput"
+      },
+      "type": "array"
+    },
+    "response_required": [
+      "turn"
+    ],
+    "turn_status_enum": [
+      "completed",
+      "interrupted",
+      "failed",
+      "inProgress"
+    ]
+  },
+  "turn_interrupt": {
+    "threadId": {
+      "type": "string"
+    },
+    "turnId": {
+      "type": "string"
+    }
+  },
+  "turn_completed_notification": [
+    "threadId",
+    "turn"
+  ],
+  "method_counts": {
+    "client_request": 248,
+    "client_notification": 1,
+    "server_request": 42,
+    "server_notification": 185
+  },
+  "platform_relevant_methods": {
+    "client_request": [
+      "initialize",
+      "thread/read",
+      "thread/resume",
+      "thread/start",
+      "turn/interrupt",
+      "turn/start",
+      "turn/steer"
+    ],
+    "client_notification": [
+      "initialized"
+    ],
+    "server_request": [
+      "item/commandExecution/requestApproval",
+      "item/fileChange/requestApproval",
+      "item/permissions/requestApproval",
+      "item/tool/call",
+      "item/tool/requestUserInput",
+      "mcpServer/elicitation/request"
+    ],
+    "server_notification": [
+      "item/agentMessage/delta",
+      "item/completed",
+      "item/started",
+      "mcpServer/event/stream/notification",
+      "mcpServer/oauthLogin/completed",
+      "mcpServer/startupStatus/updated",
+      "thread/closed",
+      "thread/started",
+      "thread/status/changed",
+      "turn/completed",
+      "turn/started"
+    ]
+  },
+  "mcp_tool_exposure_observed": {
+    "shape": "one 'namespace' tool per MCP server: {type:'namespace', name:'mcp__<server>', tools:[{type:'function', name, parameters}]}",
+    "accepted_call": "{type:'function_call', namespace:'mcp__<server>', name:'<tool>', arguments:'{...}'}",
+    "rejected_call": "flat 'mcp__<server>__<tool>' name is refused with 'unsupported call'"
+  }
+}

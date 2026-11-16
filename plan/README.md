@@ -30,7 +30,7 @@
 
 ## Codex接入增量 · 2026-11-16
 
-[W14 Codex app-server接入](W14-CODEX-APP-SERVER.md)已实现固定CLI身份/摘要校验的启动器、有界app-server协议状态机、复用W08授权/CAS/幂等的运行时控制器，以及MCP只读桥的Codex目标；30项合成回归通过，DSH/Claude接入无回归。本机真实握手、新thread、合成turn与平台工具往返仍NOT_RUN：缺具体授权，启动器固定空`CODEX_HOME`且不含凭据复用路径。独立新thread不等于已有桌面聊天附着；原客户端实例未被启动或改写，UI最后、管家不构建。
+[W14 Codex app-server接入](W14-CODEX-APP-SERVER.md)已完成真实闭环：本机`codex-cli 0.167.0-alpha.3.2`的真实initialize、真实原生thread、一条真实turn、一次真实平台只读`task_get`往返（stdio MCP→平台HTTP→原生agent message复述）、1000次零写入进度与退出对账；原12个客户端进程前后不变。协议事实由客户端自带schema核实并纠正了文档推断（无`jsonrpc`成员、`TurnStatus.inProgress`非终态、MCP以`namespace`工具暴露）。模型为本地回环Responses桩（无凭据/无外发/无计费），真实厂商模型turn、桌面聊天附着、Windows隔离与UI仍NOT_RUN；独立新thread不等于桌面聊天附着；UI最后、管家不构建。
 
 ## 阅读与交接
 

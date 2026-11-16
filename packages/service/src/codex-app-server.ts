@@ -14,21 +14,20 @@ import { canonical } from "./domain.ts";
 /**
  * Projection of the official app-server `initialize` result.
  *
- * The online documentation for the fixed build is the only available schema
- * source, and it is explicitly not a schema for this machine. Only labelled
+ * Field names come from the JSON Schema the fixed CLI itself generates
+ * (`codex app-server generate-json-schema`, v1 `InitializeResponse`:
+ * `codexHome`, `platformFamily`, `platformOs`, `userAgent`). Only labelled
  * fields that can be type-checked are surfaced; every other key is counted and
  * dropped, so an unknown field can never become a capability claim.
  */
 export interface CodexInitialize {
-  protocol_version: string | null;
   user_agent: string | null;
-  declared: {
-    approvals: boolean;
-    request_user_input: boolean;
-    interrupt: boolean;
-  };
+  codex_home: string | null;
+  platform_family: string | null;
+  platform_os: string | null;
   unrecognized_fields: number;
-  schema: "candidate/1";
+  /** Which fixed schema this projection was validated against. */
+  schema: "codex-app-server/v1";
 }
 export interface CodexStatistics {
   requests: number;
@@ -38,6 +37,8 @@ export interface CodexStatistics {
   refused_server_requests: number;
   last_method: string | null;
   turn_state: "none" | "running" | "completed" | "failed" | "interrupted";
+  /** Last assistant message text, bounded; null until one is completed. */
+  last_agent_message: string | null;
 }
 export interface CodexExit {
   code: number | null;
@@ -79,15 +80,23 @@ function object(value: unknown): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 const known = new Set([
-  "protocolVersion",
+  "codexHome",
+  "platformFamily",
+  "platformOs",
   "userAgent",
-  "capabilities",
-  "serverInfo",
 ]);
-function initializeFrame(value: unknown, id: number): CodexInitialize {
-  const frame = object(value);
+/**
+ * The fixed schema's JSON-RPC envelopes carry no `jsonrpc` member
+ * (`JSONRPCRequest` requires `id` and `method` only). Outgoing frames therefore
+ * never add one; an incoming `jsonrpc` member is tolerated only as "2.0".
+ */
+function envelope(frame: Record<string, unknown>) {
   if ("jsonrpc" in frame && frame.jsonrpc !== "2.0")
     throw new AdapterFault("CODEX_PROTOCOL");
+}
+function initializeFrame(value: unknown, id: number): CodexInitialize {
+  const frame = object(value);
+  envelope(frame);
   if (frame.id !== id || "method" in frame)
     throw new AdapterFault("CODEX_PROTOCOL");
   if ("error" in frame) {
@@ -109,25 +118,25 @@ function initializeFrame(value: unknown, id: number): CodexInitialize {
     if (!label(v)) throw new AdapterFault("CODEX_PROTOCOL");
     return v;
   };
-  const caps =
-    result.capabilities === undefined ? {} : object(result.capabilities);
-  const flag = (key: string) => {
-    if (caps[key] !== undefined && typeof caps[key] !== "boolean")
-      throw new AdapterFault("CODEX_PROTOCOL");
-    return caps[key] === true;
-  };
-  return {
-    protocol_version: optionalLabel("protocolVersion"),
+  // The response is v1 `InitializeResponse`; the four required members are
+  // projected and everything else is only counted.
+  const projection: CodexInitialize = {
     user_agent: optionalLabel("userAgent"),
-    declared: {
-      approvals: flag("approvals"),
-      request_user_input: flag("requestUserInput"),
-      interrupt: flag("interrupt"),
-    },
+    codex_home: optionalLabel("codexHome"),
+    platform_family: optionalLabel("platformFamily"),
+    platform_os: optionalLabel("platformOs"),
     unrecognized_fields: Object.keys(result).filter((k) => !known.has(k))
       .length,
-    schema: "candidate/1",
+    schema: "codex-app-server/v1",
   };
+  if (
+    projection.codex_home === null ||
+    projection.platform_family === null ||
+    projection.platform_os === null ||
+    projection.user_agent === null
+  )
+    throw new AdapterFault("CODEX_PROTOCOL");
+  return projection;
 }
 /**
  * Bounded JSONL transport for the candidate app-server entry. Exactly four
@@ -147,6 +156,7 @@ export class CodexAppServer implements CodexHandle {
     refused_server_requests: 0,
     last_method: null,
     turn_state: "none",
+    last_agent_message: null,
   };
   private child: ChildProcessWithoutNullStreams;
   private resolveReady!: (value: CodexInitialize) => void;
@@ -205,12 +215,7 @@ export class CodexAppServer implements CodexHandle {
       this.pendingId = 1;
       this.nextId = 2;
       this.statistics.last_method = "initialize";
-      this.write({
-        jsonrpc: "2.0",
-        id: 1,
-        method: "initialize",
-        params: this.hello(),
-      });
+      this.write({ id: 1, method: "initialize", params: this.hello() });
     });
     child.stdout.on("data", (data: Buffer) => this.consume(data));
     child.stderr.on("data", (data: Buffer) => {
@@ -250,7 +255,8 @@ export class CodexAppServer implements CodexHandle {
         version: "0.3.0",
         title: "Agent Weave",
       },
-      capabilities: { experimental: false, requestUserInput: false },
+      // v1 InitializeCapabilities: only documented keys, experimental API off.
+      capabilities: { experimentalApi: false },
     };
   }
   get status(): CodexHandle["status"] {
@@ -288,7 +294,7 @@ export class CodexAppServer implements CodexHandle {
       this.resolveRequest = resolveFrame;
       this.rejectRequest = rejectFrame;
       this.armRequest(timeoutCode(method));
-      this.write({ jsonrpc: "2.0", id, method, params });
+      this.write({ id, method, params });
     });
   }
   private settle(code: string | null, frame?: Record<string, unknown>) {
@@ -305,7 +311,10 @@ export class CodexAppServer implements CodexHandle {
     if (!isAbsolute(cwd)) return Promise.reject(new AdapterFault("CODEX_CWD"));
     // Only the working directory is sent: no model, sandbox or approval policy is
     // invented for a schema that this machine has not been verified against.
-    return this.request("thread/start", { cwd }).then((frame) => {
+    return this.request("thread/start", {
+      cwd,
+      approvalPolicy: "never",
+    }).then((frame) => {
       const thread = object(frame.thread);
       if (!label(thread.id) || thread.id.length > 128)
         return this.protocolFailure();
@@ -397,7 +406,6 @@ export class CodexAppServer implements CodexHandle {
     if (typeof id !== "string" && !Number.isSafeInteger(id))
       return this.fail("CODEX_PROTOCOL");
     this.write({
-      jsonrpc: "2.0",
       id,
       error: {
         code: -32601,
@@ -408,23 +416,37 @@ export class CodexAppServer implements CodexHandle {
   private notification(method: string, frame: Record<string, unknown>) {
     this.statistics.notifications++;
     if (method === "turn/completed") {
-      // The terminal status is read from a bounded field only; anything else is
-      // recorded as unknown rather than promoted to a success claim.
+      // `TurnStatus` is exactly completed | interrupted | failed | inProgress.
+      // Only the three terminal values may move the projection; anything else
+      // (including inProgress and unknown strings) must not become "completed".
       let status: unknown;
       try {
-        status = object(frame.params ?? {}).turn
-          ? object(object(frame.params).turn).status
-          : undefined;
+        status = object(object(frame.params ?? {}).turn).status;
       } catch {
         status = undefined;
       }
-      this.statistics.turn_state =
-        status === "failed"
-          ? "failed"
-          : status === "interrupted"
-            ? "interrupted"
-            : "completed";
+      if (status === "completed") this.statistics.turn_state = "completed";
+      else if (status === "failed") this.statistics.turn_state = "failed";
+      else if (status === "interrupted")
+        this.statistics.turn_state = "interrupted";
+      else if (status === "inProgress") this.statistics.turn_state = "running";
+      else countOnce(this.statistics.unknown_notifications, "turn/completed");
       return;
+    }
+    if (method === "item/completed") {
+      let item;
+      try {
+        item = object(object(frame.params ?? {}).item);
+      } catch {
+        item = undefined;
+      }
+      if (
+        item &&
+        item.type === "agentMessage" &&
+        typeof item.text === "string" &&
+        item.text.length <= 20000
+      )
+        this.statistics.last_agent_message = item.text.slice(0, 2000);
     }
     countOnce(this.statistics.unknown_notifications, method);
     if (this.statistics.unknown_notifications.length > 20)
@@ -443,7 +465,8 @@ export class CodexAppServer implements CodexHandle {
       this.statistics.turn_state = "none";
       this.settle(null, object(frame.result));
       clearTimeout(this.requestTimer);
-      this.write({ jsonrpc: "2.0", method: "initialized", params: {} });
+      // `initialized` is a real client notification in this build's schema.
+      this.write({ method: "initialized", params: {} });
       this.resolveReady(projection);
       return;
     }
@@ -532,43 +555,76 @@ interface CodexProfile {
   data_root: string;
   client_version: string;
   executable_sha256: string;
+  model_provider?: { base_url: string; model: string };
+  bridge?: { config_path: string; report_dir: string };
 }
-async function unlinked(absolute: string, file: boolean) {
-  let current = absolute;
-  while (true) {
-    const s = await lstat(current);
-    if (
-      s.isSymbolicLink() ||
-      (current === absolute && file && (!s.isFile() || s.nlink !== 1))
-    )
-      throw new AdapterFault("CODEX_UNSAFE_PATH");
-    const parent = dirname(current);
-    if (parent === current) break;
-    current = parent;
+const loopback = (v: unknown): v is string =>
+  typeof v === "string" &&
+  /^http:\/\/127\.0\.0\.1:[1-9][0-9]{0,4}$/.test(v) &&
+  Number(v.split(":").at(-1)) <= 65535;
+/**
+ * The isolated home configuration this platform writes for itself.
+ *
+ * Only three things can appear: a loopback model endpoint, the platform's own
+ * stdio read bridge, and fixed non-secret defaults. No user configuration,
+ * credential, plugin, marketplace or MCP server of the installed client is
+ * copied. `bridge.command` is the running Node executable and `bridge.args` is
+ * the platform's own compiled entry, both fixed by the trusted caller.
+ */
+export function codexHomeConfig(input: {
+  model_provider?: { base_url: string; model: string };
+  bridge?: { command: string; args: string[] };
+}): string {
+  const lines: string[] = [];
+  if (input.model_provider) {
+    const { base_url, model } = input.model_provider;
+    contract(loopback(base_url) && label(model));
+    lines.push(
+      "model = " + JSON.stringify(model),
+      'model_provider = "agent-weave-loopback"',
+      "",
+      "[model_providers.agent-weave-loopback]",
+      'name = "agent-weave loopback acceptance"',
+      "base_url = " + JSON.stringify(base_url),
+      'wire_api = "responses"',
+      "requires_openai_auth = false",
+      'experimental_bearer_token = "synthetic-local-only"',
+    );
   }
-}
-async function hash(filename: string) {
-  const h = createHash("sha256");
-  for await (const chunk of createReadStream(filename)) h.update(chunk);
-  return h.digest("hex");
+  if (input.bridge) {
+    const { command, args } = input.bridge;
+    contract(isAbsolute(command) && Array.isArray(args) && args.length <= 8);
+    contract(args.every((a) => typeof a === "string" && a.length <= 512));
+    if (lines.length) lines.push("");
+    lines.push(
+      "[mcp_servers.agent-weave-probe]",
+      "command = " + JSON.stringify(command),
+      "args = [" + args.map((a) => JSON.stringify(a)).join(", ") + "]",
+      "startup_timeout_sec = 30",
+    );
+  }
+  return lines.length ? lines.join("\n") + "\n" : "";
 }
 /**
  * Trusted controller configuration only. The launcher always creates a fresh
- * empty CODEX_HOME, so no user configuration, credential, session or database
- * of the installed client is read or reused. A real turn needs a separately
- * authorized credential profile that this module does not implement.
+ * CODEX_HOME; when a loopback model provider or the platform bridge is
+ * configured it writes only those entries into that fresh home. No user
+ * configuration, credential, session or database of the installed client is
+ * read or reused.
  */
 export function officialCodexLauncher(input: unknown): CodexLauncher {
   const o = object(input),
-    keys = [
+    required = [
       "installation_root",
       "data_root",
       "client_version",
       "executable_sha256",
-    ];
+    ],
+    optional = ["model_provider", "bridge"];
   contract(
-    Object.keys(o).length === keys.length &&
-      keys.every((k) => Object.hasOwn(o, k)),
+    required.every((k) => Object.hasOwn(o, k)) &&
+      Object.keys(o).length <= required.length + optional.length &&
+      Object.keys(o).every((k) => required.includes(k) || optional.includes(k)),
   );
   contract(
     typeof o.installation_root === "string" &&
@@ -577,9 +633,29 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
       isAbsolute(o.data_root),
   );
   contract(label(o.client_version) && fingerprint(o.executable_sha256));
+  if (o.model_provider !== undefined) {
+    const m = object(o.model_provider);
+    contract(
+      Object.keys(m).length === 2 && loopback(m.base_url) && label(m.model),
+    );
+  }
+  if (o.bridge !== undefined) {
+    const b = object(o.bridge);
+    contract(
+      Object.keys(b).length === 2 &&
+        typeof b.config_path === "string" &&
+        isAbsolute(b.config_path) &&
+        typeof b.report_dir === "string" &&
+        isAbsolute(b.report_dir),
+    );
+  }
   const p = structuredClone(o) as unknown as CodexProfile;
   p.installation_root = resolve(p.installation_root);
   p.data_root = resolve(p.data_root);
+  if (p.bridge) {
+    p.bridge.config_path = resolve(p.bridge.config_path);
+    p.bridge.report_dir = resolve(p.bridge.report_dir);
+  }
   const between = relative(p.installation_root, p.data_root);
   contract(
     between !== "" &&
@@ -588,12 +664,13 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
         isAbsolute(between)),
   );
   const executable = join(p.installation_root, "codex.exe");
+  const bridgeEntry = join(import.meta.dirname, "mcp-entry.js");
   const fp = createHash("sha256")
     .update(
       canonical({
         profile: p,
-        protocol: "codex-app-server-candidate/1",
-        policy: "empty-home-initialize-only/1",
+        protocol: "codex-app-server/1",
+        policy: "fresh-home-platform-config-only/1",
       }),
     )
     .digest("hex");
@@ -607,6 +684,13 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
       await unlinked(executable, true);
       if ((await hash(executable)) !== p.executable_sha256)
         throw new AdapterFault("CODEX_CONFIG_CHANGED");
+      if (p.bridge) {
+        // The bridge inputs are re-verified before every launch: a moved file or
+        // directory invalidates the configuration instead of being guessed at.
+        await unlinked(p.bridge.config_path, true);
+        await unlinked(p.bridge.report_dir, false);
+        await unlinked(bridgeEntry, true);
+      }
       if (!stillAuthorized())
         throw new AdapterFault("CODEX_AUTHORIZATION_CHANGED");
       await unlinked(p.data_root, false);
@@ -623,6 +707,29 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
       for (const d of Object.values(dirs)) await mkdir(d);
       const diagnostic = join(root, "stderr.log");
       await writeFile(diagnostic, "", { flag: "wx" });
+      if (p.model_provider || p.bridge) {
+        const config = codexHomeConfig({
+          ...(p.model_provider ? { model_provider: p.model_provider } : {}),
+          ...(p.bridge
+            ? {
+                bridge: {
+                  command: process.execPath,
+                  args: [
+                    bridgeEntry,
+                    "--config",
+                    p.bridge.config_path,
+                    "--report-dir",
+                    p.bridge.report_dir,
+                  ],
+                },
+              }
+            : {}),
+        });
+        contract(config.length > 0);
+        await writeFile(join(dirs.home, "config.toml"), config, {
+          flag: "wx",
+        });
+      }
       if (!stillAuthorized())
         throw new AdapterFault("CODEX_AUTHORIZATION_CHANGED");
       const system = process.env.SystemRoot ?? process.env.SYSTEMROOT;
@@ -656,4 +763,23 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
       });
     },
   });
+}
+async function unlinked(absolute: string, file: boolean) {
+  let current = absolute;
+  while (true) {
+    const s = await lstat(current);
+    if (
+      s.isSymbolicLink() ||
+      (current === absolute && file && (!s.isFile() || s.nlink !== 1))
+    )
+      throw new AdapterFault("CODEX_UNSAFE_PATH");
+    const parent = dirname(current);
+    if (parent === current) break;
+    current = parent;
+  }
+}
+async function hash(filename: string) {
+  const h = createHash("sha256");
+  for await (const chunk of createReadStream(filename)) h.update(chunk);
+  return h.digest("hex");
 }

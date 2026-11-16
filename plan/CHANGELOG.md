@@ -1,3 +1,12 @@
+# W14 Codex真实闭环 · 2026-11-16
+
+- 用本机固定`codex-cli 0.167.0-alpha.3.2`（`codex.exe` SHA-256已固定）完成真实initialize、真实原生thread（UUIDv7，平台只投影摘要）、一条真实turn、一次真实平台只读`task_get`往返：客户端经stdio MCP调用桥，平台HTTP服务返回`draft`，原生agent message复述同一任务ID与状态。
+- 协议事实由客户端自带`app-server generate-json-schema`核实并纠正此前的文档推断：信封无`jsonrpc`成员；`initialize`响应为`{codexHome,platformFamily,platformOs,userAgent}`；`TurnStatus`含`inProgress`且非终态；MCP每server收成一个`namespace`工具，调用需带`namespace`，扁平`mcp__server__tool`被拒。
+- 启动器新增受约束的隔离home配置：只写回环模型端点、平台自己的stdio桥与固定默认值；不复制用户config/凭据/插件/市场/MCP。`thread/start`固定`approvalPolicy:"never"`+read-only，服务器发起请求仍一律拒绝并计数。
+- 真实运行结果：`bridge.initialized=true`、`tool_calls=1`、`tool_errors=0`；turn`completed`；1000次读取零写入；exit0非强制；原12个客户端进程前后不变；隔离home无用户数据。
+- 模型为本地回环Responses桩（无凭据、无外发、无计费）。空home无provider时真实turn诚实失败（默认端点退避重试7次后`failed`），该失败保留。真实厂商模型turn、桌面聊天附着、Windows隔离、原生UI与L1–L3仍NOT_RUN。
+- 合成回归35项（协议11、控制器16、连接器4、启动配置4）；全量474/474、原生14/14、旧包989文件、设计校验通过；250 AT/CA仍NOT_RUN。
+
 # W14 Codex接入合成实现 · 2026-11-16
 
 - 按根 connect.md §6 接手Codex接入。C1只读预检固定MSIX包`OpenAI.Codex 26.1103.4239.0`、CLI `codex.exe`路径/大小/SHA-256、`config.toml`元数据（bearer token未读取未打印）与在运行`ChatGPT.exe`/`codex.exe`清单；二进制静态字符串只作候选依据。

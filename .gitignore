@@ -137,8 +137,10 @@ qa-runtime/
 /evidence/codex/*
 !/evidence/codex/COMPLETION.md
 !/evidence/codex/verification-summary.json
+!/evidence/codex/real-attempt-report.json
 !/evidence/codex/preflight/
 /evidence/codex/preflight/*
 !/evidence/codex/preflight/2026-11-16-readonly/
 /evidence/codex/preflight/2026-11-16-readonly/*
 !/evidence/codex/preflight/2026-11-16-readonly/preflight-summary.json
+!/evidence/codex/preflight/2026-11-16-readonly/schema-summary.json

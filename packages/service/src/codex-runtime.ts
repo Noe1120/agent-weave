@@ -528,13 +528,13 @@ export class CodexRuntimeController {
     const live = entry?.handle?.statistics;
     if (live && state === "ready" && turnState === "requested")
       turnState =
-        live.turn_state === "none"
-          ? "requested"
+        live.turn_state === "completed"
+          ? "completed"
           : live.turn_state === "failed"
             ? "failed"
             : live.turn_state === "interrupted"
               ? "interrupted"
-              : "completed";
+              : "requested";
     return {
       runtime_id: r.id,
       revision: r.revision,
@@ -547,11 +547,12 @@ export class CodexRuntimeController {
       instance_id: r.data.instance_id,
       configuration_fingerprint: r.data.configuration_fingerprint,
       client_version: r.data.client_version,
-      protocol_version: r.data.initialize?.protocol_version ?? null,
       user_agent: r.data.initialize?.user_agent ?? null,
-      declared: r.data.initialize?.declared ?? null,
+      platform_family: r.data.initialize?.platform_family ?? null,
+      platform_os: r.data.initialize?.platform_os ?? null,
       initialize_schema: r.data.initialize?.schema ?? null,
       instruction_profile: r.data.instruction_profile,
+      last_agent_message: live?.last_agent_message ?? null,
       turn: r.data.turn
         ? {
             id_sha256: r.data.turn.id
@@ -681,7 +682,7 @@ export class CodexRuntimeController {
       const handle = entry.handle;
       if (!handle || entry.finished || entry.stopRequested) return;
       const live = handle.statistics.turn_state;
-      if (live !== "none") {
+      if (live === "completed" || live === "failed" || live === "interrupted") {
         const state: CodexTurnState =
           live === "failed"
             ? "failed"

@@ -139,8 +139,9 @@ test("an authorized runtime binds a native thread without a platform session", a
   assert.equal(view.qualification, "UNVERIFIED");
   assert.equal(view.binding_mode, "owned_process");
   assert.equal(view.observation_source, "development_fixture");
-  assert.equal(view.initialize_schema, "candidate/1");
-  assert.equal(view.protocol_version, "0.135.0");
+  assert.equal(view.initialize_schema, "codex-app-server/v1");
+  assert.equal(view.platform_os, "windows");
+  assert.equal(view.platform_family, "windows");
   assert.equal(view.native_thread_sha256?.length, 64);
   assert.equal(view.turn, null);
   assert.ok(Object.values(view.capabilities).every((v) => !v.enabled));

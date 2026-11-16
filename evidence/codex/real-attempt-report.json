@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "stage": "W14 codex app-server real acceptance",
+  "observed_at": "2026-11-16T01:49:52.050Z",
+  "status": "REAL_CODEX_TOOL_ROUND_TRIP_PASS",
+  "what_is_real": [
+    "the installed codex.exe (pinned sha256) as an owned child process",
+    "app-server stdio protocol: initialize, initialized, thread/start, turn/start",
+    "the native thread and native turn identifiers issued by the client",
+    "the platform's stdio MCP read bridge (dist/packages/service/src/mcp-entry.js)",
+    "the platform HTTP service, grant, task resource and task projection",
+    "the tool call executed by the client and the returned task result",
+    "process/exit observation and the isolated CODEX_HOME lifecycle"
+  ],
+  "what_is_stubbed": [
+    "the model: a local loopback Responses-API stub (127.0.0.1) inside this harness"
+  ],
+  "what_is_not_stubbed": [
+    "Codex client",
+    "app-server protocol",
+    "MCP transport",
+    "platform service"
+  ],
+  "client": {
+    "cli_version": "0.167.0-alpha.3.2",
+    "cli_sha256": "4b3286e35d7fe866c6b0eb3f07d7a4cdb5e96489576170dfd6b3a15aa1c67382",
+    "desktop_app": "OpenAI.Codex 26.1103.4239.0 (MSIX)",
+    "platform_family": "windows"
+  },
+  "initialize": {
+    "status": "PASS_REAL",
+    "user_agent_sha256": "e9c752e61cea20beef0541308a8dc7206284accaca228b8478f90f203164ec09",
+    "unrecognized_fields": 0,
+    "schema": "codex-app-server/v1",
+    "frames_out": 2,
+    "exit_code": 0,
+    "forced": false
+  },
+  "native_thread": {
+    "status": "PASS_REAL",
+    "native_thread_sha256": "4e0ced27ea9378e543ebb2c985a0b3552341ffc59d12d22d60edd5633f661c0b",
+    "platform_session_id": null,
+    "progress_reads": 1000,
+    "database_writes_during_reads": 0
+  },
+  "synthetic_turn": {
+    "status": "PASS_REAL_CLIENT_WITH_LOCAL_MODEL_STUB",
+    "turn_id_sha256": "57f2e5f24e1fc569d1fb3c9df3e28e7930b913b47bde5fa671b31fb571e7a831",
+    "final_turn_state": "completed",
+    "native_agent_message_sha256": "83b4bb8ba7cb973cb28eca81c3fe56f8a7b7c2804d44f2037462172055abb646",
+    "native_agent_message_matches_grant_task": true,
+    "refused_server_requests": 0
+  },
+  "platform_read_round_trip": {
+    "bridge_initialized": true,
+    "bridge_tool_calls": 1,
+    "bridge_tool_errors": 0,
+    "bridge_fault": null,
+    "model_rounds": 2,
+    "tool_call_rounds": 1,
+    "tool_output_rounds": 1,
+    "advertised_namespace_tools": [
+      "exec_command",
+      "write_stdin",
+      "list_mcp_resources",
+      "list_mcp_resource_templates",
+      "read_mcp_resource",
+      "request_user_input",
+      "view_image",
+      "multi_agent_v1",
+      "mcp__agent_weave_probe",
+      "get_goal",
+      "create_goal",
+      "update_goal"
+    ],
+    "call_identifier": "mcp__agent_weave_probe/task_get",
+    "final_reply_matches_service": true
+  },
+  "containment": {
+    "user_configuration_used": false,
+    "credentials_supplied": false,
+    "user_sessions_read": false,
+    "existing_client_attached": false,
+    "original_client_processes_unchanged": true,
+    "original_client_process_counts": [
+      12,
+      12
+    ],
+    "model_egress": "loopback only (127.0.0.1); no external provider, no billing"
+  },
+  "negative_observations": [
+    "with an empty CODEX_HOME and no provider, a real turn fails honestly: the client falls back to the default OpenAI Responses WebSocket endpoint, retries 7 times, then reports status failed.",
+    "the client refuses a flat 'mcp__server__tool' call name with 'unsupported call'; the accepted shape is a namespace function_call {namespace:'mcp__<server>', name:'<tool>'}.",
+    "an outer jsonrpc member is tolerated when it is '2.0' and rejected otherwise; this build's own envelopes carry none.",
+    "the client flattened MCP tools into one namespace tool per server, so the tool list is not one function per MCP tool."
+  ],
+  "not_run": [
+    "real vendor-model turn through the user's own provider",
+    "attached_session to the existing desktop chat",
+    "turn/interrupt against a live vendor turn",
+    "Windows isolation",
+    "native UI and click acceptance"
+  ],
+  "qualification": "UNVERIFIED",
+  "author_self_review": true,
+  "independent_review": false
+}
