@@ -1,5 +1,7 @@
 # 群聊式 Agent 协作平台：实施设计包 v1.6
 
+当前W20已获新的一次真实Codex联合验收授权，范围及失败不重试限制见[阶段计划](W20-CODEX-JOINT-ACCEPTANCE.md)。实时结果以根README为准，以下W19及更早段落是历史状态，不再重复索取已批准的同一授权。
+
 当前增量：[W19 控制器只读观测桥](W19-CONTROLLER-OBSERVATION.md)，仅Codex开发夹具，将已持有句柄的状态接到W17授权；无turn/模型调用。真实原客户端联合验收仍需新的具体授权，Windows隔离暂缓，管家不构建。
 
 最新入口：[W18 主人连接诊断与重新邀请](W18-CONNECTION-REINVITE.md)。扩展登记原因与原子重新邀请，不恢复旧任务授权，不把登记状态当真实客户端健康。实时进展在根README，HANDOFF.md继续冻结。

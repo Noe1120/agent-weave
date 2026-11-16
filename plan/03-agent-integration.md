@@ -216,6 +216,8 @@ C0 使用预先获准的最小合成数据，分别验证文本、tool call ID/�
 
 ## 15. v1.6 联合兼容验证登记
 
+W20限定实施：W19默认仍只接受开发夹具；受信进程内可另提供绑定connection/task/configuration/5分钟有效期的单次`synthetic_only`验收许可，允许既有官方Codex控制器将自有thread观测接入W17。许可不是数据分类器，必须由可信装配生成独立合成资源；不是主人HTTP自证外发许可。固定任务仅一次turn，凭据不提供控制面权限。验收专用回环relay仅在W17授权就绪后代理一个固定任务GET，不进入产品服务公共接口。真实验收需将登记撤销、旧grant拒绝、控制grant撤销与确证退出放在同次运行内；未完成前不能拼接历史结果。见[W20](W20-CODEX-JOINT-ACCEPTANCE.md)。
+
 按 12 §2 和 validation/compatibility-matrix.json 填写实际版本/build/摘要、账号匿名引用、启动身份、目录/网络/插件/shell 配置、工具链及统一 fingerprint。三原客户端逐项验证同一部署下的任务响应、私密隔离、受控写入、等待回复、不中断进度、真实撤写与恢复，不能拼接宽权限成功与受限权限安全结果。管家 API 记录独立，不替代 Claude Desktop 或其他原客户端。
 
 UNKNOWN/NOT_RUN 不形成资格；LIMITED 列出人工步骤及禁用能力。配置变化使原资格待复验；无法满足用户指定代码职责时完整目标 G0=BLOCKED。所有实际凭据留在原安全存储，不填入方案模板。

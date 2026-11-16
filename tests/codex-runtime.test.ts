@@ -230,6 +230,66 @@ test("observation factory refuses official sources and unstarted runtimes withou
   );
   assert.equal(f.launched(), 1);
 });
+
+test("explicit pinned official synthetic acceptance permits observation but only one task turn", async (t) => {
+  const f = setup(t);
+  Object.assign(f.launcher, { source: "official_codex" });
+  await f.c.start(f.token, f.start());
+  const connection = id(),
+    permit = {
+      connection_id: connection,
+      task_id: f.ids.task,
+      configuration_fingerprint: f.launcher.fingerprint,
+      expires_at: new Date(f.now() + 300000).toISOString(),
+      data_class: "synthetic_only" as const,
+      max_turns: 1 as const,
+    };
+  const observe = f.c.connectionObserver(
+    f.token,
+    f.ids.project,
+    f.binding,
+    connection,
+    permit,
+  );
+  assert.equal(observe(connection)?.state, "active");
+  await f.c.turn(f.token, f.turn());
+  await until(() => f.view().turn?.state === "completed");
+  assert.equal(await fault(f.c.turn(f.token, f.turn())), "NOT_FOUND_OR_DENIED");
+  f.advance(300000);
+  assert.equal(observe(connection), undefined);
+});
+
+for (const bad of ["connection", "task", "config", "expiry", "extra", "turns"])
+  test(`official observation permit rejects ${bad}`, async (t) => {
+    const f = setup(t);
+    Object.assign(f.launcher, { source: "official_codex" });
+    await f.c.start(f.token, f.start());
+    const connection = id(),
+      permit: any = {
+        connection_id: connection,
+        task_id: f.ids.task,
+        configuration_fingerprint: f.launcher.fingerprint,
+        expires_at: new Date(f.now() + 300000).toISOString(),
+        data_class: "synthetic_only",
+        max_turns: 1,
+      };
+    if (bad === "connection") permit.connection_id = id();
+    if (bad === "task") permit.task_id = id();
+    if (bad === "config") permit.configuration_fingerprint = "b".repeat(64);
+    if (bad === "expiry") permit.expires_at = new Date(f.now()).toISOString();
+    if (bad === "extra") permit.allow_private = true;
+    if (bad === "turns") permit.max_turns = 2;
+    assert.throws(() =>
+      f.c.connectionObserver(
+        f.token,
+        f.ids.project,
+        f.binding,
+        connection,
+        permit,
+      ),
+    );
+    assert.equal(f.view().turn, null);
+  });
 test("controller connection observer checks owned native thread without starting turns or writing", async (t) => {
   const f = setup(t);
   await f.c.start(f.token, f.start());

@@ -1,10 +1,22 @@
 # Team · 原生 Windows 工作台
 
+## 当前构建 · W20（真实只读/撤权闭环已验证，严格收尾验收未通过）
+
+用户同意沿用现有CC Switch路由、必要凭据复用至新隔离home、一个自有Codex实例、最多一次合成task_get turn、联合撤权/退出/清理；30,000 tokens软停止，失败不付费重试。不动已有实例/历史/全局配置，不改HANDOFF.md。先零成本回归与只读本机配置摘要核对，再消耗本次授权；金额UNKNOWN。
+
+已完成一次真实原客户端/真实模型运行：邀请→兑换→自有thread→W17最小任务grant→task_get恰好1次、0工具错误→原生复述同task与draft→turn completed→撤销连接后旧task授权拒绝→撤销控制grant后closed、exit0、非强制。用量18,205 tokens（输入18,087/输出118），金额UNKNOWN，未触发30,000软阈值。原12个客户端进程清单与原配置摘要未变，删除2份配置副本，限定目录扫描2,524文件零凭据残留。
+
+**严格判定仍FAILED：** MCP桥的最终记录`stdin_eof=false`。宿主退出不等于桥优雅收尾；后续只读复查没有本次bridge进程、报告也未更新。已用零费用本项目MCP子进程对照验证：stdin.end正常留下EOF，强制终止留下false；实际厂商内部如何终止子进程尚无直接证据，不能冒称已证明根因或改PASS。授权已消耗，未追加原客户端启动/模型turn。详见[W20](plan/W20-CODEX-JOINT-ACCEPTANCE.md)及[证据](evidence/codex-joint/COMPLETION.md)。下一决策是是否另行授权**无模型**的自有Codex thread＋MCP退出诊断；现阶段不自动重跑计费验收。
+
+预检另修复Windows JSON UTF-8 BOM解析问题，保留启动前失败记录（0客户端/0turn）；独占marker已移到实际start前，修复后才执行上述唯一真实turn。原失败报告的source_config_unchanged=false来自未采集摘要，不是原配置被改写；不覆盖旧证据。HANDOFF.md保持不变。
+
+最终回归：`npm run verify` **608/608**，0失败/0跳过；原生14+1、旧包989文件、P0 13项、设计59文件/58摘要通过。合成通过不覆盖上述真实桥EOF失败。
+
 ## 当前阶段 · W19（控制器观测桥合成集成已完成）
 
 已有Codex控制器→W17只读授权的观测桥已完成合成集成：固定所属instance/thread，逐次校验实际控制器持有的夹具进程状态，不发turn。全量595/595（0失败/0跳过，本阶段新增13项），相关专项77项、编译HTTP走查、原生14+1、旧包989文件、P0文档13项和设计校验通过。修复了同步观测跨毫秒导致误判未来时间的问题，保留未来/过期检查。仅development_fixture，真实客户端模式明确拒绝；不是上线资格。W18已发布e010ee9，HANDOFF.md保持不变。见[W19](plan/W19-CONTROLLER-OBSERVATION.md)与[证据](evidence/controller-observation/COMPLETION.md)。
 
-当前接入方向的下一门槛需要用户具体授权：同固定Codex/CC Switch配置，新隔离home、自有原客户端实例、一次合成只读task_get、联合撤权/退出与凭据清理；需要单次token上限与明确凭据复用授权。此前单次授权已使用，本轮没有重新调用。DSH/Claude长期控制器、Windows隔离、真实点击、生产灾备和签名升级仍未完成；管家仍暂停。
+以上W19描述保留历史范围；W20新增单次受信验收许可并实际运行，当前结果见本页顶部。DSH/Claude长期控制器、Windows隔离、真实点击、生产灾备和签名升级仍未完成；管家仍暂停。
 
 ## 当前阶段 · W18（登记诊断与重新邀请已完成）
 

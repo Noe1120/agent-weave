@@ -11,7 +11,7 @@
     "generate:check": "node scripts/generate-contracts.mjs --check",
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.build.json && node scripts/copy-assets.mjs",
-    "test": "node --test --test-concurrency=2 tests/*.test.ts",
+    "test": "node --test --test-concurrency=2 tests/*.test.ts tests/codex-joint-support.test.mjs",
     "verify": "npm run generate:check && npm run format:check && npm run typecheck && npm run check:web && npm test && npm run build && npm run test:smoke",
     "start": "node dist/packages/service/src/main.js",
     "test:smoke": "node tests/build-smoke.mjs",

@@ -40,6 +40,14 @@ export type CodexState =
   | "unknown";
 export type CodexTurnState =
   "none" | "requested" | "completed" | "failed" | "interrupted" | "unknown";
+export interface CodexSyntheticAcceptance {
+  connection_id: string;
+  task_id: string;
+  configuration_fingerprint: string;
+  expires_at: string;
+  data_class: "synthetic_only";
+  max_turns: 1;
+}
 export interface CodexRuntimeData {
   target: "codex";
   mode: "app_server_thread";
@@ -192,6 +200,7 @@ export class CodexRuntimeController {
   private readonly monitor?: NodeJS.Timeout;
   private readonly turnMs: number;
   private disposed = false;
+  private readonly acceptance = new Map<string, CodexSyntheticAcceptance>();
   constructor(
     store: Store,
     launcher: CodexLauncher,
@@ -508,19 +517,51 @@ export class CodexRuntimeController {
     project: string,
     runtimeId: string,
     connectionId: string,
+    permit?: CodexSyntheticAcceptance,
   ) {
     contract(uuid(connectionId));
     const initial = this.context(token, project);
     if (initial.grant.connection_constraint) fail("NOT_FOUND_OR_DENIED");
     const first = this.read(token, project, runtimeId);
+    if (permit) {
+      contract(
+        Object.keys(permit).sort().join() ===
+          [
+            "connection_id",
+            "task_id",
+            "configuration_fingerprint",
+            "expires_at",
+            "data_class",
+            "max_turns",
+          ]
+            .sort()
+            .join(),
+      );
+      if (
+        this.acceptance.has(runtimeId) ||
+        first.turn ||
+        permit.connection_id !== connectionId ||
+        permit.configuration_fingerprint !== this.launcher.fingerprint ||
+        permit.data_class !== "synthetic_only" ||
+        permit.max_turns !== 1 ||
+        !Number.isFinite(Date.parse(permit.expires_at)) ||
+        Date.parse(permit.expires_at) <= this.now() ||
+        Date.parse(permit.expires_at) > this.now() + 300000
+      )
+        fail("NOT_FOUND_OR_DENIED");
+      requireResource(this.store, initial, permit.task_id, "task");
+    }
+    const source = this.launcher.source;
     if (
-      this.launcher.source !== "development_fixture" ||
-      first.observation_source !== "development_fixture" ||
+      (source !== "development_fixture" && !permit) ||
+      first.observation_source !== source ||
       first.state !== "ready" ||
       !first.native_thread_sha256 ||
       initial.run.state !== "active"
     )
       fail("NOT_FOUND_OR_DENIED");
+    if (permit) this.acceptance.set(runtimeId, structuredClone(permit));
+    const pinnedPermit = this.acceptance.get(runtimeId);
     const snapshot = canonical(initial.grant);
     return (requestedConnection: string): ConnectionObservation | undefined => {
       if (requestedConnection !== connectionId) return undefined;
@@ -533,8 +574,10 @@ export class CodexRuntimeController {
         view.instance_id !== first.instance_id ||
         view.native_thread_sha256 !== first.native_thread_sha256 ||
         view.configuration_fingerprint !== first.configuration_fingerprint ||
-        view.observation_source !== "development_fixture" ||
-        this.launcher.source !== "development_fixture"
+        view.observation_source !== source ||
+        this.launcher.source !== source ||
+        (pinnedPermit !== undefined &&
+          Date.parse(pinnedPermit.expires_at) <= this.now())
       )
         return undefined;
       return {
@@ -677,6 +720,16 @@ export class CodexRuntimeController {
         resource = this.runtime(ctx, r.runtime_id);
       const cached = this.replay(ctx, r.action_id, { operation: "turn", ...r });
       if (cached) return cached;
+      const permit = this.acceptance.get(r.runtime_id);
+      if (
+        permit &&
+        (resource.data.turn !== null ||
+          r.task_id !== permit.task_id ||
+          Date.parse(permit.expires_at) <= this.now() ||
+          resource.data.configuration_fingerprint !==
+            permit.configuration_fingerprint)
+      )
+        fail("NOT_FOUND_OR_DENIED");
       // The synthetic task is fixed by the trusted grant; a caller cannot widen it.
       if (!ctx.grant.resource_ids.includes(r.task_id))
         fail("NOT_FOUND_OR_DENIED");

@@ -1459,6 +1459,7 @@
     "W17-CONNECTION-TASK-ACCESS.md",
     "W18-CONNECTION-REINVITE.md",
     "W19-CONTROLLER-OBSERVATION.md",
+    "W20-CODEX-JOINT-ACCEPTANCE.md",
     "WINDOWS-ISOLATION-DECISION.md",
     "contracts/core.schema.json",
     "contracts/error-mapping.json",
