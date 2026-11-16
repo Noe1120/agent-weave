@@ -1,6 +1,7 @@
 import type { Store } from "./store.ts";
 import type { Action, Context, Grant, Resource } from "./domain.ts";
 import { fail, TransportFault } from "./errors.ts";
+import { requireConnectionGuard } from "./connection-grant-guard.ts";
 export function authenticate(
   store: Store,
   token: string,
@@ -20,6 +21,7 @@ export function authorizeGrant(
   now: number,
 ): Context {
   if (grant.project_id !== project) fail("NOT_FOUND_OR_DENIED");
+  requireConnectionGuard(store, grant, now);
   if (
     grant.state !== "active" ||
     !Number.isFinite(Date.parse(grant.expires_at)) ||

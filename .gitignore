@@ -154,6 +154,9 @@ qa-runtime/
 !/evidence/connection-registration/
 /evidence/connection-registration/*
 !/evidence/connection-registration/COMPLETION.md
+!/evidence/connection-task-access/
+/evidence/connection-task-access/*
+!/evidence/connection-task-access/COMPLETION.md
 !/evidence/codex/vendor-attempt-report.json
 !/evidence/codex/preflight/
 /evidence/codex/preflight/*

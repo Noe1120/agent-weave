@@ -237,6 +237,11 @@ export class ConnectionRegistry {
       reject(401, "CONNECTION_CREDENTIAL_INVALID");
     return this.view(r);
   }
+  /** Trusted in-process authorization metadata only; no credential or native identity. */
+  registered(id: string) {
+    const r = this.load(id);
+    return r && this.state(r) === "registered" ? this.view(r) : undefined;
+  }
   list(owner: string, project: string) {
     this.w.auth.authorize(owner);
     if (!uuid(project)) reject(400, "INVALID_REQUEST");

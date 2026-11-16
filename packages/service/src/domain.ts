@@ -38,6 +38,12 @@ export interface Run {
   state: "active" | "unknown" | "closed";
 }
 export interface Grant {
+  connection_constraint?: {
+    connection_id: string;
+    connection_revision: string;
+    task_id: string;
+    data_class: "synthetic_only";
+  };
   id: string;
   project_id: string;
   member_id: string;
