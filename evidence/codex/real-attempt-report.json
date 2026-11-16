@@ -1,8 +1,8 @@
 {
-  "schema": 1,
+  "schema": 2,
   "stage": "W14 codex app-server real acceptance",
-  "observed_at": "2026-11-16T01:49:52.050Z",
-  "status": "REAL_CODEX_TOOL_ROUND_TRIP_PASS",
+  "observed_at": "2026-11-16T03:12:22.758Z",
+  "status": "PASS_REAL_CLIENT_WITH_LOCAL_MODEL_STUB",
   "what_is_real": [
     "the installed codex.exe (pinned sha256) as an owned child process",
     "app-server stdio protocol: initialize, initialized, thread/start, turn/start",
@@ -103,5 +103,56 @@
   ],
   "qualification": "UNVERIFIED",
   "author_self_review": true,
-  "independent_review": false
+  "independent_review": false,
+  "levels": [
+    {
+      "level": "initialize",
+      "mode": "initialize",
+      "status": "UNVERIFIED",
+      "level_status": "PASS",
+      "checks": 4,
+      "evidence_directory": ".runtime/acc-L1-initialize-20261116-121154 (local, not published)"
+    },
+    {
+      "level": "native thread + bridge",
+      "mode": "thread",
+      "status": "UNVERIFIED",
+      "level_status": "PASS",
+      "checks": 14,
+      "evidence_directory": ".runtime/acc-L2-thread-20261116-121154 (local, not published)"
+    },
+    {
+      "level": "turn + platform tool round trip",
+      "mode": "stub",
+      "status": "PASS_REAL_CLIENT_WITH_LOCAL_MODEL_STUB",
+      "level_status": "PASS",
+      "checks": 19,
+      "bridge_tool_calls": 1,
+      "bridge_tool_errors": 0,
+      "native_message_carried_task": true,
+      "evidence_directory": ".runtime/acc-L3-stub-20261116-121154 (local, not published)"
+    }
+  ],
+  "vendor_mode": {
+    "status": "FAILED_AT_MODEL_TOOL_SELECTION",
+    "checks": 18,
+    "bridge_tool_calls": 0,
+    "tokens": 17865,
+    "evidence": "evidence/codex/vendor-attempt-report.json"
+  },
+  "status_vocabulary": [
+    "PASS_REAL_CLIENT_WITH_LOCAL_MODEL_STUB",
+    "PASS_REAL_VENDOR_TOOL_ROUND_TRIP",
+    "FAILED_AT_MODEL_TOOL_SELECTION",
+    "FAILED_AT_HARNESS",
+    "FAILED_AT_PROTOCOL",
+    "NOT_RUN",
+    "UNVERIFIED",
+    "UNKNOWN"
+  ],
+  "model": "local loopback Responses stub for the passing round trip; the vendor route was attempted separately and failed",
+  "cost": {
+    "tokens_recorded_for_vendor_attempts": 160090,
+    "money": "UNKNOWN"
+  }
 }

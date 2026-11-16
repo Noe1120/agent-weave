@@ -1,4 +1,4 @@
-import test, { type TestContext } from "node:test";
+﻿import test, { type TestContext } from "node:test";
 import assert from "node:assert/strict";
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { resolve } from "node:path";
@@ -304,4 +304,160 @@ test("only the fixed controller methods exist, with no generic RPC passthrough",
     "synthetic_task_get/1",
   ])
     assert.equal(source.includes(required), true, required);
+});
+
+// ---- multi-turn state isolation and the unknown re-dispatch boundary ----
+
+test("a second turn without its own terminal is never shown as completed", async (t) => {
+  const f = setup(t, "second-turn-silent", { turnMs: 350 });
+  await f.c.start(f.token, f.start());
+  await f.c.turn(f.token, f.turn());
+  await until(() => f.view().turn?.state === "completed");
+  const first = f.view();
+  assert.equal(first.turn?.state, "completed");
+  assert.ok(first.last_agent_message);
+
+  await f.c.turn(f.token, f.turn());
+  // Its own terminal event never arrives, so it must time out into unknown.
+  f.advance(400);
+  await until(() => f.view().turn?.state === "unknown");
+  const second = f.view();
+  assert.equal(second.fault, "CODEX_TURN_UNKNOWN");
+  assert.notEqual(second.turn?.state, "completed");
+  assert.equal(second.last_agent_message, null);
+  assert.equal(second.token_usage, null);
+  assert.ok((second.turn?.generation ?? 0) > (first.turn?.generation ?? 0));
+});
+test("a late terminal from the previous turn cannot complete the new one", async (t) => {
+  const f = setup(t, "late-first-terminal", { turnMs: 400 });
+  await f.c.start(f.token, f.start());
+  await f.c.turn(f.token, f.turn());
+  await until(() => f.view().turn?.state === "completed");
+  await f.c.turn(f.token, f.turn());
+  f.advance(500);
+  await until(() => f.view().turn?.state === "unknown");
+  // The stale terminal event arrives just after the timeout; wait for it to be
+  // counted instead of racing it.
+  await until(() => (f.view().turn?.stale_terminal_notifications ?? 0) >= 1);
+  const view = f.view();
+  assert.equal(view.fault, "CODEX_TURN_UNKNOWN");
+  assert.equal(view.last_agent_message, null);
+  assert.ok(
+    (view.turn?.stale_terminal_notifications ?? 0) >= 1,
+    "the late terminal event was not recorded as stale",
+  );
+});
+test("two turns keep separate generations, ids and evidence", async (t) => {
+  const f = setup(t, "two-turns-ok", { turnMs: 2000 });
+  await f.c.start(f.token, f.start());
+  await f.c.turn(f.token, f.turn());
+  await until(() => f.view().turn?.state === "completed");
+  const first = f.view();
+  await f.c.turn(f.token, f.turn());
+  await until(() => f.view().turn?.state === "completed");
+  const second = f.view();
+  assert.equal(
+    (second.turn?.generation ?? 0) > (first.turn?.generation ?? 0),
+    true,
+  );
+  assert.notEqual(second.turn?.id_sha256, first.turn?.id_sha256);
+  assert.notEqual(second.last_agent_message, first.last_agent_message);
+  assert.match(second.last_agent_message ?? "", /cccc/);
+});
+test("an unknown turn blocks every new turn until the run is rebuilt", async (t) => {
+  const f = setup(t, "turn-hang", { turnMs: 300 });
+  await f.c.start(f.token, f.start());
+  await f.c.turn(f.token, f.turn());
+  f.advance(400);
+  await until(() => f.view().turn?.state === "unknown");
+  assert.equal(f.view().state, "ready");
+  // A brand new action id, the current revision and the same runtime id are all
+  // refused: the unknown native turn may still be running.
+  assert.equal(
+    await fault(f.c.turn(f.token, f.turn())),
+    "CODEX_RECONCILIATION_REQUIRED",
+  );
+  assert.equal(
+    await fault(f.c.turn(f.token, f.turn())),
+    "CODEX_RECONCILIATION_REQUIRED",
+  );
+  // Reading progress is still allowed and still shows unknown, never completed.
+  assert.equal(f.view().turn?.state, "unknown");
+  assert.equal(f.view().state, "ready");
+  // Closing is the reconciliation path: the owned process must exit for real.
+  await f.close();
+  const closed = f.view();
+  assert.equal(closed.state, "closed");
+  assert.equal(closed.exit?.exit_observed, true);
+  assert.equal(closed.turn?.state, "unknown");
+});
+test("a rebuilt runtime after a reconciled close can run a new turn", async (t) => {
+  const f = setup(t, "two-turns-ok", { requestMs: 2000, turnMs: 2000 });
+  await f.c.start(f.token, f.start());
+  await f.c.turn(f.token, f.turn());
+  await until(() => f.view().turn?.state === "completed");
+  await f.close();
+  const closed = f.view();
+  assert.equal(closed.state, "closed");
+  assert.equal(closed.exit?.exit_observed, true);
+
+  // A second runtime is a new owned process, not a reused unknown one.
+  const second = id();
+  f.p.resource_ids.push(second);
+  f.g.resource_ids.push(second);
+  f.s.putPolicy(f.p);
+  f.s.updateGrant(f.g);
+  const launcher = f.launcher;
+  await f.c.start(f.token, {
+    project_id: f.ids.project,
+    runtime_id: second,
+    scope_id: f.ids.scope,
+    action_id: id(),
+    expected_revision: "0",
+    configuration_fingerprint: launcher.fingerprint,
+  });
+  const view = f.c.read(f.token, f.ids.project, second);
+  assert.equal(view.state, "ready");
+  assert.equal(view.turn, null);
+  await f.c.turn(f.token, {
+    project_id: f.ids.project,
+    runtime_id: second,
+    action_id: id(),
+    expected_revision: view.revision,
+    instruction_profile: "synthetic_task_get/1",
+    task_id: f.ids.task,
+  });
+  await until(
+    () => f.c.read(f.token, f.ids.project, second).turn?.state === "completed",
+  );
+  assert.equal(
+    f.c.read(f.token, f.ids.project, second).turn?.state,
+    "completed",
+  );
+});
+test("a new controller instance cannot bypass an unknown turn", async (t) => {
+  const f = setup(t, "turn-hang", { turnMs: 300 });
+  await f.c.start(f.token, f.start());
+  await f.c.turn(f.token, f.turn());
+  f.advance(400);
+  await until(() => f.view().turn?.state === "unknown");
+  const other = new CodexRuntimeController(f.s, f.launcher, { now: f.now });
+  t.after(async () => other.dispose());
+  const view = other.read(f.token, f.ids.project, f.binding);
+  assert.equal(view.state, "unknown");
+  assert.equal(view.turn?.state, "unknown");
+  // It does not own the process, so it may not dispatch either.
+  assert.equal(
+    await fault(
+      other.turn(f.token, {
+        project_id: f.ids.project,
+        runtime_id: f.binding,
+        action_id: id(),
+        expected_revision: view.revision,
+        instruction_profile: "synthetic_task_get/1",
+        task_id: f.ids.task,
+      }),
+    ),
+    "CODEX_OWNER_UNKNOWN",
+  );
 });

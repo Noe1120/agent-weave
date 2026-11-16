@@ -57,7 +57,14 @@ export interface CodexRuntimeData {
   thread_sha256: string | null;
   instruction_profile: "synthetic_task_get/1" | null;
   instruction_task_id: string | null;
-  turn: { id: string | null; state: CodexTurnState } | null;
+  turn: {
+    id: string | null;
+    generation: number;
+    state: CodexTurnState;
+    started_at: string;
+    completed_at: string | null;
+    stale_terminal_notifications: number;
+  } | null;
   fault: string | null;
   exit: CodexExit | null;
 }
@@ -110,6 +117,11 @@ interface Owned {
 }
 const active = (state: CodexState) =>
   ["starting", "ready", "turning", "closing"].includes(state);
+function generationOf(
+  resource: Resource<CodexRuntimeData> | undefined,
+): number | null {
+  return resource?.data.turn?.generation ?? null;
+}
 /** The only instruction this module can ever send. The task id comes from the grant. */
 export function syntheticInstruction(taskId: string): string {
   // Two real surfaces. In code mode the client's own `functions.exec` contract
@@ -532,19 +544,18 @@ export class CodexRuntimeController {
       state = "unknown";
       fault = "CODEX_PERSISTENCE";
     }
-    // The live native turn projection wins over the persisted copy while this
-    // controller holds the handle; a requested turn without a terminal event
-    // stays requested and never becomes a completed turn.
+    // The persisted turn state is authoritative: only the controller's own
+    // reconciliation writes a terminal value, so a reader can never see
+    // "completed" before the store holds it. Live facts are used solely to prove
+    // that the turn being reported is the same generation this platform opened;
+    // facts from an earlier generation are ignored outright.
     const live = entry?.handle?.statistics;
-    if (live && state === "ready" && turnState === "requested")
-      turnState =
-        live.turn_state === "completed"
-          ? "completed"
-          : live.turn_state === "failed"
-            ? "failed"
-            : live.turn_state === "interrupted"
-              ? "interrupted"
-              : "requested";
+    const facts = live?.turn;
+    const sameTurn =
+      facts !== undefined &&
+      facts !== null &&
+      r.data.turn !== null &&
+      facts.generation === r.data.turn.generation;
     return {
       runtime_id: r.id,
       revision: r.revision,
@@ -562,14 +573,23 @@ export class CodexRuntimeController {
       platform_os: r.data.initialize?.platform_os ?? null,
       initialize_schema: r.data.initialize?.schema ?? null,
       instruction_profile: r.data.instruction_profile,
-      last_agent_message: live?.last_agent_message ?? null,
-      token_usage: live?.token_usage ?? null,
+      last_agent_message: sameTurn ? (facts?.last_agent_message ?? null) : null,
+      token_usage: sameTurn ? (facts?.token_usage ?? null) : null,
       turn: r.data.turn
         ? {
             id_sha256: r.data.turn.id
               ? createHash("sha256").update(r.data.turn.id).digest("hex")
               : null,
+            generation: r.data.turn.generation,
             state: turnState,
+            started_at: r.data.turn.started_at,
+            completed_at: r.data.turn.completed_at,
+            stale_terminal_notifications: sameTurn
+              ? Math.max(
+                  r.data.turn.stale_terminal_notifications,
+                  facts?.stale_terminal_notifications ?? 0,
+                )
+              : r.data.turn.stale_terminal_notifications,
           }
         : null,
       statistics: live
@@ -579,6 +599,8 @@ export class CodexRuntimeController {
             notifications: live.notifications,
             unknown_notifications: [...live.unknown_notifications],
             refused_server_requests: live.refused_server_requests,
+            turns_terminal: live.turns_terminal,
+            generation: live.generation,
           }
         : null,
       observed_at: r.data.observed_at,
@@ -618,13 +640,20 @@ export class CodexRuntimeController {
       )
         throw new AdapterFault("CODEX_OWNER_UNKNOWN");
       if (entry.persistenceFault) throw new AdapterFault("CODEX_PERSISTENCE");
+      const previous = resource.data.turn;
+      // An unknown native turn may still be running: no new turn, no new
+      // action_id, no new revision may bypass it. Only a reconciled close (or a
+      // rebuilt runtime) ends that state.
+      if (previous?.state === "unknown")
+        throw new AdapterFault("CODEX_RECONCILIATION_REQUIRED");
       // A live turn blocks a second one even while its acknowledgement is still
       // in flight, so the state check cannot be the only guard.
-      if (resource.data.turn && resource.data.turn.state === "requested")
-        throw new AdapterFault("CODEX_BUSY");
+      if (previous?.state === "requested") throw new AdapterFault("CODEX_BUSY");
       if (resource.data.state !== "ready")
         throw new AdapterFault("CODEX_STATE");
       taskId = r.task_id;
+      const startedAt = new Date(this.now()).toISOString();
+      const generation = (previous?.generation ?? 0) + 1;
       const updated: Resource<CodexRuntimeData> = {
         ...resource,
         revision: nextRevision(resource.revision),
@@ -633,8 +662,15 @@ export class CodexRuntimeController {
           state: "turning",
           instruction_profile: "synthetic_task_get/1",
           instruction_task_id: r.task_id,
-          turn: { id: null, state: "requested" },
-          observed_at: new Date(this.now()).toISOString(),
+          turn: {
+            id: null,
+            generation,
+            state: "requested",
+            started_at: startedAt,
+            completed_at: null,
+            stale_terminal_notifications: 0,
+          },
+          observed_at: startedAt,
         },
       };
       this.store.putResource(updated);
@@ -644,20 +680,27 @@ export class CodexRuntimeController {
       });
     });
     const owned = entry;
-    if (owned) this.execute(owned, taskId);
+    const deadline = this.now() + this.turnMs;
+    if (owned)
+      this.execute(owned, taskId, generationOf(this.current(owned)), deadline);
     return receipt;
   }
   /** One fire-and-forget turn per accepted action; unknown results are never retried. */
-  private execute(entry: Owned, taskId: string) {
+  private execute(
+    entry: Owned,
+    taskId: string,
+    generation: number | null,
+    deadline: number,
+  ) {
     void (async () => {
       const handle = entry.handle;
       const current = () => this.current(entry);
       const thread = current()?.data.thread;
-      if (!handle || !thread) {
+      if (!handle || !thread || generation === null) {
         this.record(entry, {
           state: "unknown",
           fault: "CODEX_OWNER_UNKNOWN",
-          turn: { id: null, state: "unknown" },
+          turn: this.turnPatch(entry, "unknown", generation, null),
         });
         return;
       }
@@ -668,7 +711,7 @@ export class CodexRuntimeController {
         );
         this.record(entry, {
           state: "ready",
-          turn: { id: nativeTurn, state: "requested" },
+          turn: this.turnPatch(entry, "requested", generation, nativeTurn),
         });
       } catch (error) {
         const code = error instanceof AdapterFault ? error.code : "CODEX_TURN";
@@ -676,42 +719,66 @@ export class CodexRuntimeController {
         this.record(entry, {
           state: "ready",
           fault: code,
-          turn: {
-            id: null,
-            state: /_TIMEOUT$/.test(code) ? "unknown" : "failed",
-          },
+          turn: this.turnPatch(
+            entry,
+            /_TIMEOUT$/.test(code) ? "unknown" : "failed",
+            generation,
+            null,
+          ),
         });
         return;
       }
-      this.awaitTurn(entry);
+      this.awaitTurn(entry, generation, deadline);
     })();
   }
-  private awaitTurn(entry: Owned) {
-    const deadline = this.now() + this.turnMs;
+  private awaitTurn(entry: Owned, generation: number, deadline: number) {
     clearTimeout(entry.turnTimer);
     const poll = () => {
       const handle = entry.handle;
       if (!handle || entry.finished || entry.stopRequested) return;
-      const live = handle.statistics.turn_state;
-      if (live === "completed" || live === "failed" || live === "interrupted") {
-        const state: CodexTurnState =
-          live === "failed"
-            ? "failed"
-            : live === "interrupted"
-              ? "interrupted"
-              : "completed";
-        this.record(entry, {
-          state: "ready",
-          turn: this.turnPatch(entry, state),
-        });
-        return;
+      const facts = handle.statistics.turn;
+      // Foreign generations are ignored outright: they belong to an earlier turn
+      // and must not decide this one.
+      if (facts && facts.generation === generation) {
+        if (
+          facts.state === "completed" ||
+          facts.state === "failed" ||
+          facts.state === "interrupted"
+        ) {
+          const state: CodexTurnState =
+            facts.state === "failed"
+              ? "failed"
+              : facts.state === "interrupted"
+                ? "interrupted"
+                : "completed";
+          this.record(entry, {
+            state: "ready",
+            fault: null,
+            turn: this.turnPatch(
+              entry,
+              state,
+              generation,
+              facts.turn_id,
+              facts.stale_terminal_notifications,
+            ),
+          });
+          return;
+        }
       }
       if (this.now() >= deadline) {
         entry.turnTimeouts++;
         this.record(entry, {
           state: "ready",
           fault: "CODEX_TURN_UNKNOWN",
-          turn: this.turnPatch(entry, "unknown"),
+          turn: this.turnPatch(
+            entry,
+            "unknown",
+            generation,
+            facts && facts.generation === generation ? facts.turn_id : null,
+            facts && facts.generation === generation
+              ? facts.stale_terminal_notifications
+              : 0,
+          ),
         });
         return;
       }
@@ -719,9 +786,27 @@ export class CodexRuntimeController {
     };
     poll();
   }
-  private turnPatch(entry: Owned, state: CodexTurnState) {
+  private turnPatch(
+    entry: Owned,
+    state: CodexTurnState,
+    generation: number | null,
+    id: string | null,
+    stale = 0,
+  ) {
     const r = this.current(entry);
-    return { id: r?.data.turn?.id ?? null, state };
+    const previous = r?.data.turn;
+    return {
+      id: id ?? previous?.id ?? null,
+      generation: generation ?? previous?.generation ?? 0,
+      state,
+      started_at: previous?.started_at ?? new Date(this.now()).toISOString(),
+      completed_at:
+        state === "completed" || state === "failed" || state === "interrupted"
+          ? new Date(this.now()).toISOString()
+          : null,
+      stale_terminal_notifications:
+        stale + (previous?.stale_terminal_notifications ?? 0),
+    };
   }
   async interrupt(token: string, value: unknown): Promise<Receipt> {
     const r = requestOf(value, "revision") as RevisionRequest;
@@ -745,6 +830,8 @@ export class CodexRuntimeController {
       )
         throw new AdapterFault("CODEX_OWNER_UNKNOWN");
       const turn = resource.data.turn;
+      if (turn?.state === "unknown")
+        throw new AdapterFault("CODEX_RECONCILIATION_REQUIRED");
       if (!resource.data.thread || !turn || turn.state !== "requested")
         throw new AdapterFault("CODEX_STATE");
       if (!turn.id) throw new AdapterFault("CODEX_TURN_UNKNOWN");
@@ -755,7 +842,7 @@ export class CodexRuntimeController {
         data: {
           ...resource.data,
           state: "ready",
-          turn: { id: turn.id, state: "requested" },
+          turn: { ...turn },
           observed_at: new Date(this.now()).toISOString(),
         },
       };
@@ -774,7 +861,7 @@ export class CodexRuntimeController {
           clearTimeout(owned.turnTimer);
           this.record(owned, {
             state: "ready",
-            turn: { id: target.turn, state: "interrupted" },
+            turn: this.turnPatch(owned, "interrupted", null, target.turn),
           });
         })
         .catch((error: unknown) => {
@@ -784,7 +871,7 @@ export class CodexRuntimeController {
           this.record(owned, {
             state: "ready",
             fault: code,
-            turn: { id: target.turn, state: "unknown" },
+            turn: this.turnPatch(owned, "unknown", null, target.turn),
           });
         });
     return receipt;

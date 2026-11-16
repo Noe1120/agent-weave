@@ -33,6 +33,13 @@ async function code(promise: Promise<unknown>) {
     return (error as AdapterFault).code;
   }
 }
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+async function ready(mode: string, options = {}) {
+  const started = start(mode, options);
+  const hello = await started.handle.ready;
+  const thread = await started.handle.startThread(resolve("tests/fixtures"));
+  return { ...started, hello, thread };
+}
 test("real-shaped initialization, native thread, one turn and owned close", async () => {
   const { handle } = start("success");
   const hello = await handle.ready;
@@ -53,19 +60,15 @@ test("real-shaped initialization, native thread, one turn and owned close", asyn
     "synthetic acceptance instruction",
   );
   assert.equal(turn, "01930000-0000-7000-8000-00000000bbbb");
-  await new Promise((r) => setTimeout(r, 120));
-  assert.equal(handle.statistics.turn_state, "completed");
-  assert.ok(handle.statistics.notifications >= 3);
-  assert.deepEqual(handle.statistics.unknown_notifications, [
-    "turn/started",
-    "item/completed",
-    "thread/tokenUsage/updated",
-  ]);
-  assert.deepEqual(handle.statistics.token_usage, {
-    total: 120,
-    input: 100,
-    output: 20,
-  });
+  await wait(120);
+  const facts = handle.statistics.turn;
+  assert.ok(facts, "no turn facts recorded");
+  assert.equal(facts.generation, 1);
+  assert.equal(facts.state, "completed");
+  assert.equal(facts.turn_id, "01930000-0000-7000-8000-00000000bbbb");
+  assert.match(facts.last_agent_message ?? "", /synthetic reply/);
+  assert.deepEqual(facts.token_usage, { total: 120, input: 100, output: 20 });
+  assert.equal(facts.stale_terminal_notifications, 0);
   assert.equal(handle.statistics.refused_server_requests, 0);
   assert.equal(handle.statistics.requests, 2);
   handle.close();
@@ -74,7 +77,6 @@ test("real-shaped initialization, native thread, one turn and owned close", asyn
   assert.equal(exit.exit_observed, true);
   assert.equal(exit.forced, false);
   assert.equal(exit.fault, null);
-  // initialize, initialized, thread/start, turn/start
   assert.equal(exit.frames_out, 4);
   assert.equal(handle.status.state, "closed");
 });
@@ -101,7 +103,6 @@ test("duplicate, unsolicited, wrong id, malformed and under-encoded frames fail 
   ];
   for (const [mode, expected] of malformed) {
     const { handle } = start(mode);
-    // A wrong-id reply replaces the expected one, so readiness itself may reject.
     void handle.ready.catch(() => {});
     const exit = await handle.closed;
     assert.equal(exit.fault, expected, mode);
@@ -125,8 +126,6 @@ test("bounded stdout, frame and stderr limits terminate the transport", async ()
     ["stderr-flood", "CODEX_STDERR_LIMIT"],
   ] as [string, string][]) {
     const { handle } = start(mode);
-    // The offending frame arrives after a valid initialize reply, so the
-    // terminated transport, not the ready promise, carries the fault.
     await handle.ready;
     const exit = await handle.closed;
     assert.equal(exit.fault, expected, mode);
@@ -136,9 +135,9 @@ test("bounded stdout, frame and stderr limits terminate the transport", async ()
 test("a server-initiated approval request is refused and never granted", async () => {
   const { handle } = start("server-request");
   await handle.ready;
-  await new Promise((r) => setTimeout(r, 80));
+  await wait(80);
   assert.equal(handle.statistics.refused_server_requests, 1);
-  assert.equal(handle.statistics.turn_state, "none");
+  assert.equal(handle.statistics.turn, null);
   handle.close();
   const exit = await handle.closed;
   assert.equal(exit.fault, null);
@@ -163,9 +162,9 @@ test("timeouts, disconnection and thread/turn rejections stay distinct", async (
   const turnHang = start("turn-hang", { requestMs: 400 });
   await turnHang.handle.ready;
   const accepted = await turnHang.handle.startThread(resolve("tests/fixtures"));
-  // The turn request is acknowledged; a missing terminal event must stay "none".
   await turnHang.handle.startTurn(accepted, "synthetic");
-  assert.equal(turnHang.handle.statistics.turn_state, "none");
+  // Acknowledged but no terminal event: the turn stays running, never completed.
+  assert.equal(turnHang.handle.statistics.turn?.state, "running");
   turnHang.handle.close();
 
   const interruptHang = start("interrupt-hang", { requestMs: 300 });
@@ -179,7 +178,7 @@ test("timeouts, disconnection and thread/turn rejections stay distinct", async (
     "CODEX_INTERRUPT_TIMEOUT",
   );
 });
-test("an unacknowledged turn stays unknown and is never reported complete", async () => {
+test("an unacknowledged turn stays running and is never reported complete", async () => {
   const { handle } = start("silent-close", { requestMs: 400 });
   await handle.ready;
   const thread = await handle.startThread(resolve("tests/fixtures"));
@@ -187,25 +186,78 @@ test("an unacknowledged turn stays unknown and is never reported complete", asyn
     await code(handle.startTurn(thread, "synthetic")),
     "CODEX_TURN_TIMEOUT",
   );
-  assert.equal(handle.statistics.turn_state, "none");
+  assert.equal(handle.statistics.turn?.state, "running");
 });
-test("only the real terminal TurnStatus values move the projection", async () => {
-  const inProgress = start("turn-inprogress");
-  await inProgress.handle.ready;
-  const t1 = await inProgress.handle.startThread(resolve("tests/fixtures"));
-  await inProgress.handle.startTurn(t1, "synthetic");
-  await new Promise((r) => setTimeout(r, 120));
-  // inProgress is not terminal: a non-terminal status must never read completed.
-  assert.equal(inProgress.handle.statistics.turn_state, "running");
+test("only the real terminal TurnStatus values are accepted for the current turn", async () => {
+  const inProgress = await ready("turn-inprogress");
+  await inProgress.handle.startTurn(inProgress.thread, "synthetic");
+  await wait(120);
+  assert.equal(inProgress.handle.statistics.turn?.state, "running");
   inProgress.handle.close();
 
-  const failed = start("turn-fail");
-  await failed.handle.ready;
-  const t2 = await failed.handle.startThread(resolve("tests/fixtures"));
-  await failed.handle.startTurn(t2, "synthetic");
-  await new Promise((r) => setTimeout(r, 120));
-  assert.equal(failed.handle.statistics.turn_state, "failed");
+  const failed = await ready("turn-fail");
+  await failed.handle.startTurn(failed.thread, "synthetic");
+  await wait(120);
+  assert.equal(failed.handle.statistics.turn?.state, "failed");
   failed.handle.close();
+});
+test("each turn gets its own generation, message and token usage", async () => {
+  const { handle, thread } = await ready("two-turns-ok");
+  await handle.startTurn(thread, "first");
+  await wait(120);
+  const first = handle.statistics.turn;
+  assert.equal(first?.generation, 1);
+  assert.equal(first?.turn_id, "01930000-0000-7000-8000-00000000bbbb");
+  assert.equal(first?.state, "completed");
+  assert.match(first?.last_agent_message ?? "", /bbbb/);
+
+  await handle.startTurn(thread, "second");
+  await wait(120);
+  const second = handle.statistics.turn;
+  assert.equal(second?.generation, 2);
+  assert.equal(second?.turn_id, "01930000-0000-7000-8000-00000000cccc");
+  assert.equal(second?.state, "completed");
+  assert.match(second?.last_agent_message ?? "", /cccc/);
+  assert.notEqual(second?.last_agent_message, first?.last_agent_message);
+  handle.close();
+});
+test("a second turn without its own terminal event never inherits completed", async () => {
+  const { handle, thread } = await ready("second-turn-silent");
+  await handle.startTurn(thread, "first");
+  await wait(120);
+  assert.equal(handle.statistics.turn?.state, "completed");
+
+  await handle.startTurn(thread, "second");
+  await wait(150);
+  const facts = handle.statistics.turn;
+  assert.equal(facts?.generation, 2);
+  assert.equal(facts?.turn_id, "01930000-0000-7000-8000-00000000cccc");
+  assert.equal(facts?.state, "running");
+  assert.equal(facts?.completed_at, null);
+  handle.close();
+});
+test("a late terminal event from the first turn is counted and ignored", async () => {
+  const { handle, thread } = await ready("late-first-terminal");
+  await handle.startTurn(thread, "first");
+  await wait(120);
+  assert.equal(handle.statistics.turn?.state, "completed");
+
+  await handle.startTurn(thread, "second");
+  await wait(200);
+  const facts = handle.statistics.turn;
+  assert.equal(facts?.generation, 2);
+  assert.equal(facts?.state, "running");
+  assert.ok(
+    (facts?.stale_terminal_notifications ?? 0) >= 1,
+    "the stale terminal event was not counted",
+  );
+  handle.close();
+});
+test("a concurrent turn is refused while the current one is running", async () => {
+  const { handle, thread } = await ready("turn-hang");
+  await handle.startTurn(thread, "first");
+  assert.equal(await code(handle.startTurn(thread, "second")), "CODEX_BUSY");
+  handle.close();
 });
 test("no turn, generic request or approval path exists before initialization", async () => {
   const { handle } = start("hang", { requestMs: 5000 });
@@ -245,6 +297,5 @@ test("only the four fixed client methods exist in the transport source", () => {
     "process/spawn",
   ])
     assert.equal(source.includes(banned), false, banned);
-  // The real envelope has no jsonrpc member; the transport must not emit one.
   assert.equal(source.includes('jsonrpc: "2.0"'), false);
 });

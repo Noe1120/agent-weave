@@ -4,13 +4,18 @@
 //
 // Envelopes follow the JSON Schema the fixed CLI generates: no `jsonrpc` member,
 // requests are {id, method, params}, responses {id, result} or {id, error}, and
-// notifications {method, params}.
+// notifications {method, params}. Multi-turn modes exist so the transport's
+// per-turn attribution can be tested: every turn has its own id, and some modes
+// replay an earlier turn's terminal event into a later one.
 import { createHash } from "node:crypto";
 import { createInterface } from "node:readline";
 
 const mode = process.argv[2] ?? "success";
 const threadId = "01930000-0000-7000-8000-00000000aaaa";
-const turnId = "01930000-0000-7000-8000-00000000bbbb";
+const turnIds = [
+  "01930000-0000-7000-8000-00000000bbbb",
+  "01930000-0000-7000-8000-00000000cccc",
+];
 const modes = new Set([
   "success",
   "no-jsonrpc",
@@ -34,6 +39,9 @@ const modes = new Set([
   "interrupt-hang",
   "thread-error",
   "silent-close",
+  "two-turns-ok",
+  "second-turn-silent",
+  "late-first-terminal",
 ]);
 if (!modes.has(mode)) {
   process.stderr.write("fixture: unknown mode\n");
@@ -54,6 +62,7 @@ if (mode === "exit-early") process.exit(3);
 
 let initialize = null;
 let threadStarted = false;
+let turnCount = 0;
 const timers = new Set();
 const later = (fn, ms) => {
   const timer = setTimeout(() => {
@@ -69,7 +78,6 @@ function onInitialize(id) {
   if (mode === "error") return refuse(id, -32602, "invalid request");
   if (mode === "auth-error")
     return refuse(id, -32000, "unauthorized: login required");
-  // v1 InitializeResponse requires these four members.
   const result = {
     codexHome: "C:\\Users\\synthetic\\.codex",
     platformFamily: "windows",
@@ -104,7 +112,7 @@ function onInitialize(id) {
         line({
           id: 900,
           method: "item/commandExecution/requestApproval",
-          params: { threadId, turnId, command: ["cmd.exe", "/c", "whoami"] },
+          params: { threadId, command: ["cmd.exe", "/c", "whoami"] },
         }),
       5,
     );
@@ -113,7 +121,6 @@ function onInitialize(id) {
 function onThreadStart(id) {
   if (mode === "thread-error") return refuse(id, -32602, "invalid params");
   threadStarted = true;
-  // v2 ThreadStartResponse requires the thread object; only `id` is read.
   answer(id, {
     approvalPolicy: "never",
     approvalsReviewer: "user",
@@ -125,30 +132,33 @@ function onThreadStart(id) {
   });
 }
 
-function onTurnStart(id) {
-  // No reply at all: the client must time out and leave the turn unknown.
-  if (mode === "silent-close") return;
-  answer(id, { turn: { id: turnId, items: [], status: "inProgress" } });
-  // Acknowledged but never terminal: only an explicit interrupt may end it.
-  if (mode === "turn-hang") return;
+const terminal = (turnId, status) =>
+  notify("turn/completed", {
+    threadId,
+    turn: { id: turnId, items: [], status },
+  });
+
+function eventsFor(turnId) {
   later(() => notify("turn/started", { threadId, turn: { id: turnId } }), 5);
+  later(
+    () =>
+      notify("item/completed", {
+        threadId,
+        turnId,
+        item: { type: "agentMessage", text: "synthetic reply for " + turnId },
+      }),
+    10,
+  );
   later(
     () =>
       notify("thread/tokenUsage/updated", {
         threadId,
+        turnId,
         tokenUsage: {
           total: { totalTokens: 120, inputTokens: 100, outputTokens: 20 },
         },
       }),
     12,
-  );
-  later(
-    () =>
-      notify("item/completed", {
-        threadId,
-        item: { type: "agentMessage", text: "synthetic reply" },
-      }),
-    10,
   );
   if (mode === "turn-inprogress")
     return later(
@@ -160,26 +170,39 @@ function onTurnStart(id) {
       15,
     );
   later(
-    () =>
-      notify("turn/completed", {
-        threadId,
-        turn: {
-          id: turnId,
-          items: [],
-          status: mode === "turn-fail" ? "failed" : "completed",
-        },
-      }),
+    () => terminal(turnId, mode === "turn-fail" ? "failed" : "completed"),
     15,
   );
 }
 
+function onTurnStart(id) {
+  const turnId = turnIds[Math.min(turnCount, turnIds.length - 1)];
+  turnCount++;
+  // No reply at all: the client must time out and leave the turn unknown.
+  if (mode === "silent-close") return;
+  answer(id, { turn: { id: turnId, items: [], status: "inProgress" } });
+
+  if (mode === "second-turn-silent" && turnCount === 2) {
+    // Acknowledged second turn with no terminal event of its own.
+    later(() => notify("turn/started", { threadId, turn: { id: turnId } }), 5);
+    return;
+  }
+  if (mode === "late-first-terminal" && turnCount === 2) {
+    // The second turn is acknowledged, then the FIRST turn's terminal event
+    // arrives late. It must never decide the second turn.
+    later(() => notify("turn/started", { threadId, turn: { id: turnId } }), 5);
+    later(() => terminal(turnIds[0], "completed"), 20);
+    return;
+  }
+  if (mode === "turn-hang") return;
+  eventsFor(turnId);
+}
+
 function onInterrupt(id) {
   if (mode === "interrupt-hang") return;
+  const turnId = turnIds[Math.min(turnCount - 1, turnIds.length - 1)];
   answer(id, {});
-  notify("turn/completed", {
-    threadId,
-    turn: { id: turnId, items: [], status: "interrupted" },
-  });
+  terminal(turnId, "interrupted");
 }
 
 createInterface({ input: process.stdin }).on("line", (text) => {
@@ -191,7 +214,6 @@ createInterface({ input: process.stdin }).on("line", (text) => {
     return;
   }
   if (frame.method === undefined) {
-    // Client answers a server-initiated request: record the refusal digest.
     process.stderr.write(
       "client-response:" +
         createHash("sha256")

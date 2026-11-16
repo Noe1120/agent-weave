@@ -34,6 +34,25 @@ export interface CodexInitialize {
   /** Which fixed schema this projection was validated against. */
   schema: "codex-app-server/v1";
 }
+/**
+ * Facts about exactly one native turn. Every turn gets its own generation and
+ * its own counters, so a late or duplicated terminal event from an earlier turn
+ * can never move the projection of the current one.
+ */
+export interface CodexTurnFacts {
+  generation: number;
+  thread_id: string;
+  turn_id: string | null;
+  state: "running" | "completed" | "failed" | "interrupted" | "unknown";
+  started_at: number;
+  completed_at: number | null;
+  last_agent_message: string | null;
+  token_usage: { total: number; input: number; output: number } | null;
+  /** Terminal events that did not match this turn (stale or foreign). */
+  stale_terminal_notifications: number;
+  /** Notifications attributed to a different turn while this one ran. */
+  foreign_notifications: number;
+}
 export interface CodexStatistics {
   requests: number;
   responses: number;
@@ -41,11 +60,12 @@ export interface CodexStatistics {
   unknown_notifications: string[];
   refused_server_requests: number;
   last_method: string | null;
-  turn_state: "none" | "running" | "completed" | "failed" | "interrupted";
-  /** Last assistant message text, bounded; null until one is completed. */
-  last_agent_message: string | null;
-  /** Token usage reported by the client for this thread; cost evidence only. */
-  token_usage: { total: number; input: number; output: number } | null;
+  /** The turn this connection is currently tracking; null before any turn. */
+  turn: CodexTurnFacts | null;
+  /** Turns that reached a terminal state on this connection. */
+  turns_terminal: number;
+  /** Highest generation issued on this connection. */
+  generation: number;
 }
 export interface CodexExit {
   code: number | null;
@@ -162,9 +182,9 @@ export class CodexAppServer implements CodexHandle {
     unknown_notifications: [],
     refused_server_requests: 0,
     last_method: null,
-    turn_state: "none",
-    last_agent_message: null,
-    token_usage: null,
+    turn: null,
+    turns_terminal: 0,
+    generation: 0,
   };
   private child: ChildProcessWithoutNullStreams;
   private resolveReady!: (value: CodexInitialize) => void;
@@ -332,6 +352,24 @@ export class CodexAppServer implements CodexHandle {
   startTurn(threadId: string, text: string) {
     if (!label(threadId) || typeof text !== "string" || text.length > 4000)
       return Promise.reject(new AdapterFault("CODEX_TURN_ARGS"));
+    if (this.statistics.turn?.state === "running")
+      return Promise.reject(new AdapterFault("CODEX_BUSY"));
+    // A new generation is opened before the request leaves, so an early
+    // `turn/started` notification already belongs to this attempt.
+    this.statistics.generation++;
+    const facts: CodexTurnFacts = {
+      generation: this.statistics.generation,
+      thread_id: threadId,
+      turn_id: null,
+      state: "running",
+      started_at: Date.now(),
+      completed_at: null,
+      last_agent_message: null,
+      token_usage: null,
+      stale_terminal_notifications: 0,
+      foreign_notifications: 0,
+    };
+    this.statistics.turn = facts;
     return this.request("turn/start", {
       threadId,
       input: [{ type: "text", text }],
@@ -340,6 +378,7 @@ export class CodexAppServer implements CodexHandle {
         id = turn.id;
       if (id === undefined || id === null) return null;
       if (!label(id)) return this.protocolFailure();
+      if (this.statistics.turn === facts) facts.turn_id = id;
       return id;
     });
   }
@@ -421,31 +460,79 @@ export class CodexAppServer implements CodexHandle {
       },
     });
   }
+  /**
+   * True when this notification belongs to the turn this connection is tracking.
+   * A turn without an acknowledged id yet is matched by thread only; once the id
+   * is known, both thread and turn must match.
+   */
+  private owned(
+    params: Record<string, unknown>,
+    turnId: unknown,
+  ): CodexTurnFacts | null {
+    const turn = this.statistics.turn;
+    if (!turn) return null;
+    if (params.threadId !== turn.thread_id) return null;
+    if (turn.turn_id !== null) {
+      if (typeof turnId === "string" ? turnId !== turn.turn_id : true)
+        return null;
+    }
+    return turn;
+  }
   private notification(method: string, frame: Record<string, unknown>) {
     this.statistics.notifications++;
+    if (method === "turn/started") {
+      const params = object(frame.params ?? {});
+      const turn = this.statistics.turn;
+      const id = object(params.turn ?? {}).id;
+      if (turn && params.threadId === turn.thread_id && label(id)) {
+        if (turn.turn_id === null) turn.turn_id = id;
+        else if (turn.turn_id !== id) turn.foreign_notifications++;
+      } else if (turn) turn.foreign_notifications++;
+      return;
+    }
     if (method === "turn/completed") {
       // `TurnStatus` is exactly completed | interrupted | failed | inProgress.
-      // Only the three terminal values may move the projection; anything else
-      // (including inProgress and unknown strings) must not become "completed".
+      // Only a terminal value that matches THIS turn may move the projection.
+      let params: Record<string, unknown> = {};
       let status: unknown;
+      let turnId: unknown;
       try {
-        status = object(object(frame.params ?? {}).turn).status;
+        params = object(frame.params ?? {});
+        const turn = object(params.turn ?? {});
+        status = turn.status;
+        turnId = turn.id;
       } catch {
         status = undefined;
       }
-      if (status === "completed") this.statistics.turn_state = "completed";
-      else if (status === "failed") this.statistics.turn_state = "failed";
-      else if (status === "interrupted")
-        this.statistics.turn_state = "interrupted";
-      else if (status === "inProgress") this.statistics.turn_state = "running";
+      const owner = this.owned(params, turnId);
+      if (!owner) {
+        const current = this.statistics.turn;
+        if (current) current.stale_terminal_notifications++;
+        countOnce(
+          this.statistics.unknown_notifications,
+          "turn/completed:stale",
+        );
+        return;
+      }
+      if (status === "completed") owner.state = "completed";
+      else if (status === "failed") owner.state = "failed";
+      else if (status === "interrupted") owner.state = "interrupted";
+      else if (status === "inProgress") owner.state = "running";
       else countOnce(this.statistics.unknown_notifications, "turn/completed");
+      if (
+        status === "completed" ||
+        status === "failed" ||
+        status === "interrupted"
+      ) {
+        owner.completed_at = Date.now();
+        this.statistics.turns_terminal++;
+      }
       return;
     }
     if (method === "thread/tokenUsage/updated") {
       try {
-        const total = object(
-          object(object(frame.params ?? {}).tokenUsage).total,
-        );
+        const params = object(frame.params ?? {});
+        const total = object(object(params.tokenUsage).total);
         const pick = (k: string) => {
           const v: unknown = total[k];
           return typeof v === "number" &&
@@ -458,24 +545,35 @@ export class CodexAppServer implements CodexHandle {
         const out = pick("outputTokens"),
           input = pick("inputTokens"),
           sum = pick("totalTokens");
+        const owner = this.owned(params, params.turnId);
+        if (!owner) {
+          if (this.statistics.turn)
+            this.statistics.turn.foreign_notifications++;
+          return;
+        }
         if (out !== null && input !== null && sum !== null)
-          this.statistics.token_usage = { total: sum, input, output: out };
+          owner.token_usage = { total: sum, input, output: out };
       } catch {}
+      return;
     }
     if (method === "item/completed") {
-      let item;
+      let params: Record<string, unknown> = {};
+      let item: Record<string, unknown> | undefined;
       try {
-        item = object(object(frame.params ?? {}).item);
+        params = object(frame.params ?? {});
+        item = object(params.item ?? {});
       } catch {
         item = undefined;
       }
-      if (
-        item &&
-        item.type === "agentMessage" &&
-        typeof item.text === "string" &&
-        item.text.length <= 20000
-      )
-        this.statistics.last_agent_message = item.text.slice(0, 2000);
+      const owner = this.owned(params, params.turnId);
+      if (owner && item && item.type === "agentMessage") {
+        if (typeof item.text === "string" && item.text.length <= 20000)
+          owner.last_agent_message = item.text.slice(0, 2000);
+        return;
+      }
+      if (item && item.type === "agentMessage" && this.statistics.turn)
+        this.statistics.turn.foreign_notifications++;
+      return;
     }
     countOnce(this.statistics.unknown_notifications, method);
     if (this.statistics.unknown_notifications.length > 20)
@@ -491,7 +589,9 @@ export class CodexAppServer implements CodexHandle {
     if (method === "initialize") {
       const projection = initializeFrame(frame, frame.id as number);
       this.initialized = true;
-      this.statistics.turn_state = "none";
+      this.statistics.turn = null;
+      this.statistics.generation = 0;
+      this.statistics.turns_terminal = 0;
       this.settle(null, object(frame.result));
       clearTimeout(this.requestTimer);
       // `initialized` is a real client notification in this build's schema.

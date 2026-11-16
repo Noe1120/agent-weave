@@ -1,26 +1,41 @@
 // Real installed Codex acceptance. Explicitly opt-in: never called by npm verify,
-// and each level needs its own authorization flag.
+// and each level needs its own authorization flag plus its own new output folder.
 //
 //   --allow-codex-app-server-initialize  spawn the fixed CLI, one initialize, EOF
-//   --allow-codex-new-thread             additionally create one native thread and
-//                                        attach the platform read bridge over stdio MCP
-//   --allow-codex-synthetic-turn         additionally run one synthetic turn against a
-//                                        LOCAL loopback model stub, so one real tool call
-//                                        reaches the platform service with no external
-//                                        provider, no credential and no billing
+//   --allow-codex-new-thread             create one native thread and attach the
+//                                        platform read bridge over stdio MCP
+//   --allow-codex-synthetic-turn         run one turn; the model is a local stub
+//   --allow-codex-provider-reuse         run one turn against the operator's own
+//                                        loopback provider (never the stub)
 //
 // The real client, the real app-server protocol, the real MCP stdio bridge and the
-// real platform HTTP service are all in the loop. Only the model is a local stub, and
-// the report says so.
-import assert from "node:assert/strict";
+// real platform HTTP service are always in the loop. The two turn modes are kept
+// apart: a stub run can never borrow a vendor result, and a vendor run never reads
+// the stub's request log. Nothing here throws away evidence: every check is
+// recorded, and the report, the process post-check and the cleanup summary are
+// written on the success path, the failure path and the exception path alike.
 import { execFileSync, spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
-import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { isAbsolute, join } from "node:path";
 import { parseArgs } from "node:util";
 import { adapterFixture } from "./adapter-helpers.ts";
 import { id } from "./helpers.ts";
+import {
+  acceptanceMode,
+  acceptanceStatus,
+  levelPassed,
+  readMockRequests,
+  readsMockRequests,
+} from "./codex-acceptance-plan.ts";
 import { officialCodexLauncher } from "../dist/packages/service/src/codex-app-server.js";
 import { CodexRuntimeController } from "../dist/packages/service/src/codex-runtime.js";
 import { createServer } from "../dist/packages/service/src/http.js";
@@ -39,44 +54,86 @@ const { values } = parseArgs({
   },
   strict: true,
 });
-assert.equal(
-  values["allow-codex-app-server-initialize"],
-  true,
-  "Real client launch requires explicit app-server initialize authorization",
-);
-if (values["allow-codex-synthetic-turn"])
-  assert.equal(
-    values["allow-codex-new-thread"],
-    true,
-    "A turn needs its own thread authorization first",
+if (!values.config || !isAbsolute(values.config))
+  throw new Error("--config must be an absolute path");
+if (!values.output || !isAbsolute(values.output))
+  throw new Error("--output must be an absolute path");
+const mode = acceptanceMode({
+  initialize: values["allow-codex-app-server-initialize"] === true,
+  thread: values["allow-codex-new-thread"] === true,
+  turn: values["allow-codex-synthetic-turn"] === true,
+  vendor: values["allow-codex-provider-reuse"] === true,
+});
+if (
+  values["allow-codex-provider-reuse"] &&
+  !values["allow-codex-synthetic-turn"]
+)
+  throw new Error(
+    "--allow-codex-provider-reuse still needs the synthetic turn gate",
   );
-if (values["allow-codex-provider-reuse"]) {
-  assert.equal(
-    values["allow-codex-new-thread"],
-    true,
-    "A vendor turn needs its own thread authorization first",
-  );
-  assert.equal(
-    values["allow-codex-synthetic-turn"],
-    true,
-    "A vendor turn is still one synthetic acceptance turn",
-  );
-  assert.ok(
-    values["provider-config"] && isAbsolute(values["provider-config"]),
-    "--provider-config must be an absolute path",
-  );
-}
-const vendorTurn = values["allow-codex-provider-reuse"] === true;
-assert.equal(process.platform, "win32");
-assert.ok(values.config && isAbsolute(values.config));
-assert.ok(values.output && isAbsolute(values.output));
-// Exclusive output folder is the attempt latch: reruns cannot repeat a level here.
+if (values["allow-codex-provider-reuse"] && !values["provider-config"])
+  throw new Error("--provider-config is required for a vendor turn");
+if (process.platform !== "win32") throw new Error("Windows only");
+
+// Exclusive output folder: a rerun can never overwrite an earlier attempt.
 mkdirSync(values.output);
 const out = (name) => join(values.output, name);
-const write = (name, data) =>
-  writeFileSync(out(name), JSON.stringify(data, null, 2) + "\n", {
-    flag: "wx",
-  });
+const write = (name, data) => {
+  writeFileSync(out(name), JSON.stringify(data, null, 2) + "\n", "utf8");
+  return name;
+};
+const clone = (value) =>
+  value === undefined ? null : JSON.parse(JSON.stringify(value));
+
+const facts = {
+  mode,
+  bridgeConnections: 0,
+  bridgeToolCalls: 0,
+  bridgeToolErrors: 0,
+  bridgeFaults: 0,
+  turnState: null,
+  agentMessage: null,
+  tokenUsageTotal: null,
+  taskId: null,
+  stubRounds: null,
+  processUnchanged: false,
+  cleanupComplete: false,
+  harnessError: null,
+  protocolError: null,
+};
+const report = {
+  schema: 2,
+  mode,
+  status: "UNKNOWN",
+  started_at: new Date().toISOString(),
+  finished_at: null,
+  status_vocabulary: [
+    "PASS_REAL_CLIENT_WITH_LOCAL_MODEL_STUB",
+    "PASS_REAL_VENDOR_TOOL_ROUND_TRIP",
+    "FAILED_AT_MODEL_TOOL_SELECTION",
+    "FAILED_AT_HARNESS",
+    "FAILED_AT_PROTOCOL",
+    "NOT_RUN",
+    "UNVERIFIED",
+    "UNKNOWN",
+  ],
+  evidence_files_read: [],
+  checks: [],
+  failures: [],
+  steps: [],
+  cleanup: null,
+  process: null,
+  error: null,
+  facts,
+  author_self_review: true,
+  independent_review: false,
+};
+const check = (code, ok, detail = null) => {
+  report.checks.push({ code, ok: Boolean(ok), detail });
+  if (!ok) report.failures.push({ code, detail });
+  return Boolean(ok);
+};
+
 function inventory() {
   const text = execFileSync(
     join(
@@ -97,38 +154,34 @@ function inventory() {
   const value = text.trim() ? JSON.parse(text) : [];
   return Array.isArray(value) ? value : [value];
 }
-const clone = (value) =>
-  value === undefined ? null : JSON.parse(JSON.stringify(value));
 async function waitFor(file, ms = 20000) {
   const deadline = Date.now() + ms;
   for (;;) {
-    try {
-      return readFileSync(file, "utf8");
-    } catch {
-      if (Date.now() > deadline) throw new Error("timeout waiting for " + file);
-      await new Promise((r) => setTimeout(r, 100));
-    }
+    if (existsSync(file)) return readFileSync(file, "utf8");
+    if (Date.now() > deadline) throw new Error("timeout waiting for " + file);
+    await new Promise((r) => setTimeout(r, 100));
   }
 }
 
-const operator = JSON.parse(
-  readFileSync(values.config, "utf8").replace(/^\uFEFF/, ""),
-);
-const before = inventory();
-write("process-before.json", before);
-const steps = [];
-let report;
 let handle;
 let controller;
 let fixture;
 let server;
 let mock;
-let mockState;
+let reportDir = null;
+let bridgeConfig = null;
+let before = [];
+const cleanup = [];
 try {
-  // Level 1: initialization only, straight through the fixed launcher.
-  handle = await officialCodexLauncher(operator).launch(() => true);
+  before = inventory();
+  write("process-before.json", before);
+
+  // ---- Level 1: initialize only, straight through the fixed launcher ----
+  handle = await officialCodexLauncher(
+    JSON.parse(readFileSync(values.config, "utf8").replace(/^\uFEFF/, "")),
+  ).launch(() => true);
   const initialize = await handle.ready;
-  steps.push({
+  report.steps.push({
     step: "initialize",
     state: handle.status.state,
     user_agent: initialize.user_agent,
@@ -138,39 +191,35 @@ try {
     unrecognized_fields: initialize.unrecognized_fields,
     schema: initialize.schema,
   });
-  assert.equal(handle.status.state, "ready");
+  check("initialize_ready", handle.status.state === "ready");
   handle.close();
-  const exit = await handle.closed;
-  steps.push({ step: "initialize_close", exit: clone(exit) });
-  assert.equal(exit.exit_observed, true);
-  assert.equal(exit.forced, false);
+  const initExit = await handle.closed;
+  report.steps.push({ step: "initialize_close", exit: clone(initExit) });
+  check("initialize_exit_zero", initExit.code === 0, String(initExit.code));
+  check("initialize_not_forced", initExit.forced === false);
+  check("initialize_exit_observed", initExit.exit_observed === true);
+  handle = undefined;
 
-  let threadDigest = null;
-  let turnState = null;
-  let lastMessage = null;
-  let tokenUsage = null;
-  let bridge = null;
-  let toolCallSeen = null;
-  let launcherFingerprint = null;
-  if (values["allow-codex-new-thread"]) {
+  // ---- Level 2: native thread + platform bridge (+ optional model) ----
+  if (mode !== "initialize") {
     fixture = adapterFixture();
     fixture.g.expires_at = new Date(Date.now() + 900000).toISOString();
     fixture.s.updateGrant(fixture.g);
     server = createServer(fixture.service);
     await listenLoopback(server);
     const address = server.address();
-    assert.ok(address && typeof address !== "string");
+    if (!address || typeof address === "string")
+      throw new Error("platform service has no port");
     const origin = `http://127.0.0.1:${address.port}`;
-    steps.push({
+    report.steps.push({
       step: "platform_service",
       origin,
       kind: "synthetic in-memory grant",
     });
 
-    // The platform's own fixed-scope read bridge for this attempt.
-    const reportDir = out("bridge-reports");
+    reportDir = out("bridge-reports");
     mkdirSync(reportDir);
-    const bridgeConfig = out("bridge-config.json");
+    bridgeConfig = out("bridge-config.json");
     writeFileSync(
       bridgeConfig,
       JSON.stringify(
@@ -195,12 +244,15 @@ try {
       { flag: "wx" },
     );
 
+    const operator = JSON.parse(
+      readFileSync(values.config, "utf8").replace(/^\uFEFF/, ""),
+    );
     const launcherInput = {
       ...operator,
       bridge: { config_path: bridgeConfig, report_dir: reportDir },
     };
-    if (vendorTurn) {
-      // The operator's own loopback provider, read through a pinned provider block.
+    let modelKind = "none";
+    if (mode === "vendor") {
       launcherInput.provider_reuse = {
         source_config: values["provider-config"],
         provider_id: "custom",
@@ -208,17 +260,15 @@ try {
           ? { model: values["provider-model"] }
           : {}),
       };
-      steps.push({
+      modelKind = "vendor loopback route";
+      report.steps.push({
         step: "provider_reuse",
         provider_id: "custom",
         model_override: values["provider-model"] ?? null,
-        kind: "operator-authorized loopback provider; exactly one turn",
-        cost: "unknown before the turn; token usage captured after it",
       });
-    } else if (values["allow-codex-synthetic-turn"]) {
-      // A local Responses-API stub: the only non-real participant.
+    } else if (mode === "stub") {
       const portFile = out("mock-port.txt");
-      mockState = out("mock-requests.jsonl");
+      const mockState = out("mock-requests.jsonl");
       mock = spawn(
         process.execPath,
         [
@@ -231,57 +281,75 @@ try {
       const port = (await waitFor(portFile)).trim().replace("PORT=", "");
       launcherInput.model_provider = {
         base_url: `http://127.0.0.1:${port}`,
-        // Only for a zero-cost tool-visibility probe of model-name gating.
         model: process.env.MOCK_MODEL_NAME ?? "agent-weave-mock",
       };
-      steps.push({
+      modelKind = "local loopback stub";
+      report.steps.push({
         step: "model_stub",
         base_url: launcherInput.model_provider.base_url,
         kind: "local loopback Responses stub, no credential, no egress",
       });
     }
+
     const launcher = officialCodexLauncher(launcherInput);
-    launcherFingerprint = launcher.fingerprint;
     controller = new CodexRuntimeController(fixture.s, launcher, {
       now: fixture.now,
       monitorMs: 250,
       turnMs: 150000,
     });
-    const request = {
+    await controller.start(fixture.token, {
       project_id: fixture.ids.project,
       runtime_id: fixture.binding,
       scope_id: fixture.ids.scope,
       action_id: id(),
       expected_revision: "0",
       configuration_fingerprint: launcher.fingerprint,
-    };
-    await controller.start(fixture.token, request);
+    });
     let view = controller.read(
       fixture.token,
       fixture.ids.project,
       fixture.binding,
     );
-    assert.equal(view.state, "ready");
-    assert.equal(view.session_id, null);
-    assert.equal(view.qualification, "UNVERIFIED");
-    threadDigest = view.native_thread_sha256;
-    steps.push({
+    facts.taskId = fixture.ids.task;
+    report.steps.push({
       step: "native_thread",
       state: view.state,
-      native_thread_sha256: threadDigest,
+      native_thread_sha256: view.native_thread_sha256,
       platform_session_id: view.session_id,
-      mcp_bridge_attached: true,
+      model: modelKind,
     });
+    check("thread_ready", view.state === "ready", view.fault);
+    check("thread_no_platform_session", view.session_id === null);
+    check(
+      "thread_digest_present",
+      typeof view.native_thread_sha256 === "string",
+    );
+
+    // The client starts its MCP servers asynchronously; give the bridge a
+    // bounded window to appear before judging the connection.
+    const bridgeDeadline = Date.now() + 20000;
+    while (Date.now() < bridgeDeadline) {
+      const connected =
+        reportDir &&
+        readdirSync(reportDir, { withFileTypes: true }).some((entry) => {
+          if (!entry.isDirectory()) return false;
+          return existsSync(join(reportDir, entry.name, "report.json"));
+        });
+      if (connected) break;
+      await new Promise((r) => setTimeout(r, 200));
+    }
     const writes = fixture.s.db.prepare("SELECT total_changes() n").get().n;
     for (let i = 0; i < 1000; i++)
       controller.read(fixture.token, fixture.ids.project, fixture.binding);
-    assert.equal(
-      fixture.s.db.prepare("SELECT total_changes() n").get().n,
-      writes,
+    const afterReads = fixture.s.db.prepare("SELECT total_changes() n").get().n;
+    report.steps.push({ step: "read_progress", reads: 1000 });
+    check(
+      "progress_reads_zero_writes",
+      writes === afterReads,
+      `${writes}→${afterReads}`,
     );
-    steps.push({ step: "read_progress", reads: 1000, database_writes: 0 });
 
-    if (values["allow-codex-synthetic-turn"]) {
+    if (mode === "stub" || mode === "vendor") {
       view = controller.read(
         fixture.token,
         fixture.ids.project,
@@ -306,18 +374,28 @@ try {
         if (Date.now() > deadline) break;
         await new Promise((r) => setTimeout(r, 250));
       }
-      turnState = view.turn?.state ?? "none";
-      lastMessage = view.last_agent_message;
-      tokenUsage = view.token_usage ?? null;
-      steps.push({
+      facts.turnState = view.turn?.state ?? "none";
+      facts.agentMessage = view.last_agent_message ?? null;
+      facts.tokenUsageTotal = view.token_usage?.total ?? null;
+      report.steps.push({
         step: "synthetic_turn",
         state: view.state,
         turn: view.turn,
         fault: view.fault,
-        last_agent_message: lastMessage,
+        token_usage: view.token_usage,
+        agent_message: facts.agentMessage,
         statistics: view.statistics,
       });
+      check("turn_terminal", facts.turnState === "completed", facts.turnState);
+      check(
+        "turn_message_carries_task",
+        Boolean(facts.agentMessage?.includes(fixture.ids.task)),
+        facts.agentMessage,
+      );
+      if (mode === "vendor")
+        check("turn_reports_token_usage", (facts.tokenUsageTotal ?? 0) > 0);
     }
+
     view = controller.read(fixture.token, fixture.ids.project, fixture.binding);
     await controller.close(fixture.token, {
       project_id: fixture.ids.project,
@@ -326,145 +404,222 @@ try {
       expected_revision: view.revision,
     });
     view = controller.read(fixture.token, fixture.ids.project, fixture.binding);
-    steps.push({ step: "close", state: view.state, exit: clone(view.exit) });
-    assert.equal(view.state, "closed");
-    assert.equal(view.exit?.exit_observed, true);
-    assert.equal(view.exit?.forced, false);
+    report.steps.push({
+      step: "close",
+      state: view.state,
+      exit: clone(view.exit),
+    });
+    check("close_state", view.state === "closed", view.state);
+    check("close_exit_observed", view.exit?.exit_observed === true);
+    check("close_not_forced", view.exit?.forced === false);
+  }
 
-    // The real client's own view of the bridge, and the stub's request log.
-    bridge = readdirSync(reportDir, { withFileTypes: true })
-      .filter((d) => d.isDirectory())
-      .map((d) => {
+  // ---- Evidence from the real client's own bridge connections ----
+  if (reportDir) {
+    const connections = readdirSync(reportDir, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => {
         try {
           return JSON.parse(
-            readFileSync(join(reportDir, d.name, "report.json"), "utf8"),
+            readFileSync(join(reportDir, entry.name, "report.json"), "utf8"),
           );
         } catch {
           return null;
         }
       })
       .filter(Boolean);
-    steps.push({
+    report.evidence_files_read.push("bridge-reports/*/report.json");
+    facts.bridgeConnections = connections.length;
+    facts.bridgeToolCalls = connections.reduce(
+      (sum, item) => sum + Number(item.tool_calls ?? 0),
+      0,
+    );
+    facts.bridgeToolErrors = connections.reduce(
+      (sum, item) => sum + Number(item.tool_errors ?? 0),
+      0,
+    );
+    facts.bridgeFaults = connections.filter(
+      (item) => item.fault !== null,
+    ).length;
+    report.steps.push({
       step: "bridge_connections",
-      connections: bridge.map((b) => ({
-        target: b.target,
-        initialized: b.initialized,
-        tool_calls: b.tool_calls,
-        tool_errors: b.tool_errors,
-        fault: b.fault,
-        stdin_eof: b.stdin_eof,
+      connections: connections.map((item) => ({
+        target: item.target,
+        initialized: item.initialized,
+        tool_calls: item.tool_calls,
+        tool_errors: item.tool_errors,
+        fault: item.fault,
+        stdin_eof: item.stdin_eof,
       })),
     });
-    if (values["allow-codex-synthetic-turn"]) {
-      const lines = readFileSync(mockState, "utf8")
-        .trim()
-        .split("\n")
-        .map((l) => JSON.parse(l));
-      toolCallSeen = lines.some((l) => l.result === "tool_call");
-      const finalRound = lines.filter((l) => l.result === "final_message");
-      steps.push({
-        step: "model_stub_requests",
-        rounds: lines.length,
-        advertised_tools: lines[0]?.tool_names ?? [],
-        tool_call_rounds: lines.filter((l) => l.result === "tool_call").length,
-        tool_output_rounds: finalRound.length,
-        final_reply: finalRound.at(-1)?.reply ?? null,
-      });
-      assert.equal(toolCallSeen, true, "the real client never called the tool");
-      assert.ok(
-        finalRound.length >= 1 && /draft/.test(finalRound.at(-1).reply),
-        "the platform read result never reached the model stub",
-      );
-      assert.equal(turnState, "completed", "the native turn did not complete");
-      if (vendorTurn) {
-        assert.ok(tokenUsage, "the client did not report token usage");
-        assert.ok(
-          tokenUsage.total > 0 && tokenUsage.total <= 200000,
-          "token usage is missing or implausible: " +
-            JSON.stringify(tokenUsage),
-        );
-      }
-      assert.ok(
-        lastMessage && lastMessage.includes(fixture.ids.task),
-        "the native agent message did not carry the synthetic task id",
-      );
-      assert.ok(
-        bridge.some((b) => b.tool_calls >= 1 && b.tool_errors === 0),
-        "no bridge connection reported exactly the tool call",
-      );
-    } else if (!values["allow-codex-synthetic-turn"])
-      assert.ok(
-        bridge.every((b) => b.tool_calls === 0),
-        "a thread-only run must not call a tool",
-      );
-    assert.ok(bridge.length >= 1, "the real client never opened the bridge");
-    assert.ok(
-      bridge.every((b) => b.initialized === true && b.fault === null),
-      "the bridge handshake did not complete cleanly",
+    check(
+      "bridge_connected",
+      connections.length >= 1,
+      String(connections.length),
     );
-    assert.equal(
-      controller.read(fixture.token, fixture.ids.project, fixture.binding)
-        .state,
-      "closed",
+    check(
+      "bridge_handshake_clean",
+      connections.every(
+        (item) => item.initialized === true && item.fault === null,
+      ),
     );
+    if (mode === "thread")
+      check(
+        "thread_only_no_tool_call",
+        connections.every((item) => item.tool_calls === 0),
+      );
+    if (mode === "stub" || mode === "vendor") {
+      check(
+        "bridge_tool_call",
+        facts.bridgeToolCalls === 1,
+        String(facts.bridgeToolCalls),
+      );
+      check(
+        "bridge_no_tool_errors",
+        facts.bridgeToolErrors === 0,
+        String(facts.bridgeToolErrors),
+      );
+    }
   }
-  const after = inventory();
-  write("process-after.json", after);
-  const unchanged = JSON.stringify(before) === JSON.stringify(after);
-  report = {
-    status: vendorTurn
-      ? "REAL_CODEX_VENDOR_TOOL_ROUND_TRIP_PASS"
-      : values["allow-codex-synthetic-turn"]
-        ? "REAL_CODEX_TOOL_ROUND_TRIP_PASS"
-        : threadDigest
-          ? "REAL_CODEX_APP_SERVER_LIFECYCLE_PASS"
-          : "REAL_CODEX_APP_SERVER_INITIALIZE_PASS",
-    observed_at: new Date().toISOString(),
-    platform_state:
-      "synthetic isolated in-memory fixture; fresh CODEX_HOME per launch",
-    client_version: operator.client_version,
-    configuration_fingerprint: launcherFingerprint,
-    thread_created: Boolean(threadDigest),
-    native_thread_sha256: threadDigest,
-    synthetic_turn_state: turnState,
-    native_agent_message_sha256: lastMessage
-      ? createHash("sha256").update(lastMessage).digest("hex")
-      : null,
-    native_agent_message_matches_task:
-      lastMessage && fixture ? lastMessage.includes(fixture.ids.task) : null,
-    model: vendorTurn
-      ? "operator loopback provider (real vendor route, exactly one turn)"
-      : values["allow-codex-synthetic-turn"]
-        ? "local loopback Responses stub (the only non-real participant)"
-        : "not invoked",
-    token_usage: tokenUsage,
-    user_configuration_used: false,
-    credentials_supplied: false,
-    user_sessions_read: false,
-    existing_client_attached: false,
-    original_client_processes: {
+
+  // ---- The local stub's request log: never read in any other mode ----
+  if (readsMockRequests(mode)) {
+    const stub = readMockRequests(mode, values.output);
+    if (stub === null) {
+      check("stub_requests_present", false, "mock-requests.jsonl missing");
+    } else {
+      report.evidence_files_read.push("mock-requests.jsonl");
+      facts.stubRounds = stub.rounds;
+      report.steps.push({
+        step: "model_stub_requests",
+        rounds: stub.rounds,
+        tool_call_rounds: stub.toolCalls,
+        final_replies: stub.finalReplies,
+      });
+      check(
+        "stub_tool_call_round",
+        stub.toolCalls >= 1,
+        String(stub.toolCalls),
+      );
+      check(
+        "stub_saw_platform_result",
+        stub.finalReplies.some((reply) => /draft/.test(reply)),
+        stub.finalReplies.join(" | "),
+      );
+    }
+  } else {
+    report.steps.push({
+      step: "model_stub_requests",
+      skipped: "no local stub in this mode",
+    });
+  }
+} catch (error) {
+  facts.harnessError = error?.message ?? String(error);
+  report.error = {
+    name: error?.name ?? null,
+    message: facts.harnessError,
+    stack:
+      typeof error?.stack === "string"
+        ? error.stack.split("\n").slice(0, 8)
+        : null,
+  };
+} finally {
+  // Cleanup runs on every path and reports what it could not finish.
+  const record = (name, fn) => {
+    try {
+      fn();
+      cleanup.push({ step: name, ok: true, error: null });
+    } catch (error) {
+      cleanup.push({
+        step: name,
+        ok: false,
+        error: String(error?.message ?? error),
+      });
+    }
+  };
+  const recordAsync = async (name, fn) => {
+    try {
+      await fn();
+      cleanup.push({ step: name, ok: true, error: null });
+    } catch (error) {
+      cleanup.push({
+        step: name,
+        ok: false,
+        error: String(error?.message ?? error),
+      });
+    }
+  };
+  if (handle) {
+    record("close_owned_handle", () => handle.close());
+    await recordAsync("await_owned_exit", () => handle.closed);
+  }
+  if (controller)
+    await recordAsync("dispose_controller", () => controller.dispose());
+  if (server) await recordAsync("close_platform_service", () => server.close());
+  if (fixture) record("close_fixture", () => fixture.close());
+  if (mock) {
+    record("stop_model_stub", () => mock.kill());
+    await new Promise((r) => setTimeout(r, 300));
+  }
+  if (bridgeConfig) {
+    record("remove_bridge_configuration", () => {
+      if (existsSync(bridgeConfig)) rmSync(bridgeConfig, { force: true });
+      if (existsSync(bridgeConfig)) throw new Error("still present");
+    });
+  }
+  // Post-check after cleanup, so our own child is not counted as an original.
+  try {
+    const after = inventory();
+    write("process-after.json", after);
+    facts.processUnchanged = JSON.stringify(before) === JSON.stringify(after);
+    report.process = {
       before: before.length,
       after: after.length,
-      unchanged,
-    },
-    steps,
-    client_qualification: "UNVERIFIED",
-    windows_isolation: "UNVERIFIED",
+      unchanged: facts.processUnchanged,
+      file: "process-after.json",
+    };
+  } catch (error) {
+    report.process = {
+      before: before.length,
+      after: null,
+      unchanged: false,
+      error: String(error?.message ?? error),
+    };
+    cleanup.push({
+      step: "process_after_inventory",
+      ok: false,
+      error: String(error?.message ?? error),
+    });
+  }
+  facts.cleanupComplete = cleanup.every((item) => item.ok);
+  report.cleanup = {
+    ok: facts.cleanupComplete,
+    steps: cleanup,
+    bridge_configuration_removed: cleanup.some(
+      (item) => item.step === "remove_bridge_configuration" && item.ok,
+    ),
   };
-  assert.equal(unchanged, true, "Original client processes changed");
-} catch (error) {
-  report = {
-    status: "FAIL",
-    steps,
-    error: { name: error?.name, message: error?.message },
-  };
-  process.exitCode = 1;
-} finally {
-  handle?.close();
-  if (controller) await controller.dispose();
-  if (server) await new Promise((r) => server.close(() => r()));
-  fixture?.close();
-  mock?.kill();
+  if (!facts.cleanupComplete && !facts.harnessError)
+    facts.harnessError = "cleanup incomplete";
+  report.finished_at = new Date().toISOString();
+  report.status = acceptanceStatus(facts);
+  report.level_status = levelPassed(facts) ? "PASS" : "FAILED";
+  write("report.json", report);
+  process.exitCode = report.level_status === "PASS" ? 0 : 1;
+  console.log(
+    JSON.stringify(
+      {
+        status: report.status,
+        level_status: report.level_status,
+        mode: report.mode,
+        checks: report.checks.length,
+        failures: report.failures,
+        cleanup_ok: facts.cleanupComplete,
+        process_unchanged: facts.processUnchanged,
+        output: values.output,
+      },
+      null,
+      2,
+    ),
+  );
 }
-write("report.json", report);
-console.log(JSON.stringify(report, null, 2));

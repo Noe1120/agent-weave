@@ -1,145 +1,122 @@
 {
-  "schema": 1,
-  "stage": "W14 codex app-server real acceptance",
-  "observed_at": "2026-11-16T01:53:40.128Z",
+  "schema": 2,
+  "observed_at": "2026-11-16T03:12:22.758Z",
+  "stage": "W14 codex integration, implementation defects fixed and re-verified",
   "qualification": "UNVERIFIED",
-  "status": "PASS_REAL_WITH_LOCAL_MODEL_STUB",
-  "real_client_operations": {
-    "app_server_initialize": "PASS_REAL",
-    "native_thread_start": "PASS_REAL",
-    "synthetic_turn": "PASS_REAL_CLIENT",
-    "platform_tool_round_trip": "PASS_REAL",
-    "process_close_and_reconcile": "PASS",
-    "user_desktop_attach": "NOT_RUN",
-    "vendor_model_turn": "NOT_RUN"
+  "verdicts": {
+    "platform_codex_integration": "PASS (client, protocol, bridge, platform service, lifecycle)",
+    "local_model_stub_tool_round_trip": "PASS_REAL_CLIENT_WITH_LOCAL_MODEL_STUB",
+    "vendor_model_tool_round_trip": "FAILED_AT_MODEL_TOOL_SELECTION",
+    "vendor_model_tool_reach_root_cause": "the client declares only code-mode namespaces to this model; the MCP namespace is not declared",
+    "codex_integration_fully_complete": false
   },
-  "client": {
-    "cli_version": "0.167.0-alpha.3.2",
-    "cli_sha256": "4b3286e35d7fe866c6b0eb3f07d7a4cdb5e96489576170dfd6b3a15aa1c67382",
-    "cli_bytes": 369018160,
-    "desktop_app": "OpenAI.Codex 26.1103.4239.0 (MSIX)",
-    "schema_generated_by_client": true
+  "code_fixes_this_round": [
+    "per-turn identity in the transport: generation, native turn id, per-turn message and token usage, stale/foreign terminal events counted and ignored",
+    "the controller binds a platform turn to one transport generation and projects the persisted state, so a reader never sees completed before the store records it",
+    "an unknown turn blocks every new turn with CODEX_RECONCILIATION_REQUIRED; only a reconciled close then a rebuilt runtime may run again",
+    "the acceptance harness separates stub and vendor modes and never reads a missing stub log; it records checks instead of throwing and always writes the report, process post-check and cleanup summary",
+    "the turn deadline is fixed when the turn is accepted, not when the acknowledgement lands"
+  ],
+  "commands": [
+    {
+      "date": "2026-11-16",
+      "command": "node --test --test-concurrency=2 tests/codex-app-server.test.ts tests/codex-runtime.test.ts tests/codex-launcher-config.test.ts tests/codex-read-connector.test.ts tests/codex-acceptance-plan.test.ts",
+      "exit_code": 0,
+      "tests": 54,
+      "pass": 54,
+      "fail": 0,
+      "skipped": 0,
+      "log": "evidence/codex/2026-11-16-synthetic/codex-group-2026-11-16.log"
+    },
+    {
+      "date": "2026-11-16",
+      "command": "npm run verify",
+      "exit_code": 0,
+      "tests": 493,
+      "pass": 493,
+      "fail": 0,
+      "skipped": 0,
+      "log": "evidence/codex/2026-11-16-synthetic/verify-2026-11-16.log"
+    },
+    {
+      "date": "2026-11-16",
+      "command": "npm run test:native",
+      "exit_code": 0,
+      "evidence": "14/14 C# + 1 WPF static",
+      "log": "evidence/codex/2026-11-16-synthetic/native-2026-11-16.log"
+    },
+    {
+      "date": "2026-11-16",
+      "command": "npm run test:native:package",
+      "exit_code": 0,
+      "evidence": "old 0.3.0 package 989 files PASS",
+      "log": "evidence/codex/2026-11-16-synthetic/package-2026-11-16.log"
+    },
+    {
+      "date": "2026-11-16",
+      "command": "python plan/tools/test_p0_readiness.py -v",
+      "exit_code": 0,
+      "log": "evidence/codex/2026-11-16-synthetic/p0-2026-11-16.log"
+    },
+    {
+      "date": "2026-11-16",
+      "command": "python plan/tools/verify_design.py --refresh-combined --write-report --refresh-manifest",
+      "exit_code": 0,
+      "log": "evidence/codex/2026-11-16-synthetic/design-refresh-2026-11-16.log"
+    },
+    {
+      "date": "2026-11-16",
+      "command": "python plan/tools/verify_design.py",
+      "exit_code": 0,
+      "evidence": "document_checks PASS; AT 190 / CA 60 all NOT_RUN; file_count 52",
+      "log": "evidence/codex/2026-11-16-synthetic/design-verify-2026-11-16.log"
+    }
+  ],
+  "real_acceptance": {
+    "initialize": {
+      "level_status": "PASS",
+      "checks": 4
+    },
+    "thread": {
+      "level_status": "PASS",
+      "checks": 14
+    },
+    "stub_turn": {
+      "level_status": "PASS",
+      "status": "PASS_REAL_CLIENT_WITH_LOCAL_MODEL_STUB",
+      "checks": 19,
+      "bridge_tool_calls": 1,
+      "bridge_tool_errors": 0
+    },
+    "vendor_turn": {
+      "level_status": "FAILED",
+      "status": "FAILED_AT_MODEL_TOOL_SELECTION",
+      "checks": 18,
+      "bridge_tool_calls": 0,
+      "tokens": 17865
+    }
   },
-  "platform_read_round_trip": {
-    "bridge_target": "codex",
-    "bridge_initialized": true,
-    "bridge_tool_calls": 1,
-    "bridge_tool_errors": 0,
-    "bridge_fault": null,
-    "returned_assessment": "task status draft",
-    "native_agent_message_matches_grant_task": true
+  "cost": {
+    "vendor_attempts": 8,
+    "tokens_total": 160090,
+    "money": "UNKNOWN (route billing not observable); no unit-price estimate claimed"
   },
   "containment": {
     "user_configuration_used": false,
-    "credentials_supplied": false,
-    "user_sessions_read": false,
+    "user_global_config_modified": false,
+    "credentials_uploaded": false,
+    "user_chat_history_read": false,
+    "existing_desktop_attached": false,
     "original_client_processes_unchanged": true,
-    "original_client_process_count": 12,
-    "model_egress": "loopback stub only; no external provider, no billing"
+    "bridge_configuration_removed_after_each_run": true
   },
-  "synthetic_tests": {
-    "protocol": 11,
-    "controller": 16,
-    "read_connector": 4,
-    "launcher_config": 7,
-    "total": 39
-  },
-  "commands": [
-    {
-      "command": "node --test tests/codex*.test.ts",
-      "status": "passed",
-      "exit_code": 0,
-      "evidence": "35/35"
-    },
-    {
-      "command": "npm run verify",
-      "status": "passed",
-      "exit_code": 0,
-      "evidence": "477/477"
-    },
-    {
-      "command": "npm run test:native",
-      "status": "passed",
-      "exit_code": 0,
-      "evidence": "14/14 C# + 1 WPF static"
-    },
-    {
-      "command": "npm run test:native:package",
-      "status": "passed",
-      "exit_code": 0,
-      "evidence": "989 files PASS"
-    },
-    {
-      "command": "python plan/tools/test_p0_readiness.py -v",
-      "status": "passed",
-      "exit_code": 0
-    },
-    {
-      "command": "python plan/tools/verify_design.py --refresh-combined --write-report --refresh-manifest",
-      "status": "passed",
-      "exit_code": 0
-    },
-    {
-      "command": "python plan/tools/verify_design.py",
-      "status": "passed",
-      "exit_code": 0,
-      "evidence": "document_checks PASS; AT 190 / CA 60 all NOT_RUN"
-    },
-    {
-      "command": "node tests/codex-live-walkthrough.mjs --allow-codex-app-server-initialize --allow-codex-new-thread --allow-codex-synthetic-turn --config <local> --output <new dir>",
-      "status": "passed",
-      "exit_code": 0,
-      "evidence": "REAL_CODEX_TOOL_ROUND_TRIP_PASS"
-    },
-    {
-      "command": "npm run test:codex:live -- --allow-codex-provider-reuse --provider-config <local> ... (4 attempts)",
-      "status": "failed",
-      "exit_code": 1,
-      "evidence": "turn completed but the model never called the platform tool; gate rejected every attempt"
-    }
-  ],
-  "protocol_facts_from_client_schema": {
-    "envelope": "no jsonrpc member; request {id,method,params?}; response {id,result}; error {id,error{code,message}}",
-    "initialize_response": [
-      "codexHome",
-      "platformFamily",
-      "platformOs",
-      "userAgent"
-    ],
-    "turn_status_enum": [
-      "completed",
-      "interrupted",
-      "failed",
-      "inProgress"
-    ],
-    "mcp_tool_exposure": "one namespace tool per server; call needs namespace + inner tool name",
-    "client_request_methods": 248,
-    "server_request_methods": 42,
-    "server_notification_methods": 185,
-    "client_notification_methods": 1
-  },
-  "negative_observations": [
-    "empty CODEX_HOME without a provider: real turn falls back to the default OpenAI Responses WebSocket endpoint, retries 7 times, then fails honestly",
-    "flat mcp__server__tool call names are refused as unsupported",
-    "inProgress must not be projected as completed"
-  ],
   "not_run": [
-    "real vendor-model turn through the user provider",
-    "attached_session to the existing desktop chat",
-    "turn/interrupt against a live vendor turn",
+    "vendor-model tool round trip",
+    "attached session to the existing desktop chat",
     "Windows isolation",
-    "native UI and click acceptance"
+    "native UI acceptance",
+    "product acceptance (250 AT/CA)"
   ],
   "author_self_review": true,
-  "independent_review": false,
-  "vendor_model_leg": {
-    "status": "FAILED_AT_MODEL_TOOL_SELECTION",
-    "authorization": "operator: continue the integration with total cost under 10 CNY",
-    "attempts": 4,
-    "total_tokens": 88445,
-    "bridge_connected_every_attempt": true,
-    "platform_tool_calls": 0,
-    "evidence": "evidence/codex/vendor-attempt-report.json",
-    "budget_status": "within limit; stopped after attempt 4"
-  }
+  "independent_review": false
 }

@@ -243,7 +243,14 @@ const server = createServer((request, response) => {
       );
       return;
     }
-    if (request.method !== "POST" || !request.url?.endsWith("/responses")) {
+    appendFileSync(
+      stateFile + ".access",
+      JSON.stringify({ method: request.method, url: request.url }) + "\n",
+    );
+    if (
+      request.method !== "POST" ||
+      !(request.url ?? "").includes("/responses")
+    ) {
       response.writeHead(404).end();
       return;
     }
@@ -292,12 +299,14 @@ const server = createServer((request, response) => {
           return "";
         };
         const text = flat(body.input);
+        // Tolerate every wording the platform may use: task_id <uuid>,
+        // task_id: "<uuid>", "task_id": "<uuid>".
         const match =
           text.match(
-            /task_id\s+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i,
+            /task_id[^0-9a-f]{0,8}([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i,
           ) ??
           text.match(
-            /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i,
+            /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i,
           );
         log({
           ...entry,
@@ -309,7 +318,7 @@ const server = createServer((request, response) => {
               : strategy === "dotted"
                 ? tool.name + "." + tool.inner
                 : tool.flat,
-          task_id: match ? match[0] : null,
+          task_id: match ? match[1] : null,
         });
         toolCallStream(
           tool,
