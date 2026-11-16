@@ -1,5 +1,7 @@
 # 03 Agent 接入、兼容性与 Windows 验证
 
+> 2026-11-16 W16：新增主人邀请、限定兑换、登记查询/撤销后端，保持三原客户端 target，尚不绑定真实原生会话或签发执行 grant。客户端提交的配置摘要仅与主人固定值比对，不构成真实发行版/账户/身份认证证据；所有登记仍显示 runtime_state=not_connected、qualification=UNVERIFIED。Windows 隔离部署与实测按用户要求暂缓，但实际写入/私密执行门槛不豁免。见 [W16](W16-CONNECTION-REGISTRATION.md)。
+
 > 2026-11-16 W15：已有 DSH initialize-only / Codex app-server 控制器新增受保护 HTTP 生命周期通路，见 [W15](W15-RUNTIME-GATEWAY.md)。GET 只读投影关联成员/run；POST start/close 需 grant 与 policy 同时具有 runtime_control，且仍通过 adapter_configure、scope/CAS/幂等校验。启动器只来自可信服务装配，正常服务默认无启动器；无持有控制器的活动记录为 unknown。HTTP 不开放 prompt/turn/interrupt/附着，也不因此提升真实客户端或 Windows 资格。
 
 > 2026-11-14：开发实现增量：W08仅可信进程内登记、能力原因投影、配置失效与本地detach。普通调用方不能自报VERIFIED或注入执行命令；真实发送/回答/审批/打断未开放，详见W08-ADAPTER-FOUNDATION.md。

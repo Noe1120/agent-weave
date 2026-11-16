@@ -6,6 +6,14 @@
 
 ## 0. 先看结论
 
+### W16 最新增量（优先于下方前序交接）
+
+用户已明确“暂缓 Windows 隔离部署与实测，先推进产品级连接管理后端”。本轮在 D 盘主工作区的 `codex/connection-management` 分支实施 [W16](plan/W16-CONNECTION-REGISTRATION.md)：主人邀请、单次兑换、登记凭据、只读列表/自身状态、过期/撤销/成员变更失效。没有迁移、原客户端启动、模型调用或系统策略改动。登记状态 registered **不等于在线**，runtime_state 始终 not_connected，凭据不能用于 execution_grant/runtime_control。
+
+代码入口 `packages/service/src/connection-registry.ts`、`workspace-http.ts`、`http.ts`；测试 `tests/connection-http.test.ts` 和编译后 `tests/connection-walkthrough.mjs`。源库 schema4 不变。邀请 10 分钟，连接凭据自签发起 8 小时；签名键轮换/备份恢复后旧凭据拒绝。成功兑换仅返回自己的登记元数据，不开放项目内容。下一阶段应实现受信连接器/原生会话绑定与按任务最小授权，不能把邀请持有者自行声明的 fingerprint 当真实客户端身份。验证与交付见 `evidence/connection-registration/COMPLETION.md`，Git 状态以实际 log/status 为准。
+
+以下记录保留 W15 交接历史；其中“下一方向尚未编码”已由本增量取代。
+
 1. 我们在构建 **Agent Weave：独立原生 Windows 多 Agent 项目协作平台**，不是浏览器壳，也不是用模型 API 替代原客户端的聊天软件。
 2. 最新已交付阶段为 **W15 受保护运行管理后端**，代码提交 `0f2134ff6eb93f1f0c0642a55813a722f86e6fc1`，上一轮已普通推送并核对远端 main 一致。
 3. **用户最新表示当前环境难以支持 Windows 隔离阶段，希望先做其他任务。后续按暂缓实际隔离部署/实测来安排，不要再把购买内存、创建虚拟机或取得系统管理员权限作为所有开发工作的前提。** 暂缓不是豁免或通过；真实 Agent 写入与私密执行仍受该门槛约束。

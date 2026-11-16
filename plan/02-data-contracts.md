@@ -1,5 +1,7 @@
 # 02 数据、状态与接口契约
 
+> 2026-11-16 W16：成员连接登记子阶段使用现有 resources/OwnerAuth，无迁移。邀请只可兑换固定成员/配置的登记凭据；登记凭据只可读取自身状态，不能用于 execution_grant、runtime_control、消息或任务读取。主人 Cookie/CSRF 与邀请/连接 Bearer 分离，邀请单次兑换与 CAS 撤销均在事务中完成。成员 revision、有效期和签名键变化使旧登记失效；registered 不等于原客户端在线。详见 [W16](W16-CONNECTION-REGISTRATION.md)。
+
 > 2026-11-16 W15：新增 runtime/0.1 后端边界，沿用现有 adapter_runtime 资源与 schema4。只读 `GET /v1/projects/:project/runtimes/:runtime` 使用 adapter_read；生命周期 `POST /v1/runtimes/:target/{start|close}` 另需 runtime_control 且经原控制器鉴权。成员/run 从认证上下文派生；task 引用逐次校验权限。只投影状态、版本、指纹、原生 thread 摘要和退出观察，不返回原生标识/消息/路径/凭据；状态读取无 DB 写入、无原客户端操作。详见 [W15](W15-RUNTIME-GATEWAY.md)，不修改 core/1.0。
 
 > 2026-11-14：开发实现增量：W09在现有resources表保存任务DAG、不可变输入快照与授权资料；Broker/排队/评审等待重新校验完整上游版本。核心wire与迁移不改，详见W09-DEPENDENCIES-KNOWLEDGE.md。

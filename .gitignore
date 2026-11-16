@@ -149,6 +149,11 @@ qa-runtime/
 !/evidence/runtime-gateway/
 /evidence/runtime-gateway/*
 !/evidence/runtime-gateway/COMPLETION.md
+
+# W16 reviewed registration summary; no credentials or raw runtime files.
+!/evidence/connection-registration/
+/evidence/connection-registration/*
+!/evidence/connection-registration/COMPLETION.md
 !/evidence/codex/vendor-attempt-report.json
 !/evidence/codex/preflight/
 /evidence/codex/preflight/*

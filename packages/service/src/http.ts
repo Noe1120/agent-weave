@@ -18,6 +18,7 @@ import { ServiceFault } from "./errors.ts";
 import { randomUUID } from "node:crypto";
 import { RuntimeGateway } from "./runtime-gateway.ts";
 import { AdapterFault } from "./adapter-contract.ts";
+import { ConnectionRegistry } from "./connection-registry.ts";
 export function createServer(
   service: CoreService,
   workspace = new WorkspaceService(service.store, service.now),
@@ -52,6 +53,37 @@ export function createServer(
         );
         if (!credential) throw new TransportFault(401, "UNAUTHENTICATED");
         const token = credential[1]!;
+        if (req.url === "/v1/connections/redeem") {
+          if (req.method !== "POST")
+            throw new TransportFault(405, "METHOD_NOT_ALLOWED");
+          send(res, 200, {
+            contract_version: "connection/0.1",
+            kind: "connection_result",
+            data: new ConnectionRegistry(workspace).redeem(
+              token,
+              await body(req),
+            ),
+          });
+          return;
+        }
+        const connection = /^\/v1\/connections\/([0-9a-f-]{36})$/i.exec(
+          req.url,
+        );
+        if (connection) {
+          if (req.method !== "GET")
+            throw new TransportFault(405, "METHOD_NOT_ALLOWED");
+          if (
+            req.headers["transfer-encoding"] ||
+            Number(req.headers["content-length"] ?? 0) !== 0
+          )
+            throw new TransportFault(400, "BAD_REQUEST");
+          send(res, 200, {
+            contract_version: "connection/0.1",
+            kind: "connection_result",
+            data: new ConnectionRegistry(workspace).read(token, connection[1]!),
+          });
+          return;
+        }
         const runtimeCommand =
           /^\/v1\/runtimes\/(codex|deepseek_harness)\/(start|close)$/.exec(
             req.url,

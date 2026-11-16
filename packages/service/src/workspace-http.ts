@@ -3,6 +3,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import type { WorkspaceService } from "./workspace-service.ts";
 import { reject } from "./workspace-auth.ts";
 import { readJson, sendJson } from "./http-transport.ts";
+import { ConnectionRegistry } from "./connection-registry.ts";
 const assets: Record<string, [string, string]> = {
   "/": ["index.html", "text/html; charset=utf-8"],
   "/app.js": ["app.js", "text/javascript; charset=utf-8"],
@@ -94,6 +95,22 @@ export async function handleWorkspace(
     const token = ownerToken(req),
       csrf = req.headers["x-csrf-token"];
     w.auth.authorize(token, typeof csrf === "string" ? csrf : "");
+    if (
+      path === "/v1/console/connections/invite" ||
+      path === "/v1/console/connections/revoke"
+    ) {
+      const connections = new ConnectionRegistry(w);
+      const operation = path.endsWith("/invite") ? "invite" : "revoke";
+      result(
+        res,
+        connections[operation](
+          token,
+          typeof csrf === "string" ? csrf : "",
+          body,
+        ),
+      );
+      return true;
+    }
     if (path === "/v1/console/logout") {
       if (
         !body ||
@@ -124,6 +141,12 @@ export async function handleWorkspace(
     reject(400, "INVALID_REQUEST");
   const token = ownerToken(req);
   w.auth.authorize(token);
+  const connections =
+    /^\/v1\/console\/projects\/([0-9a-f-]{36})\/connections$/i.exec(path);
+  if (connections) {
+    result(res, new ConnectionRegistry(w).list(token, connections[1]!));
+    return true;
+  }
   if (path === "/v1/console/session") {
     result(res, w.auth.session(token));
     return true;
