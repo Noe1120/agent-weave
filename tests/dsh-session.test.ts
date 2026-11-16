@@ -18,9 +18,9 @@ async function run(mode: string, sinkFails = false) {
   const stderr: Buffer[] = [];
   const report = await probeFreshSession(child, resolve("."), {
     requestMs: mode.includes("timeout") ? 300 : 5000,
-    // Ordinary process exit uses the probe's 5s cleanup budget. Only tests
-    // intentionally withholding EOF/pipe closure use a shortened deadline.
-    closeMs: ["ignore-eof", "permission-held-pipe"].includes(mode) ? 300 : 5000,
+    // A held descendant pipe must not shorten the root's normal exit budget.
+    // Only the root intentionally ignoring EOF needs accelerated termination.
+    closeMs: mode === "ignore-eof" ? 300 : 5000,
     onStderr(bytes) {
       if (sinkFails) throw new Error("disk full");
       stderr.push(bytes);

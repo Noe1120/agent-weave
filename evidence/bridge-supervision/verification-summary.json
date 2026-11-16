@@ -1,0 +1,138 @@
+{
+  "stage": "W21",
+  "qualification": "OFFLINE_SYNTHETIC_PROTOTYPE_ONLY",
+  "outcome": "PASS_WITH_EXPLICIT_SCOPE",
+  "base_commit": "c61308b357aad75be64a310f043db2ed45492129",
+  "original_clients_started": 0,
+  "model_calls": 0,
+  "user_credentials_reused": 0,
+  "production_code_changed": false,
+  "handoff_sha256": "9E057D55395FAABD77A175B64042F18DF24A7AC53334C10A0A370D3F06DF0586",
+  "checks": [
+    {
+      "command": "npm run verify",
+      "exit_code": 0,
+      "failed": 0,
+      "passed": 625,
+      "skipped": 0
+    },
+    {
+      "command": "W21_COMPILED=1 node --test tests/bridge-supervisor.test.ts",
+      "exit_code": 0,
+      "failed": 0,
+      "passed": 14
+    },
+    {
+      "command": "node --test tests/dsh-session.test.ts",
+      "exit_code": 0,
+      "failed": 0,
+      "passed": 37
+    },
+    {
+      "command": "npm run test:native",
+      "csharp_passed": 14,
+      "exit_code": 0,
+      "static_passed": 1
+    },
+    {
+      "command": "npm run test:native:package",
+      "files": 989,
+      "exit_code": 0
+    },
+    {
+      "command": "python -B plan/tools/test_p0_readiness.py",
+      "exit_code": 0,
+      "passed": 13
+    },
+    {
+      "command": "python -B plan/tools/verify_design.py",
+      "files": 60,
+      "exit_code": 0,
+      "manifest_entries": 59
+    }
+  ],
+  "prior_failed_runs": [
+    {
+      "fix": "Test deadline 3000ms and immediate rejection handler; HOST_EXIT_TIMEOUT assertion retained",
+      "failed": 1,
+      "reason": "Shared test deadline exhausted at bridge exit before host timeout; late rejection subscription",
+      "passed": 13,
+      "log": ".runtime/w21/compiled-journey.log"
+    },
+    {
+      "fix": "Deterministic 600ms root delay reproduces failure; default 5000ms root budget with descendant holding pipes 9000ms; assertions retained",
+      "failed": 1,
+      "reason": "Held-pipe fixture gave normal root exit only 300ms; forced exit violated assertion",
+      "passed": 624,
+      "log": ".runtime/w21/verify-final.log"
+    }
+  ],
+  "review": "AUTHOR_SELF_REVIEW_NOT_INDEPENDENT",
+  "w20_outcome": "FAILED_UNCHANGED",
+  "product_tests": "AT190_CA60_NOT_RUN",
+  "unimplemented": [
+    "authenticated relay and production launcher integration",
+    "ingress backpressure and notification total limits",
+    "open request deadlines",
+    "crash/restart recovery",
+    "production report-path ownership validation"
+  ],
+  "logs": [
+    {
+      "path": ".runtime/w21/red.log",
+      "sha256": "894a036bcf15f224ce859ef81a91d94217ee9cc1870609b285bfc2b31ccc795a"
+    },
+    {
+      "path": ".runtime/w21/compiled-journey.log",
+      "sha256": "0055ace3811c2ec32c4cfbee87f65e0b7020788ff8b72922f3d57e1e42f61f93"
+    },
+    {
+      "path": ".runtime/w21/compiled-journey-fixed.log",
+      "sha256": "0078df77be019aab2b5f14ba2b18dd7b8bc7457ebc8f3b6676dbfd77e402ec4b"
+    },
+    {
+      "path": ".runtime/w21/verify.log",
+      "sha256": "5151ad614b145e126a8e0c187f1ffbd78abe0507192f6164ab0121865acc4ddf"
+    },
+    {
+      "path": ".runtime/w21/verify-final.log",
+      "sha256": "0f36bbf35d36ea81040f2506693b416e2e1736c6ae2c183886341df279b40402"
+    },
+    {
+      "path": ".runtime/w21/held-pipe-diagnosis.log",
+      "sha256": "bc388520a2d296ff5b60606b06e9777de27a16e6567d4e75b734bc4b31ec83e9"
+    },
+    {
+      "path": ".runtime/w21/held-pipe-red.log",
+      "sha256": "2685e429a694da9708790a05ee32f157dd4304faa0bd4e152286388cecba3b80"
+    },
+    {
+      "path": ".runtime/w21/held-pipe-green.log",
+      "sha256": "7e1819520af4cddaca3f09c81edbb281f7b58911dd704d9af2d4c411ff6f91d5"
+    },
+    {
+      "path": ".runtime/w21/verify-release.log",
+      "sha256": "0840bd057a07ba35b532ffd1c994d1163432ffee30bd81700bb5a4d3dcdbb45b"
+    },
+    {
+      "path": ".runtime/w21/compiled-final.log",
+      "sha256": "15893b4e68093834e6983d27b2c94b7e97f0a2646bcb1ce1bfd9ea76fcddcca9"
+    },
+    {
+      "path": ".runtime/w21/native-final.log",
+      "sha256": "dcc94f27c24aab212d2638dcd72044fcb5d6056439da26c77e2659ea4280f267"
+    },
+    {
+      "path": ".runtime/w21/package-final.log",
+      "sha256": "77c06975809839528ad44681a225adfd36628db49898b4eac30815809a5f75dd"
+    },
+    {
+      "path": ".runtime/w21/p0-final.log",
+      "sha256": "7cc1bd1b18a1660cd107c78323e5b480972d16e2fc41ae2cc106c2b89483921d"
+    },
+    {
+      "path": ".runtime/w21/design-final.log",
+      "sha256": "5137effb9ca54386dd7ba5eeffee913e088d55fe66106e3ff664965b3bcd526d"
+    }
+  ]
+}

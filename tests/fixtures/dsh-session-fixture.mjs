@@ -41,7 +41,7 @@ reader.on("line", (line) => {
       return process.stdout.write("x".repeat(65537) + "\n");
     if (mode === "stderr-flood") return process.stderr.write("x".repeat(65537));
     if (mode === "permission-held-pipe")
-      spawn(process.execPath, ["-e", "setTimeout(()=>{},4200)"], {
+      spawn(process.execPath, ["-e", "setTimeout(()=>{},9000)"], {
         detached: true,
         windowsHide: true,
         stdio: ["ignore", 1, 2],
@@ -110,6 +110,8 @@ reader.on("line", (line) => {
 });
 reader.on("close", () => {
   if (mode === "ignore-eof") setInterval(() => {}, 1000);
+  // Exercise ordinary delayed root exit while the descendant keeps pipes open.
+  else if (mode === "permission-held-pipe") setTimeout(() => {}, 600);
   else if (mode === "delayed-eof") setTimeout(() => {}, 600);
   else process.exitCode = mode === "exit-failure" ? 7 : 0;
 });

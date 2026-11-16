@@ -181,3 +181,9 @@ qa-runtime/
 /evidence/codex/preflight/2026-11-16-readonly/*
 !/evidence/codex/preflight/2026-11-16-readonly/preflight-summary.json
 !/evidence/codex/preflight/2026-11-16-readonly/schema-summary.json
+
+# W21 offline supervision summaries only; runtime credentials and logs stay local.
+!/evidence/bridge-supervision/
+/evidence/bridge-supervision/*
+!/evidence/bridge-supervision/COMPLETION.md
+!/evidence/bridge-supervision/verification-summary.json

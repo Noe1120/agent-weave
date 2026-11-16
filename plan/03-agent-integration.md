@@ -224,6 +224,8 @@ UNKNOWN/NOT_RUN 不形成资格；LIMITED 列出人工步骤及禁用能力。�
 
 ## 16. W07开发运行器与未来附着边界（实施注记）
 
+W21桥生命周期设计：原客户端宿主退出不能代替MCP子进程正常退出证据。平台持有真正桥的stdio时，应先关闭请求准入、排空已接收请求，再发送EOF并同时检查桥真实退出及最终报告，最后关闭自有宿主。排空不延长业务grant，也不释放逻辑写锁；超时/非零/缺证据保持失败。当前仅tests离线原型，尚无真实客户端转发端及认证通道，见[W21](W21-BRIDGE-SUPERVISION.md)。
+
 W07仅启用固定哈希配置的 development_fixture，以 owned_process 绑定平台自有测试进程；可信进程内RunnerController负责授权、持久化和Broker调用，worker只提交严格JSONL事件。原生RunnerHost的Job生命周期管理不构成安全沙箱：以当前用户运行的进程仍可能访问同用户资源，合作式等待begin的fixture不能推广为任意原客户端的启动隔离证明。
 
 后续 attached_session 必须区分断开连接、中断回合、退出客户端；不得把自有进程的Terminate路径用于用户原客户端。参考[Agents Anywhere定向研究](research/2026-11-14-agents-anywhere.md)只提供源码线索，Claude SDK不能替代Claude Desktop。能力发现/配置校验与会话读写分别实现；只读查询不能顺手resume/接管，未知发送结果不能自动重发。实际适配入口仍需本章与09/12规定的固定版本、明确授权和同配置证据。
