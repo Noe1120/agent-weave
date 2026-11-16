@@ -183,6 +183,12 @@
   ],
   "corrected_claims": {
     "tool_surface_configurability": "an earlier note said the thread tool surface is not pinnable through documented config. That was based on `[code_mode]` (a wrong table name) and provider `capabilities.*`. With the exact keys, features.code_mode.enabled / direct_only_tool_namespaces / excluded_tool_namespaces are supported (evidence/codex/config-key-probe-2026-11-16.json); only mcp_servers.<id>.omit_tools_from is rejected.",
-    "still_not_tested": "whether direct_only_tool_namespaces makes the platform MCP namespace a direct tool for this model needs one authorized real turn (proposal in plan/W14 §7.1)"
+    "still_not_tested": "resolved: direct_only_tool_namespaces = [\"mcp__agent_weave_probe\"] was run once with the real model and produced a real tool round trip (evidence/codex/real-vendor-directonly-2026-11-16.json)"
+  },
+  "passing_configuration": {
+    "status": "PASS_REAL_VENDOR_TOOL_ROUND_TRIP",
+    "tokens": 22331,
+    "evidence": "evidence/codex/real-vendor-directonly-2026-11-16.json",
+    "note": "this does not retroactively validate the eight failed attempts or the default configuration"
   }
 }

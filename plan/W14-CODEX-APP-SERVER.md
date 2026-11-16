@@ -12,13 +12,13 @@ Spec：connect.md §6（C1–C6）、[03 §4](03-agent-integration.md)、[09](09
 | 项 | 结果 |
 | --- | --- |
 | 固定身份/配置指纹 | 已固定：MSIX `OpenAI.Codex 26.1103.4239.0`、CLI `0.167.0-alpha.3.2`、`codex.exe` SHA-256、启动前后哈希与授权复核 |
-| 真实 initialize | **PASS_REAL**（本机 CLI 子进程，空 `CODEX_HOME`，无凭据） |
+| 真实 initialize | **PASS_REAL**（本机 CLI 子进程，空 `CODEX_HOME`，该级不注入任何凭据） |
 | 真实原生 thread | **PASS_REAL**（客户端签发 UUIDv7 thread；平台只投影 SHA-256，`session_id` 恒 null） |
 | 一条合成 turn | **PASS_REAL_CLIENT**（turn `completed`；模型为本地桩） |
 | 一次平台只读工具往返 | **PASS_REAL**：真实客户端经 stdio MCP 调 `task_get`，平台 HTTP 服务返回 `draft`，原生 agent message 复述同一任务 ID 与状态 |
 | 纯只读进度 | **PASS**：1000 次读取，DB 写入 0 |
 | 关闭/退出 | **PASS**：exit 0、`forced=false`、`exit_observed=true`；原客户端进程 12→12 |
-| 撤权 | 合成回归覆盖（真实运行中未撤权） |
+| 撤权 | 合成回归覆盖；零成本运行已验证 `GRANT_REVOKED`→`closing`→`closed`；**真实厂商配置下的联合撤权验收未执行** |
 | 真实厂商模型调用平台工具 | **FAILED_AT_MODEL_TOOL_SELECTION**（8 次，见 §5.2；预算内停止；客户端未向该模型声明 MCP 命名空间） |
 | 已有桌面聊天附着 `attached_session` | NOT_RUN，且不以新 thread 冒充 |
 | Windows 强制隔离 / 原生 UI / 完整 L1–L3 | NOT_RUN / UNVERIFIED |
@@ -31,7 +31,7 @@ Spec：connect.md §6（C1–C6）、[03 §4](03-agent-integration.md)、[09](09
 | --- | --- |
 | 桌面原客户端 | MSIX `OpenAI.Codex` `26.1103.4239.0`，`OpenAI.Codex_26.1103.4239.0_x64__2p2nqsd0c76g0`，主进程 `app\ChatGPT.exe` |
 | CLI | `...\OpenAI\Codex\bin\f71a721e0e6193a9\codex.exe`，369,018,160 字节，SHA-256 `4b3286e3…c67382`，`codex-cli 0.167.0-alpha.3.2` |
-| 用户配置 | `C:\Users\1\.codex\config.toml`：`model_provider="custom"`、回环 `127.0.0.1:15721`、`wire_api="responses"`；**bearer token 未读取、未打印、未复制** |
+| 用户配置 | `C:\Users\1\.codex\config.toml`：`model_provider="custom"`、回环 `127.0.0.1:15721`、`wire_api="responses"`。**预检阶段未读取**；本阶段按授权**仅复用获准的必要 provider 配置与令牌**（运行期读取 provider 段写入隔离 home，不打印、不外发、不修改原配置，运行后删除副本） |
 | 运行中实例 | 预检与两次真实验收均为 12 个（`ChatGPT.exe` 11、`codex.exe` 1），前后完全一致 |
 | 客户端自带 schema | `codex app-server generate-json-schema --out <dir> --experimental` exit 0；ClientRequest 248 / ServerRequest 42 / ServerNotification 185 / ClientNotification 1 |
 
@@ -54,7 +54,7 @@ Spec：connect.md §6（C1–C6）、[03 §4](03-agent-integration.md)、[09](09
 | 服务器请求一律拒绝 | 审批、`requestUserInput`、elicitation 等以 `-32601` 拒绝并计数（本次真实运行 `refused_server_requests: 0`，因为线程策略为 `approvalPolicy:"never"` + read-only） |
 | 未知通知不升级 | 未识别通知只计数（≤20 类）；只有 `turn/completed` 的三个终态值会改变投影 |
 | 未知结果不重发 | 超时/无终态一律 `unknown`，不复用 action、不重试、不按旧 PID 杀进程 |
-| 配置只来自可信侧 | 隔离 home 里只写：回环模型端点、平台自己的 stdio 桥、固定非秘密默认值；无用户 config/凭据/插件/市场/MCP 复制 |
+| 配置只来自可信侧 | 隔离 home 里只写：获准复用的 provider 段、回环模型端点、平台自己的 stdio 桥、固定非秘密默认值；其余用户 config/插件/市场/MCP 不复制 |
 
 ## 4. 已实现文件
 
@@ -72,8 +72,8 @@ Spec：connect.md §6（C1–C6）、[03 §4](03-agent-integration.md)、[09](09
 
 | 检查 | 结果 |
 | --- | --- |
-| Codex 回归组（5 个文件，`--test-concurrency=2`） | 54/54 通过（协议 15、控制器 22、连接器 4、启动配置 7、验收计划 6） |
-| `npm run verify` | 493/493 通过，0 失败 0 跳过（含格式/类型/构建/冒烟） |
+| Codex 回归组（5 个文件，`--test-concurrency=2`） | 56/56 通过（协议 15、控制器 22、连接器 4、启动配置 11、验收计划 6；含回环监听 2 项） |
+| `npm run verify` | 497/497 通过，0 失败 0 跳过（含格式/类型/构建/冒烟） |
 | `npm run test:native` | 14/14 C# + 1 项 WPF 静态 |
 | `npm run test:native:package` | 旧 0.3.0 包 989 文件 PASS |
 | 设计校验 | `test_p0_readiness.py` 与 `verify_design.py` 通过；250 AT/CA 仍 NOT_RUN |
@@ -118,7 +118,7 @@ Spec：connect.md §6（C1–C6）、[03 §4](03-agent-integration.md)、[09](09
 | 用量 | 22,331 tokens（阈值 30,000，未触发中断；金额 UNKNOWN） |
 | 退出 | exit 0、`forced=false`、`exit_observed=true`；原 12 个客户端进程不变 |
 | 清理 | provider 令牌副本 `token_hits_before=1 → removed=2 → after=0`；bridge 配置删除 |
-| 撤权 | **本次付费运行未执行**（授权仅一次 turn）；由同一 harness 的零成本 stub 运行验证：`GRANT_REVOKED` → `closing` → `closed` 且 exit 0 非强制 |
+| 撤权 | **该次运行遗漏撤权步骤**——不是「因为只授权一次 turn」：撤权不需要新的模型回合，此前指令已要求撤销临时授权；脚本随后补齐，并在**零成本运行（本地模型桩）**上单独验证 `GRANT_REVOKED` → `closing` → `closed` 且 exit 0 非强制。**真实厂商配置下的联合撤权验收未执行**，不能追认为该次付费运行的撤权通过 |
 
 证据：`evidence/codex/real-vendor-directonly-2026-11-16.json`（`PASS_REAL_VENDOR_TOOL_ROUND_TRIP`，18 项检查，0 失败）。
 
@@ -153,7 +153,7 @@ direct_only_tool_namespaces = ["mcp__agent_weave_probe"]
 | `mcp_servers.<id>.omit_tools_from` | **硬错误 unknown variant**，该构建不接受 |
 | 对照：`[features.code_mode]` 内未知字段 | 硬错误，说明该表字段集固定 |
 
-上一版据 `[code_mode]` 顶层表与 provider `capabilities.*` 被拒而断言"工具面不可配置"，**该断言错误，现更正**。平台已把这三个字段接入受信配置（`codeHomeConfig` 可选 `code_mode`、验收脚本 `--code-mode-direct`），字段经严格校验且有回归；**尚未用真实模型运行该配置**（需另行授权的一次 turn）。
+上一版据 `[code_mode]` 顶层表与 provider `capabilities.*` 被拒而断言"工具面不可配置"，**该断言错误，现更正**。平台已把这三个字段接入受信配置（`codexHomeConfig` 可选 `code_mode`、验收脚本 `--code-mode-direct`），字段经严格校验且有回归；本阶段已用真实模型在 `direct_only_tool_namespaces = ["mcp__agent_weave_probe"]` 下运行该配置并通过一次真实往返（§5.2.1）。
 
 五维区分（证据 `evidence/codex/vendor-tool-registration-2026-11-16.json`，取自第 8 次 vendor 运行自己的时间窗）：
 
@@ -188,7 +188,7 @@ direct_only_tool_namespaces = ["mcp__agent_weave_probe"]
 ## 7. 仍未完成（下一步入口）
 
 1. **真实厂商模型的工具调用**：历史 8 次失败（160,090 tokens）后，本阶段以 §5.2.1 的固定配置**通过一次真实往返**（22,331 tokens）。累计 9 次尝试、182,421 tokens、金额 UNKNOWN。仍未证明的是其他配置/版本下的可重复性，候选方向：
-   a. 用平台已接入的 `features.code_mode.direct_only_tool_namespaces = ["mcp__agent_weave_probe"]` 让命名空间直连（代码与回归已就绪，需一次授权 turn 验证，见 §7.1）；
+   a. ~~用 `direct_only_tool_namespaces` 让命名空间直连~~：**本阶段已验证通过**（§5.2.1），不再是待验方向；
    b. 客户端后续版本若提供逐项 MCP 工具声明或更强派发，重验；
    c. 换一条会向该模型直接声明 MCP 工具的路由（需用户侧配置）；
    d. 把「模型是否调用平台工具」作为独立行为资格项，按 suite 评定（当前记录为失败）。

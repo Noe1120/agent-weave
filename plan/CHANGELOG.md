@@ -27,6 +27,14 @@
 
 # W13 CC Switch原配置核实、真实MCP与只读桥 · 2026-11-16
 
+## 2026-11-16 · W14 固定配置下的真实单任务只读接入阶段通过
+
+- 预检（零成本）发现并修复：只设 `code_mode` 时隔离 home 的 `config.toml` 根本不写（写入门漏项）。
+- 按授权执行**一次**真实 turn：`[features.code_mode] direct_only_tool_namespaces = ["mcp__agent_weave_probe"]`、模型 `gpt-6.1-sol`、既有 CC Switch 路由。结果 `PASS_REAL_VENDOR_TOOL_ROUND_TRIP`：桥 `tool_calls=1`、`tool_errors=0`，turn `completed`，原生回复含同一 task ID 与真实 `draft`，22,331 tokens（阈值 30,000 未触发中断），exit 0 非强制，原 12 个客户端进程不变，provider 令牌副本 `before=1 → removed=2 → after=0`。
+- 历史默认配置下的 8 次失败（160,090 tokens）保留为 `FAILED_AT_MODEL_TOOL_SELECTION`，不追认为可用。
+- 撤权：该次运行遗漏撤权步骤；脚本随后补齐，并在零成本运行（本地模型桩）上单独验证 `GRANT_REVOKED` → `closing` → `closed`。**真实厂商配置下的联合撤权验收未执行**。
+- 最终验证时发现回环监听把 Windows 保留端口的 `EACCES` 当致命错误（导致 494/495），修复为自动端口重试并补两条回归；最终 `npm run verify` 497/497、Codex 专项 56/56。
+- 文档口径统一：仅复用获准的必要 provider 配置与令牌（不读历史、不改原配置）；金额 UNKNOWN；不写预算未超；不追认历史清理/后检。
 ## 2026-11-16：Claude me路由核对修正
 
 用户明确指定CC Switch的me分组＋路由模式。2026-11-16只读复核发现live-state为proxy/attached，proxy_route匹配me；settings旧选择器仍为official、数据库is_current仍为cc7，二者不能替代活动路由证据。此前仅固定Desktop网关文件，未固定me，相关结论已收窄为MCP传输通过。第八次测试窗口发现MCP但未发送prompt、tool_calls=0，模型不可用提示未解决；测试实例退出与凭据清除已核实。现在第三方准备入口要求绑定路由目标、live-state及provider元数据摘要，并在启动前再次核对；这仍不是运行时provider外发证明。用户已授权一次独立窗口合成任务，不重复索取；当前已有用户Claude实例，不能接管或重启，下一次真实尝试尚未启动。

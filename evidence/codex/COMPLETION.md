@@ -6,7 +6,7 @@
 
 | 项目 | 结果 |
 | --- | --- |
-| 真实 initialize（本机固定 CLI 子进程、空 CODEX_HOME、无凭据） | PASS_REAL |
+| 真实 initialize（本机固定 CLI 子进程、空 CODEX_HOME、该级不注入任何凭据） | PASS_REAL |
 | 真实原生 thread（客户端签发 UUIDv7，平台只投影 SHA-256） | PASS_REAL |
 | 一条真实 turn | PASS_REAL_CLIENT（模型为本地回环桩） |
 | 一次真实平台只读工具往返（`task_get`） | PASS_REAL |
@@ -20,7 +20,12 @@
 
 逐级真实结果（每级独占新目录）：initialize `level_status=PASS`（4 项检查）、thread `level_status=PASS`（14 项）、stub turn `PASS_REAL_CLIENT_WITH_LOCAL_MODEL_STUB`（19 项，`bridge tool_calls=1`、`tool_errors=0`、原生消息带同一 task ID）。
 
-**平台 Codex 接入基础＝完成；真实厂商模型工具往返＝未完成/阻塞；不能宣称 Codex 全部接入完成。** 详见 `real-attempt-report.json`、`vendor-attempt-report.json`、`vendor-tool-surface-20261116.json`。
+**平台 Codex 接入基础＝完成。**
+
+- 历史**默认配置**下的真实厂商模型工具往返：`FAILED_AT_MODEL_TOOL_SELECTION`（8 次，见 `vendor-attempt-report.json`）；该结论保留，不因后来成功而追认原配置可用。
+- 本阶段**固定配置** `[features.code_mode] direct_only_tool_namespaces = ["mcp__agent_weave_probe"]` 下：`PASS_REAL_VENDOR_TOOL_ROUND_TRIP`（1 次真实 turn，22,331 tokens，18 项检查 0 失败，见 `real-vendor-directonly-2026-11-16.json`）。
+- **不能宣称 Codex 全部接入完成**：桌面聊天附着、Windows 强制隔离、原生 UI、完整 L1–L3、250 项产品验收仍未做。
+- **撤权**：该次付费运行遗漏撤权步骤；脚本随后补齐，并在零成本运行（本地模型桩）上单独验证通过；**真实厂商配置下的联合撤权验收未执行**。
 
 ## 2. 真实运行做了什么
 
@@ -74,8 +79,8 @@
 
 | 命令 | 结果 |
 | --- | --- |
-| Codex 回归组（5 文件，`--test-concurrency=2`） | 54/54，0 失败 0 跳过 |
-| `npm run verify` | 493/493，0 失败 0 跳过 |
+| Codex 回归组（5 文件，`--test-concurrency=2`） | 56/56，0 失败 0 跳过 |
+| `npm run verify` | 497/497，0 失败 0 跳过 |
 | `npm run test:native` | 14/14 C# + 1 项 WPF 静态 |
 | `npm run test:native:package` | 旧 0.3.0 包 989 文件 PASS |
 | `plan/tools/test_p0_readiness.py -v` | 通过 |
@@ -86,7 +91,7 @@
 
 ## 5.2 真实厂商模型支线（授权后 8 次尝试，预算内停止）
 
-操作者要求「继续接入，费用 10 元以内」。使用其本机 CC Switch 回环路由（provider 段复制进全新的隔离 home，凭据不入任何报告），发起 4 次真实 turn，合计 **160,090 tokens**；**金额 UNKNOWN**（未观察到账单，因此也不主张“未超支”），全部 turn 完成、桥全部握手成功，但**一次都没有平台工具调用**。逐次结果与根因见 `vendor-attempt-report.json` 与 W14 §5.2。结论：该模型下客户端只提供 code 模式工具面，MCP 工具只能经 `functions.exec` 的 `tools.*` 调用，模型四次都没进入；同一客户端在无模型元数据时会直接暴露 `mcp__agent_weave_probe` 命名空间并调用成功。平台验收对每次尝试都判 FAIL，没有一次记成成功。预算未超，之后不再花钱。
+操作者要求「继续接入，费用 10 元以内」。使用其本机 CC Switch 回环路由：**仅复用获准的必要 provider 配置与令牌**（运行期从操作者配置读取 provider 段写入本次隔离 home，运行后删除副本；不读取历史会话、不修改原配置、令牌不进入任何报告），发起 4 次真实 turn，合计 **160,090 tokens**；**金额 UNKNOWN**（未观察到账单，因此也不主张“未超支”），全部 turn 完成、桥全部握手成功，但**一次都没有平台工具调用**。逐次结果与根因见 `vendor-attempt-report.json` 与 W14 §5.2。结论：该模型下客户端只提供 code 模式工具面，MCP 工具只能经 `functions.exec` 的 `tools.*` 调用，模型四次都没进入；同一客户端在无模型元数据时会直接暴露 `mcp__agent_weave_probe` 命名空间并调用成功。平台验收对每次尝试都判 FAIL，没有一次记成成功。预算未超，之后不再花钱。
 
 ## 6. 仍未完成（需要新的具体授权）
 

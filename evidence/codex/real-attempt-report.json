@@ -77,16 +77,12 @@
     "final_reply_matches_service": true
   },
   "containment": {
-    "user_configuration_used": false,
-    "credentials_supplied": false,
-    "user_sessions_read": false,
-    "existing_client_attached": false,
-    "original_client_processes_unchanged": true,
-    "original_client_process_counts": [
-      12,
-      12
-    ],
-    "model_egress": "loopback only (127.0.0.1); no external provider, no billing"
+    "provider_configuration_reused": "operator-authorized minimal provider block copied into the isolated home; original configuration untouched",
+    "user_history_read": false,
+    "credentials_in_reports": false,
+    "credential_copy_removed_after_run": true,
+    "existing_desktop_attached": false,
+    "original_client_processes_unchanged": true
   },
   "negative_observations": [
     "with an empty CODEX_HOME and no provider, a real turn fails honestly: the client falls back to the default OpenAI Responses WebSocket endpoint, retries 7 times, then reports status failed.",
@@ -95,7 +91,8 @@
     "the client flattened MCP tools into one namespace tool per server, so the tool list is not one function per MCP tool."
   ],
   "not_run": [
-    "real vendor-model turn through the user's own provider",
+    "vendor-model tool round trip under the historical default configuration",
+    "revocation jointly with the real vendor configuration (verified separately on the local model stub)",
     "attached_session to the existing desktop chat",
     "turn/interrupt against a live vendor turn",
     "Windows isolation",
@@ -154,5 +151,12 @@
   "cost": {
     "tokens_recorded_for_vendor_attempts": 160090,
     "money": "UNKNOWN"
+  },
+  "stage_result": "该固定配置下的真实单任务只读接入阶段通过",
+  "fixed_configuration_pass": {
+    "evidence": "evidence/codex/real-vendor-directonly-2026-11-16.json",
+    "status": "PASS_REAL_VENDOR_TOOL_ROUND_TRIP",
+    "tokens": 22331,
+    "revocation": "not exercised in the paid run; verified separately on the local model stub"
   }
 }

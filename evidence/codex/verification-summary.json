@@ -116,16 +116,17 @@
     "money": "UNKNOWN"
   },
   "containment": {
-    "user_configuration_used": false,
-    "user_global_config_modified": false,
-    "credentials_uploaded": false,
-    "user_chat_history_read": false,
+    "provider_configuration_reused": "operator-authorized minimal provider block (base_url/wire_api/token), read at launch and written into the isolated home only",
+    "original_configuration_modified": false,
+    "user_history_read": false,
+    "credentials_in_reports": false,
+    "credential_copy_removed_after_run": true,
     "existing_desktop_attached": false,
-    "original_client_processes_unchanged": true,
-    "bridge_configuration_removed_after_each_run": true
+    "original_client_processes_unchanged": true
   },
   "not_run": [
-    "vendor-model tool round trip",
+    "vendor-model tool round trip under the historical default configuration (recorded as FAILED_AT_MODEL_TOOL_SELECTION)",
+    "revocation jointly with the real vendor configuration (the paid run omitted it; verified separately on the local model stub)",
     "attached session to the existing desktop chat",
     "Windows isolation",
     "native UI acceptance",
@@ -144,7 +145,8 @@
       "unsupported": [
         "mcp_servers.<id>.omit_tools_from"
       ],
-      "effect_observed": "direct_only_tool_namespaces = [\"clock\"] changed the surfaced clock namespace"
+      "effect_observed": "direct_only_tool_namespaces = [\"clock\"] changed the surfaced clock namespace",
+      "follow_up": "verified with the real model in this stage: direct_only_tool_namespaces made the platform namespace directly callable (PASS_REAL_VENDOR_TOOL_ROUND_TRIP)"
     },
     "five_way_distinction": {
       "evidence": "evidence/codex/vendor-tool-registration-2026-11-16.json",
@@ -163,8 +165,8 @@
   },
   "not_claimed": [
     "whole-product Codex integration",
-    "revocation inside the paid run",
-    "budget not exceeded"
+    "the historical default configuration working",
+    "revocation inside the paid run"
   ],
   "vendor_leg": {
     "attempts_total": 9,
@@ -175,8 +177,9 @@
     "passing_configuration": "features.code_mode direct_only_tool_namespaces = [\"mcp__agent_weave_probe\"]",
     "evidence": "evidence/codex/real-vendor-directonly-2026-11-16.json",
     "not_proven": [
-      "revocation inside the paid run itself (verified zero-cost in the same harness)",
-      "that the original configuration was already working (it was not)"
+      "revocation inside the paid run itself: that run omitted the step, the script was completed afterwards and verified separately on the local model stub",
+      "that the historical default configuration was already working (it was not)",
+      "repeatability of the passing configuration across other client versions or routes"
     ]
   },
   "preflight_defect_found": {
