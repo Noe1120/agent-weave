@@ -1,5 +1,7 @@
 # 群聊式 Agent 协作平台：实施设计包 v1.6
 
+当前增量：[W19 控制器只读观测桥](W19-CONTROLLER-OBSERVATION.md)，仅Codex开发夹具，将已持有句柄的状态接到W17授权；无turn/模型调用。真实原客户端联合验收仍需新的具体授权，Windows隔离暂缓，管家不构建。
+
 最新入口：[W18 主人连接诊断与重新邀请](W18-CONNECTION-REINVITE.md)。扩展登记原因与原子重新邀请，不恢复旧任务授权，不把登记状态当真实客户端健康。实时进展在根README，HANDOFF.md继续冻结。
 
 当前实施入口：[W17 连接绑定与单任务只读授权](W17-CONNECTION-TASK-ACCESS.md)。承接 W16，受信进程内装配、合成数据限定、逐次验证与重启拒绝；不启动原客户端或开放私密执行。用户要求暂停根 HANDOFF.md 更新，实时状态以根 [README.md](../README.md) 为准，下方交接文字保留历史语境。

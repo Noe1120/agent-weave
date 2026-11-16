@@ -21,6 +21,7 @@ import {
 } from "./domain.ts";
 import { fail } from "./errors.ts";
 import { Store, digest } from "./store.ts";
+import type { ConnectionObservation } from "./connection-task-access.ts";
 import type {
   CodexExit,
   CodexHandle,
@@ -500,6 +501,57 @@ export class CodexRuntimeController {
     clearTimeout(entry.turnTimer);
     this.record(entry, { state: "closing", fault: entry.fault });
     entry.handle?.close();
+  }
+  /** Trusted assembly only; validates owned synthetic transport without sending input. */
+  connectionObserver(
+    token: string,
+    project: string,
+    runtimeId: string,
+    connectionId: string,
+  ) {
+    contract(uuid(connectionId));
+    const initial = this.context(token, project);
+    if (initial.grant.connection_constraint) fail("NOT_FOUND_OR_DENIED");
+    const first = this.read(token, project, runtimeId);
+    if (
+      this.launcher.source !== "development_fixture" ||
+      first.observation_source !== "development_fixture" ||
+      first.state !== "ready" ||
+      !first.native_thread_sha256 ||
+      initial.run.state !== "active"
+    )
+      fail("NOT_FOUND_OR_DENIED");
+    const snapshot = canonical(initial.grant);
+    return (requestedConnection: string): ConnectionObservation | undefined => {
+      if (requestedConnection !== connectionId) return undefined;
+      const ctx = this.context(token, project);
+      if (canonical(ctx.grant) !== snapshot || this.disposed) return undefined;
+      const view = this.read(token, project, runtimeId);
+      if (
+        ctx.run.state !== "active" ||
+        (view.state !== "ready" && view.state !== "turning") ||
+        view.instance_id !== first.instance_id ||
+        view.native_thread_sha256 !== first.native_thread_sha256 ||
+        view.configuration_fingerprint !== first.configuration_fingerprint ||
+        view.observation_source !== "development_fixture" ||
+        this.launcher.source !== "development_fixture"
+      )
+        return undefined;
+      return {
+        connection_id: connectionId,
+        project_id: project,
+        member_id: ctx.grant.member_id,
+        target: "codex",
+        configuration_fingerprint: view.configuration_fingerprint,
+        run_id: ctx.run.id,
+        run_epoch: ctx.run.epoch,
+        native_binding: ctx.run.native_binding,
+        mode: "owned_process",
+        data_class: "synthetic_only",
+        state: "active",
+        observed_at: this.now(),
+      };
+    };
   }
   read(token: string, project: string, id: string) {
     contract(uuid(project) && uuid(id));

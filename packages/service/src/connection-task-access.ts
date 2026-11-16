@@ -111,8 +111,11 @@ export class ConnectionTaskAccess {
         data_class: "synthetic_only",
       };
       const valid = (time: number) => {
-        const current = this.registry.registered(connectionId);
         const observation = this.observe(connectionId);
+        // A synchronous controller check can cross a clock tick. Validate against
+        // completion time, never an earlier pre-observation timestamp or a grace window.
+        const checkedAt = now();
+        const current = this.registry.registered(connectionId);
         const run = store.getRun(grant.run_id);
         return (
           !!current &&
@@ -137,9 +140,10 @@ export class ConnectionTaskAccess {
           observation.data_class === "synthetic_only" &&
           observation.state === "active" &&
           Number.isFinite(observation.observed_at) &&
-          observation.observed_at <= time &&
-          time - observation.observed_at <= 30000 &&
-          expires > time
+          checkedAt >= time &&
+          observation.observed_at <= checkedAt &&
+          checkedAt - observation.observed_at <= 30000 &&
+          expires > checkedAt
         );
       };
       if (!valid(now())) fail("GRANT_REVOKED");

@@ -1,5 +1,7 @@
 # 03 Agent 接入、兼容性与 Windows 验证
 
+> W19：Codex控制器新增仅development_fixture可用的可信只读观测工厂，固定instance/native thread并逐次校验所属句柄与授权，为W17提供合成集成；不启动客户端、不发送turn、不开放真实配置，未知不等于停止。见[W19](W19-CONTROLLER-OBSERVATION.md)。
+
 > W18：登记诊断与重新邀请仅为主人连接管理后端；不触发原客户端启动/停止、观测或模型。新登记不能复活W17旧任务授权；真实控制器健康与执行资格仍需独立集成验证。见[W18](W18-CONNECTION-REINVITE.md)。
 
 > 2026-11-16 W17：受信连接绑定采用服务进程内只读观测，校验原身份/配置/run/epoch/native binding，不能由 HTTP 调用方自报后取得任务权限。本阶段只实现 synthetic_only / owned_process 的单任务只读授权内核；不是实际客户端身份认证，不支持附着会话，不触发启动/模型/停止，Windows 隔离资格不变。见 [W17](W17-CONNECTION-TASK-ACCESS.md)。

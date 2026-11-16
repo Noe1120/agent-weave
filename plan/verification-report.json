@@ -1458,6 +1458,7 @@
     "W16-CONNECTION-REGISTRATION.md",
     "W17-CONNECTION-TASK-ACCESS.md",
     "W18-CONNECTION-REINVITE.md",
+    "W19-CONTROLLER-OBSERVATION.md",
     "WINDOWS-ISOLATION-DECISION.md",
     "contracts/core.schema.json",
     "contracts/error-mapping.json",

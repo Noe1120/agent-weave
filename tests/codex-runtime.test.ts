@@ -12,6 +12,10 @@ import {
 import { CodexRuntimeController } from "../packages/service/src/codex-runtime.ts";
 import { ServiceFault } from "../packages/service/src/errors.ts";
 import { AdapterFault } from "../packages/service/src/adapter-contract.ts";
+import { WorkspaceService } from "../packages/service/src/workspace-service.ts";
+import { ConnectionRegistry } from "../packages/service/src/connection-registry.ts";
+import { ConnectionTaskAccess } from "../packages/service/src/connection-task-access.ts";
+import type { Grant } from "../packages/service/src/domain.ts";
 const workDir = resolve("tests/fixtures");
 function setup(
   t: TestContext,
@@ -126,6 +130,195 @@ async function until(condition: () => boolean, ms = 3000) {
 const untilAcked = (
   view: () => { turn: { id_sha256: string | null } | null },
 ) => until(() => view().turn?.id_sha256 != null);
+test("owned controller observation gates real task reads and closing cannot mutate the platform task", async (t) => {
+  const f = setup(t);
+  await f.c.start(f.token, f.start());
+  const w = new WorkspaceService(f.s, f.now),
+    registry = new ConnectionRegistry(w);
+  f.s.db
+    .prepare("INSERT INTO workspace_projects VALUES(?,?,?,?,?,?)")
+    .run(
+      f.ids.project,
+      "Synthetic",
+      "",
+      id(),
+      "1",
+      new Date(f.now()).toISOString(),
+    );
+  f.s.db
+    .prepare("INSERT INTO workspace_members VALUES(?,?,?,?,?,?,?,?)")
+    .run(
+      f.ids.member,
+      f.ids.project,
+      "codex",
+      "Codex",
+      "read",
+      "active",
+      "1",
+      new Date(f.now()).toISOString(),
+    );
+  const owner = w.auth.pair(w.auth.newPairing().code);
+  const invite = registry.invite(owner.token, owner.csrf, {
+    project_id: f.ids.project,
+    member_id: f.ids.member,
+    action_id: id(),
+    expected_member_revision: "1",
+    configuration_fingerprint: f.launcher.fingerprint,
+  });
+  const connection = registry.redeem(invite.invitation_token, {
+    connection_id: invite.connection_id,
+    action_id: id(),
+    configuration_fingerprint: f.launcher.fingerprint,
+  });
+  const observer = f.c.connectionObserver(
+    f.token,
+    f.ids.project,
+    f.binding,
+    connection.connection_id,
+  );
+  const manager = new ConnectionTaskAccess(w, observer);
+  const grant: Grant = {
+    ...f.g,
+    id: id(),
+    actions: ["read_resource"],
+    resource_ids: [f.ids.task, f.ids.acceptance],
+    expires_at: new Date(f.now() + 300000).toISOString(),
+  };
+  for (const rid of grant.resource_ids) {
+    const r = f.s.getResource(rid)!;
+    r.acl.push(grant.id);
+    f.s.putResource(r);
+  }
+  const token = manager.issue(
+    connection.connection_token,
+    connection.connection_id,
+    grant,
+    f.ids.task,
+  ).token;
+  const task = f.s.getResource(f.ids.task),
+    run = f.s.getRun(f.ids.run);
+  const before = f.s.db.prepare("SELECT total_changes() n").get()!.n;
+  for (let i = 0; i < 100; i++)
+    assert.equal(
+      (f.service.readResource(token, f.ids.project, "task", f.ids.task) as any)
+        .data.status,
+      "draft",
+    );
+  assert.equal(f.s.db.prepare("SELECT total_changes() n").get()!.n, before);
+  assert.equal(f.view().turn, null);
+  await f.close();
+  assert.throws(
+    () => f.service.readResource(token, f.ids.project, "task", f.ids.task),
+    /NOT_FOUND_OR_DENIED/,
+  );
+  assert.deepEqual(f.s.getResource(f.ids.task), task);
+  assert.deepEqual(f.s.getRun(f.ids.run), run);
+  assert.equal(f.launched(), 1);
+});
+
+test("observation factory refuses official sources and unstarted runtimes without launching", async (t) => {
+  const f = setup(t);
+  assert.throws(() =>
+    f.c.connectionObserver(f.token, f.ids.project, f.binding, id()),
+  );
+  assert.equal(f.launched(), 0);
+  await f.c.start(f.token, f.start());
+  Object.assign(f.launcher, { source: "official_codex" });
+  assert.throws(
+    () => f.c.connectionObserver(f.token, f.ids.project, f.binding, id()),
+    /NOT_FOUND_OR_DENIED/,
+  );
+  assert.equal(f.launched(), 1);
+});
+test("controller connection observer checks owned native thread without starting turns or writing", async (t) => {
+  const f = setup(t);
+  await f.c.start(f.token, f.start());
+  assert.equal(typeof (f.c as any).connectionObserver, "function");
+  const connection = id();
+  const observe = f.c.connectionObserver(
+    f.token,
+    f.ids.project,
+    f.binding,
+    connection,
+  );
+  const changes = f.s.db.prepare("SELECT total_changes() n").get()!.n;
+  for (let i = 0; i < 100; i++) {
+    const o = observe(connection)!;
+    assert.equal(o.state, "active");
+    assert.equal(o.member_id, f.ids.member);
+    assert.equal(o.native_binding, f.g.native_binding);
+    assert.equal(o.mode, "owned_process");
+    assert.equal(o.data_class, "synthetic_only");
+    assert.ok(!JSON.stringify(o).includes("synthetic-thread"));
+  }
+  assert.equal(observe(id()), undefined);
+  assert.equal(f.s.db.prepare("SELECT total_changes() n").get()!.n, changes);
+  assert.equal(f.view().turn, null);
+  assert.equal(f.launched(), 1);
+  await f.close();
+  assert.equal(observe(connection), undefined);
+});
+
+for (const scenario of [
+  "grant",
+  "policy",
+  "run",
+  "epoch",
+  "instance",
+  "thread",
+  "config",
+  "source",
+  "new_controller",
+])
+  test(`controller connection observation rejects ${scenario} changes`, async (t) => {
+    const f = setup(t);
+    await f.c.start(f.token, f.start());
+    const connection = id(),
+      observe = f.c.connectionObserver(
+        f.token,
+        f.ids.project,
+        f.binding,
+        connection,
+      );
+    if (scenario === "grant") f.s.updateGrant({ ...f.g, state: "revoked" });
+    if (scenario === "policy") f.s.putPolicy({ ...f.p, active: false });
+    if (scenario === "run")
+      f.s.putRun({ ...f.s.getRun(f.ids.run)!, state: "unknown" });
+    if (scenario === "epoch")
+      f.s.putRun({ ...f.s.getRun(f.ids.run)!, epoch: "2" });
+    const r = f.s.getResource<any>(f.binding)!;
+    if (scenario === "instance") r.data.instance_id = id();
+    if (scenario === "thread") r.data.thread_sha256 = "b".repeat(64);
+    if (scenario === "config")
+      r.data.configuration_fingerprint = "b".repeat(64);
+    if (scenario === "source") r.data.source = "official_codex";
+    if (["instance", "thread", "config", "source"].includes(scenario))
+      f.s.putResource(r);
+    if (scenario === "new_controller") {
+      const other = new CodexRuntimeController(f.s, f.launcher, {
+        now: f.now,
+        monitorMs: 0,
+      });
+      try {
+        assert.throws(() =>
+          other.connectionObserver(
+            f.token,
+            f.ids.project,
+            f.binding,
+            connection,
+          ),
+        );
+      } finally {
+        await other.dispose();
+      }
+    } else {
+      const before = f.s.db.prepare("SELECT total_changes() n").get()!.n;
+      if (["grant", "policy", "epoch"].includes(scenario))
+        assert.throws(() => observe(connection));
+      else assert.equal(observe(connection), undefined);
+      assert.equal(f.s.db.prepare("SELECT total_changes() n").get()!.n, before);
+    }
+  });
 test("an authorized runtime binds a native thread without a platform session", async (t) => {
   const f = setup(t);
   const run = f.s.getRun(f.ids.run);

@@ -9,6 +9,37 @@ import type { Grant } from "../packages/service/src/domain.ts";
 import { tempWorkspace } from "./temp.ts";
 import { Store } from "../packages/service/src/store.ts";
 
+test("time advancing during a synchronous observation is not mistaken for a future timestamp", async () => {
+  const f = await setup();
+  try {
+    const { ConnectionTaskAccess } =
+      await import("../packages/service/src/connection-task-access.ts");
+    const manager = new ConnectionTaskAccess(f.w, () => {
+      f.advance(1);
+      return { ...f.observe(), observed_at: f.now() };
+    });
+    const result = manager.issue(
+      f.connection.connection_token,
+      f.connection.connection_id,
+      f.grant,
+      f.ids.task,
+    );
+    assert.equal(
+      (
+        f.service.readResource(
+          result.token,
+          f.ids.project,
+          "task",
+          f.ids.task,
+        ) as any
+      ).data.status,
+      "draft",
+    );
+  } finally {
+    f.close();
+  }
+});
+
 test("owner reinvite fences the old task grant without starting or granting a new task", async () => {
   const f = await setup();
   try {

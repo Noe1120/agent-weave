@@ -1,5 +1,11 @@
 # Team · 原生 Windows 工作台
 
+## 当前阶段 · W19（控制器观测桥合成集成已完成）
+
+已有Codex控制器→W17只读授权的观测桥已完成合成集成：固定所属instance/thread，逐次校验实际控制器持有的夹具进程状态，不发turn。全量595/595（0失败/0跳过，本阶段新增13项），相关专项77项、编译HTTP走查、原生14+1、旧包989文件、P0文档13项和设计校验通过。修复了同步观测跨毫秒导致误判未来时间的问题，保留未来/过期检查。仅development_fixture，真实客户端模式明确拒绝；不是上线资格。W18已发布e010ee9，HANDOFF.md保持不变。见[W19](plan/W19-CONTROLLER-OBSERVATION.md)与[证据](evidence/controller-observation/COMPLETION.md)。
+
+当前接入方向的下一门槛需要用户具体授权：同固定Codex/CC Switch配置，新隔离home、自有原客户端实例、一次合成只读task_get、联合撤权/退出与凭据清理；需要单次token上限与明确凭据复用授权。此前单次授权已使用，本轮没有重新调用。DSH/Claude长期控制器、Windows隔离、真实点击、生产灾备和签名升级仍未完成；管家仍暂停。
+
 ## 当前阶段 · W18（登记诊断与重新邀请已完成）
 
 主人连接诊断与显式重新邀请已实现：区分成员变化、签名键变化、邀请/凭据到期和撤销；原子替换旧登记，失败回滚、同动作重试、不复活旧任务授权。全量582/582，连接相关78项通过（本轮新增24项），编译HTTP走查、原生14+1与旧包989文件检查通过。工作区仍为D盘，HANDOFF.md冻结；0原客户端启动/模型调用/窗口点击，不变更Windows隔离、不构建管家。见[W18](plan/W18-CONNECTION-REINVITE.md)及[证据](evidence/connection-reinvite/COMPLETION.md)。

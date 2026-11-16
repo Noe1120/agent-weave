@@ -160,6 +160,9 @@ qa-runtime/
 !/evidence/connection-reinvite/
 /evidence/connection-reinvite/*
 !/evidence/connection-reinvite/COMPLETION.md
+!/evidence/controller-observation/
+/evidence/controller-observation/*
+!/evidence/controller-observation/COMPLETION.md
 !/evidence/codex/vendor-attempt-report.json
 !/evidence/codex/preflight/
 /evidence/codex/preflight/*
