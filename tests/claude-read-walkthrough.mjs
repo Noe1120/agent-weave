@@ -7,6 +7,7 @@ import { createInterface } from "node:readline";
 import { fixture } from "./helpers.ts";
 import { CoreService } from "../dist/packages/service/src/service.js";
 import { createServer } from "../dist/packages/service/src/http.js";
+import { listenLoopback } from "../dist/packages/service/src/loopback-listener.js";
 
 const output = resolve(
   process.env.CLAUDE_READ_EVIDENCE ??
@@ -17,7 +18,7 @@ mkdirSync(output);
 const f = fixture();
 const service = new CoreService(f.s, f.now);
 const server = createServer(service);
-await new Promise((r) => server.listen(0, "127.0.0.1", r));
+await listenLoopback(server);
 const config = {
   version: 1,
   target: "claude_desktop",

@@ -149,6 +149,8 @@
     "roots_notification": "registerRootsProvider -> notifyRootsChanged -> client.sendRootsListChanged; fixed-scope bridge must not request/read client roots",
     "actual_attempt11_notification_method": "NOT_CAPTURED; static candidate plus deterministic regression, not confirmed exact wire frame",
     "desktop_identity": "Native Desktop internally uses bundled task runtime; no independent CLI/SDK/API substitution or internal IPC injection performed",
-    "latest_readonly_inventory": "2026-11-16T00:21Z no Claude process; no launch/restart performed in this follow-up"
+    "latest_readonly_inventory": "2026-11-16T00:21Z no Claude process; no launch/restart performed in this follow-up",
+    "attempt12_real_validation": "One roots change, one authorized task_get, one queued service read and exact UI reply; both MCP fault null. Permission once recorded without assistant approval action.",
+    "remaining_diagnostic": "Desktop EventLogging403 region_unavailable; tool roundtrip succeeded independently. Not suppressed or treated as gateway model error."
   }
 }

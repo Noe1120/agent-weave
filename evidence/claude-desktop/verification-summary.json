@@ -2,12 +2,12 @@
   "date": "2026-11-16",
   "timezone": "Asia/Tokyo",
   "phase": "W13_CLAUDE_DESKTOP_MCP_PROBE",
-  "overall": "REAL_MCP_DISCOVERY_AND_SYNTHETIC_READ_BRIDGE_PASS_FULL_INTEGRATION_INCOMPLETE",
+  "overall": "REAL_SINGLE_SYNTHETIC_TOOL_ROUNDTRIP_PASS_FULL_INTEGRATION_INCOMPLETE",
   "service": {
     "command": "npm run verify",
     "exit_code": 0,
-    "tests": 436,
-    "pass": 436,
+    "tests": 439,
+    "pass": 439,
     "fail": 0,
     "skip": 0,
     "synthetic_claude_tests": 80,
@@ -27,7 +27,7 @@
     "rebuilt": false
   },
   "real_attempt": {
-    "count": 11,
+    "count": 12,
     "version": "5.11492.2",
     "process_started": true,
     "startup_fixed": true,
@@ -37,15 +37,15 @@
     "remaining_probe_processes": 0,
     "existing_dsh_processes_unchanged": true,
     "retries_without_login": 3,
-    "next_prerequisite": "Renewed specific one-task authorization and user Allow once participation; recheck original-client inventory empty immediately before launch",
-    "normal_desktop_exit": "Attempt11 ROOT_EXIT/exit0; no assistant stop, cause not attributed",
+    "next_prerequisite": "No additional prompt authorized; production egress/provisioning, lifecycle and Windows isolation remain separate gates",
+    "normal_desktop_exit": "Attempt12 ROOT_EXIT/exit0, both MCP EOF; no assistant STOP, action not attributed",
     "third_party_cc_switch": true,
-    "read_connector_discovery_attempts": 6,
-    "real_tool_calls": 0,
+    "read_connector_discovery_attempts": 7,
+    "real_tool_calls": 1,
     "me_route_at_previous_launches": "NOT_PINNED; transport-only evidence retained",
     "latest_readonly_route_metadata": "me/proxy/attached confirmed; runtime upstream UNVERIFIED",
-    "user_task_prompts_sent": 2,
-    "latest_task_status": "NOT_COMPLETED; permission not approved and task connection notification fault"
+    "user_task_prompts_sent": 3,
+    "latest_task_status": "PASS_REAL_SINGLE_SYNTHETIC_READ_TOOL_ROUNDTRIP"
   },
   "design": {
     "status": "PASS",
@@ -66,17 +66,17 @@
   "os_isolation": "NOT_TESTED",
   "review": "AUTHOR_SELF_REVIEW_NOT_INDEPENDENT",
   "logs": {
-    "service_sha256": "098f9831eace079b9446379986c6b5f7f1c854d65baf64a9aea87aa61e8bcd1e",
+    "service_sha256": "6fd22189f4d0cfc7e5d97a6accebe4cd6e0fa2bf6077d70ac20fd96a278618c2",
     "first_service_failure_sha256": "b99858ceced0372ac68282012e8397391bbf6cf962218ce88a50f0f7169e238a",
     "claude_sha256": "d7a402404a2878e0b1a4f41e0bdf18e9b687cea26b7d0db2c6d16e194ca18de6",
-    "native_sha256": "692bff2b04044e3fe0d1d123871d29a3e5c3da2cc88d286bdcec233cb7c43338",
+    "native_sha256": "d8261df0bb6b5da05e278836aab975b3120c2cae20e9084657e6b5a5bda3c020",
     "package_sha256": "77c06975809839528ad44681a225adfd36628db49898b4eac30815809a5f75dd",
     "prelaunch_red_sha256": "8e9abacd6e9721d61162cfed66c5a52299ccf14cc5994fa289ec3134f5a38cf0",
     "prelaunch_green_sha256": "bd07a647241f3098e3bef24dce9424c5f0ffd08e2012f165f4fe903d8e30eec0",
-    "compiled_read_walkthrough_sha256": "535fc39c9ce5639f539113ed799057c2bfac90070cfcd846cd43fb4957f768cc",
+    "compiled_read_walkthrough_sha256": "d434d7622908d8be4e98009f640f8eb66409655447e5c56932ca65ff9bf315bf",
     "first_compiled_read_failure_sha256": "4d4043acca04d204e6d23a2b7a7350d095b979adfb8fb94d9189599533b07366",
-    "real_final_sha256": "ccf9bf85e79a5cb2bb9bdf1ff10ed0fa5839890dc88bce0458a096ebe1282ca5",
-    "preservation_sha256": "afaf54da532aed3c1002faf3130c6612684dcc3e306992c3fc31ed8b9ba12558",
+    "real_final_sha256": "20defc5268243c7bab5f55caa6135756459e49cbebc97dea774e1a8efb4ba616",
+    "preservation_sha256": "6abef14493db5cfde764a37e264135fa9b3f9022868cd04b300c425b1174d76c",
     "design_sha256": "605484a3cc6ea6bccae941f02b9af0cbb792168b6418f6ef37451848502c7f72",
     "p0_sha256": "de143bf68e7b768d156f835e9e8ff6684f936656c49fbaf2bd2384add8995066",
     "dsh_failed_full_sha256": "253595bdda09cfdffe35b616b17dc2357de891dd6ec56f1a185916cb52415445",
@@ -109,7 +109,18 @@
     "contention_stress_sha256": "a59416c3448d619cb746f8fb90f231d1db869b409407558ba08482eda902a055",
     "bounded_stress_sha256": "f21f4e80e66135fbf118bb7cb006b12e8bfaefa66620e5fb0866792b376739d4",
     "historical_design_sha256": "605484a3cc6ea6bccae941f02b9af0cbb792168b6418f6ef37451848502c7f72",
-    "historical_p0_sha256": "0f70e437d5565baed1bf0ffdc25fdcd4eb238d31a05f615b16449fb44b5e1817"
+    "historical_p0_sha256": "0f70e437d5565baed1bf0ffdc25fdcd4eb238d31a05f615b16449fb44b5e1817",
+    "attempt11_real_final_sha256": "ccf9bf85e79a5cb2bb9bdf1ff10ed0fa5839890dc88bce0458a096ebe1282ca5",
+    "attempt11_preservation_sha256": "afaf54da532aed3c1002faf3130c6612684dcc3e306992c3fc31ed8b9ba12558",
+    "port_red_sha256": "30fd556db994851f1c1f07e1bad88e019f03414574b709a04b75cc0212c2227e",
+    "port_green_sha256": "10e29744b4adc136f720fd5d016cd825cd2263700996575b905ed22319241574",
+    "port_initial_test_expectation_failure_sha256": "a7516b581379a5e61b72f1f1da11fdb93c110ba8efbb5203ef044c1e8a6e4ad2",
+    "before_attempt12_service_sha256": "098f9831eace079b9446379986c6b5f7f1c854d65baf64a9aea87aa61e8bcd1e",
+    "before_attempt12_native_sha256": "692bff2b04044e3fe0d1d123871d29a3e5c3da2cc88d286bdcec233cb7c43338",
+    "before_attempt12_package_sha256": "77c06975809839528ad44681a225adfd36628db49898b4eac30815809a5f75dd",
+    "before_attempt12_compiled_read_walkthrough_sha256": "535fc39c9ce5639f539113ed799057c2bfac90070cfcd846cd43fb4957f768cc",
+    "before_attempt12_design_sha256": "605484a3cc6ea6bccae941f02b9af0cbb792168b6418f6ef37451848502c7f72",
+    "before_attempt12_p0_sha256": "de143bf68e7b768d156f835e9e8ff6684f936656c49fbaf2bd2384add8995066"
   },
   "warnings": [
     "Node SQLite experimental warning remains visible.",
@@ -117,10 +128,11 @@
     "synthetic_only/provider_fingerprint are trusted acceptance declarations, not production data classification or provider egress enforcement.",
     "First compiled walkthrough expected ready after apply_plan; corrected to documented queued without changing production state machine; failed evidence retained.",
     "Forced test Desktop cleanup is not graceful EOF; native network/file accesses not audited.",
-    "Two authorized synthetic user prompts sent in attempts10/11; no tool/service read. Original config/history unchanged.",
     "Desktop automatic connection probes may bill; total requests and fees UNKNOWN.",
-    "Attempt11 exact rejected notification method not recorded; valid roots change compatibility fixed with synthetic regression only.",
-    "Original DSH monitor unknown failure exact cause not proven. Runner resource contention reproduced; bounded test scheduling preserves all cases/assertions and production deadlines."
+    "Original DSH monitor unknown failure exact cause not proven. Runner resource contention reproduced; bounded test scheduling preserves all cases/assertions and production deadlines.",
+    "Three cumulative user prompts; attempt12 one actual synthetic read. Permission response once recorded, not automated by assistant.",
+    "Attempt11 exact notification unknown; attempt12 validates roots handling in real Desktop.",
+    "Own Desktop EventLogging403 region_unavailable retained; not suppressed or confused with MCP success."
   ],
   "first_full_run": {
     "tests": 415,
@@ -243,7 +255,7 @@
     "test_red": "gateway-only route formerly accepted",
     "test_green": "reject missing binding, wrong provider/direct/detached/name/model metadata drift; recheck before launch and redact copy on failure",
     "empty_profile_fallback": "REFUSED by real opt-in entry",
-    "new_real_launches_after_correction": 3,
+    "new_real_launches_after_correction": 4,
     "original_configurations_unchanged": 4,
     "history_read": false,
     "source_scope": "Acceptance helpers, MCP report/session compatibility, tests and documentation; no production provisioning",
@@ -305,16 +317,16 @@
   "latest_followup_verification": {
     "command": "npm run verify",
     "exit_code": 0,
-    "tests": 436,
-    "pass": 436,
+    "tests": 439,
+    "pass": 439,
     "fail": 0,
     "skip": 0,
     "synthetic_claude_tests": 80,
     "compiled_smoke": "PASS",
     "real_clients_started_by_verify": 0,
     "test_file_concurrency": 2,
-    "status": "PASS_SYNTHETIC; original DSH monitor failure exact trigger remains unconfirmed",
-    "log_sha256": "098f9831eace079b9446379986c6b5f7f1c854d65baf64a9aea87aa61e8bcd1e"
+    "status": "PASS_SYNTHETIC; earlier failures and attribution limitations retained",
+    "log_sha256": "6fd22189f4d0cfc7e5d97a6accebe4cd6e0fa2bf6077d70ac20fd96a278618c2"
   },
   "diagnostic_report_ownership": {
     "red": "3 tests:1fail/2pass",
@@ -327,7 +339,8 @@
     "red": "2tests:1fail/1pass; MCP_NOTIFICATION_INVALID on valid notification",
     "green": "21/21 connector tests; ready-only notification no-op/counter then real authorized local HTTP read; no outbound roots request, extra scope or DB mutation",
     "negative_cases": "Early/malformed/unknown/repeated-init still fail",
-    "runtime_attribution": "Static installed call chain and matching fault class; exact attempt11 method not captured; real acceptance pending"
+    "runtime_attribution": "Static installed call chain and matching fault class; exact attempt11 method not captured; real acceptance pending",
+    "attempt12_real_acceptance": "PASS: roots notification1, actual tool call1, tool errors0, both fault null and EOFtrue; does not retroactively capture attempt11 frame"
   },
   "test_scheduling": {
     "default_test_file_concurrency": 2,
@@ -344,5 +357,64 @@
     "dsh_exact_root_cause": "UNCONFIRMED; safe state assertion diagnostics added only",
     "production_timeouts_changed": false,
     "tests_skipped_or_assertions_removed": false
+  },
+  "real_task_roundtrip": {
+    "attempt": 12,
+    "source": "Live Computer Use screenshot of owned fresh Desktop task; own MCP report and service read corroboration",
+    "user_prompts_sent": 1,
+    "gateway_visible": true,
+    "selected_model_display": "claude-haiku-5-5 Extended",
+    "connector": "agent-weave-probe",
+    "reply_task_id": "fbd2b2ae-ade0-4981-bc20-931317e496b4",
+    "reply_status": "queued",
+    "task_reply_matches_service": true,
+    "permission_clicked_by_assistant": false,
+    "permission_request_observed_in_own_log_at": "09:31:34 JST",
+    "permission_response": "once at09:31:39 JST; no assistant permission input",
+    "permission_click_visually_observed": false,
+    "task_success": true,
+    "cost": "UNKNOWN",
+    "history_read": false,
+    "original_config_modified": false,
+    "scope": "One original Desktop synthetic read-only tool roundtrip, not full integration"
+  },
+  "live12_first_followup_failure": {
+    "command": "npm run verify",
+    "tests": 436,
+    "pass": 435,
+    "fail": 1,
+    "skip": 0,
+    "failure": "message polling first local HTTP read: MCP_SERVICE_UNAVAILABLE in4ms",
+    "log_sha256": "662218ae0486f441b45c6c5512a75a98abecebbf8dbe02956f4df0666c4eb85c",
+    "original_fetch_cause": "Not captured; subsequent instrumented reproduction described separately"
+  },
+  "ephemeral_port_root_cause": {
+    "os_readonly_configuration": "TCP IPv4 dynamic range starts1024, count64511; not modified",
+    "instrumented_sweep": {
+      "successful_reads": 2999,
+      "failure": {
+        "port": 10080,
+        "fetch_cause": "bad port",
+        "connector_error": "MCP_SERVICE_UNAVAILABLE"
+      },
+      "sha256": "4045838af1ccab28454ce1ae0337deb9b74933927247f9207deefb3e6c1ffbbe"
+    },
+    "deterministic_red": "Force OS port0 allocation to10080 in child test only; actual main startup succeeds but fetch fails bad port",
+    "fix": "Automatic service/test HTTP listeners select49152..65535; bounded32 bind attempts only on EADDRINUSE. Explicit port unchanged. No Fetch protection bypass, application-request retry, timeout/permission relaxation or OS setting change.",
+    "coverage": "Compiled walkthrough, source main, MCP tests and fetch-based workspace tests; native private entry uses .NET HTTP and is unchanged",
+    "original_failure_attribution": "Same symptom and concrete allocator defect reproduced; original run did not retain actual port/underlying cause so exact event attribution unconfirmed",
+    "test_harness_correction": "First green run expected zero listening handlers, but native http.Server owns setupConnectionsTracking. Corrected comparison to pre-existing handler identities, not production behavior; failed evidence retained."
+  },
+  "previous_service_verification_before_port_fix": {
+    "command": "npm run verify",
+    "exit_code": 0,
+    "tests": 436,
+    "pass": 436,
+    "fail": 0,
+    "skip": 0,
+    "synthetic_claude_tests": 80,
+    "compiled_smoke": "PASS",
+    "real_clients_started_by_verify": 0,
+    "test_file_concurrency": 2
   }
 }

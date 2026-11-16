@@ -10,11 +10,12 @@ import { join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { ExecutionFeed } from "../packages/service/src/workspace-feed.ts";
 import { createServer as stubServer } from "node:http";
+import { listenLoopback } from "../packages/service/src/loopback-listener.ts";
 
 async function setup() {
   const f = fixture();
   const server = createServer(f.service);
-  await new Promise<void>((r) => server.listen(0, "127.0.0.1", r));
+  await listenLoopback(server);
   const address = server.address();
   assert.ok(address && typeof address !== "string");
   const config = {
@@ -364,7 +365,7 @@ test("connector rejects malformed or extra feed fields instead of disclosing raw
       }),
     );
   });
-  await new Promise<void>((r) => stub.listen(0, "127.0.0.1", r));
+  await listenLoopback(stub);
   try {
     const a = stub.address();
     assert.ok(a && typeof a !== "string");
@@ -392,14 +393,14 @@ test("connector refuses redirects without forwarding its grant to another destin
     calls++;
     res.end("{}");
   });
-  await new Promise<void>((r) => receiver.listen(0, "127.0.0.1", r));
+  await listenLoopback(receiver);
   const a = receiver.address();
   assert.ok(a && typeof a !== "string");
   const redirect = stubServer((_req, res) => {
     res.writeHead(302, { location: `http://127.0.0.1:${a.port}/leak` });
     res.end();
   });
-  await new Promise<void>((r) => redirect.listen(0, "127.0.0.1", r));
+  await listenLoopback(redirect);
   try {
     const b = redirect.address();
     assert.ok(b && typeof b !== "string");

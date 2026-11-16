@@ -2,8 +2,8 @@
   "schema": 3,
   "date": "2026-11-16",
   "timezone": "Asia/Tokyo",
-  "status": "REAL_CLAUDE_MCP_DISCOVERY_PASS_FULL_INTEGRATION_INCOMPLETE",
-  "attempts": 11,
+  "status": "REAL_CLAUDE_ONE_SYNTHETIC_TOOL_ROUNDTRIP_PASS_FULL_INTEGRATION_INCOMPLETE",
+  "attempts": 12,
   "first_attempt_historical": {
     "schema": 1,
     "date": "2026-11-15",
@@ -520,6 +520,103 @@
           "fault": null
         }
       ]
+    },
+    {
+      "attempt": 12,
+      "status": "PASS_REAL_DESKTOP_SYNTHETIC_TASK_TOOL_ROUNDTRIP",
+      "observed_at": "2026-11-16T00:32:23.551Z",
+      "cleanup_confirmed": true,
+      "owned_root_exit_observed": true,
+      "job_empty": true,
+      "host_exit_code": 0,
+      "root_exit_code": 0,
+      "stop_reason": "ROOT_EXIT",
+      "existing_clients_unchanged": true,
+      "copied_gateway_credential_redacted": true,
+      "mcp_connections": [
+        {
+          "connection": "connection-7P7HmX",
+          "schema": 1,
+          "initialize_requests": 1,
+          "initialized": true,
+          "tools_list_requests": 1,
+          "tool_calls": 1,
+          "tool_errors": 0,
+          "resources_list_requests": 0,
+          "prompts_list_requests": 0,
+          "roots_list_changed_notifications": 1,
+          "stdin_eof": true,
+          "fault": null
+        },
+        {
+          "connection": "connection-zLF4tm",
+          "schema": 1,
+          "initialize_requests": 1,
+          "initialized": true,
+          "tools_list_requests": 1,
+          "tool_calls": 0,
+          "tool_errors": 0,
+          "resources_list_requests": 1,
+          "prompts_list_requests": 1,
+          "roots_list_changed_notifications": 0,
+          "stdin_eof": true,
+          "fault": null
+        }
+      ],
+      "prompts_sent": 1,
+      "service_reads": [
+        {
+          "at": "2026-11-16T00:31:39.612Z",
+          "kind": "task",
+          "expected_task": true,
+          "status": "queued",
+          "response_sha256": "1d41b32d51a544eb539efcb0c1a0c8067b3dc6d02d6ba0b3aaaf68af4e2c2b56"
+        }
+      ],
+      "cost": "UNKNOWN",
+      "me_route": "PINNED_PREFLIGHT_METADATA; runtime upstream not attested",
+      "ui_observation": {
+        "attempt": 12,
+        "source": "Live Computer Use screenshot of owned fresh Desktop task; own MCP report and service read corroboration",
+        "user_prompts_sent": 1,
+        "gateway_visible": true,
+        "selected_model_display": "claude-haiku-5-5 Extended",
+        "connector": "agent-weave-probe",
+        "reply_task_id": "fbd2b2ae-ade0-4981-bc20-931317e496b4",
+        "reply_status": "queued",
+        "task_reply_matches_service": true,
+        "permission_clicked_by_assistant": false,
+        "permission_request_observed_in_own_log_at": "09:31:34 JST",
+        "permission_response": "once at09:31:39 JST; no assistant permission input",
+        "permission_click_visually_observed": false,
+        "task_success": true,
+        "cost": "UNKNOWN",
+        "history_read": false,
+        "original_config_modified": false,
+        "scope": "One original Desktop synthetic read-only tool roundtrip, not full integration"
+      },
+      "raw_report_sha256": "20defc5268243c7bab5f55caa6135756459e49cbebc97dea774e1a8efb4ba616",
+      "connector_entry_sha256": "5744aa9944c7a1d94b94abd48dd724a429094a72cdc3cbcea40a54dd3acb04c0",
+      "host_sha256": "33e2fbb505ebf735cc16e84191dac1864ea10ebb948f3818ec1fd63b2dd22dec",
+      "shutdown": "Root exit0 and both MCP EOF observed; no assistant STOP, user action not attributed",
+      "non_mcp_diagnostics": "Own Desktop EventLogging batch flush403 region_unavailable remains visible in raw local logs; not a tool failure and not resolved/bypassed",
+      "connector_modules_verified_after_acceptance": {
+        "scope": "Same source modules used in attempt12; only listener/main/test files changed afterwards",
+        "modules": [
+          {
+            "name": "mcp-entry",
+            "sha256": "5744aa9944c7a1d94b94abd48dd724a429094a72cdc3cbcea40a54dd3acb04c0"
+          },
+          {
+            "name": "mcp-session",
+            "sha256": "9e6ed5be5fbd69b9bbcecde1f00b73370f5fed64b4e4158c010023b2ff73b286"
+          },
+          {
+            "name": "mcp-read-client",
+            "sha256": "9cfb464cf8b3e86d360d8b71cce52b85920facd51f9eaa976d7b13efa3e2b610"
+          }
+        ]
+      }
     }
   ],
   "findings": {
@@ -527,7 +624,7 @@
     "native_reproduction": "SHGetFolderPath(CSIDL_APPDATA) returns HRESULT 80070003 when fresh USERPROFILE lacks AppData/Roaming",
     "repair": "Create USERPROFILE/AppData/Roaming and AppData/Local and verify native resolved paths equal fresh environment values before launch",
     "lifetime_repair": "Retain actual root process handle; explicitly assign root to Job; observe root exit independently of pipe close; require Job empty and unchanged client inventories",
-    "latest_observation": "Attempt10 task MCP report collision; attempt11 separate reports succeed, correct task_get permission appears, but not approved. Task connection fault MCP_NOTIFICATION_INVALID and zero tool/service reads. Owned window exited naturally before user could see it.",
+    "latest_observation": "Attempt12 sent one authorized prompt. Original Desktop made one task_get call and service returned queued; UI replied exact task ID and queued. Task roots notification counted1, both connections fault null and EOF true. Permission response once recorded by own Desktop log; no assistant permission action.",
     "mcp_connection_trigger": "Pinned client main-process IPC launches chat MCP only on a request from mainView; no internal IPC injection used",
     "attempt_4_historical_auth_observation": {
       "sign_in_cookie_present": false,
@@ -538,19 +635,19 @@
     "superseded_next_prerequisite": "User-owned authenticated session in a dedicated profile remains to be authorized and verified; login sufficiency is not established",
     "superseded_next_prerequisite_is_not_current": true,
     "root_cause_correction": "Blank independent profile omitted the actual third-party configuration; 3p Desktop resolves MCP preferences in LOCALAPPDATA/Claude-3p. No official login needed for the observed handshake.",
-    "next_prerequisite": "No live approval window remains. Need specific renewed authorization for one synthetic task (previous one consumed), empty original-client inventory, and user participation for Allow once. Never take over original instance.",
+    "next_prerequisite": "One synthetic real tool acceptance complete. Further prompts require concrete authorization; production provisioning/provider egress, automated lifecycle and same-configuration Windows isolation remain separate unverified stages.",
     "route_guard": "Require pinned me identity and live-state/provider metadata before preparation and immediately before launch; reject omitted route rather than fallback to empty official profile. This is preflight metadata, not live egress enforcement.",
     "automatic_probe_correction": "Pinned Desktop automatically performs a one-token inference health probe; broad400/404 mapping is not original-response evidence. Two later user prompts sent, fees/total inference UNKNOWN; no private request/history read.",
-    "followup_existing_instance_gate": "Attempt11 stopped and cleaned. Later original instance not touched; latest read-only inventory at2026-11-16T00:21Z empty. Must recheck immediately before any authorized launch.",
+    "followup_existing_instance_gate": "Owned attempt12 root exited and cleanup verified; do not operate subsequent user clients.",
     "report_collision": "Own attempt10 task runtime starts a second connector with the same --report; exclusive wx fails. New --report-dir creates a unique per-connection report without overwriting discovery evidence; attempt11 has two reports.",
-    "notification_compatibility": "Pinned task manager sends notifications/roots/list_changed when roots providers change. Reproduced valid notification rejection and fixed with validated ready-only no-op/counter; unknown/malformed notifications still fail. Actual rejected method in attempt11 was not captured; exact attribution and real fix acceptance remain unverified."
+    "notification_compatibility": "Attempt12 real task roots notification counted1 without failure, followed by actual tool call. Attempt11 exact rejected frame still was not captured; no retroactive claim."
   },
   "scope": {
     "model_calls": null,
-    "prompts": 2,
+    "prompts": 3,
     "login": false,
     "old_credentials": false,
-    "ui_clicks": "Actual fresh Desktop UI prompts in attempts10/11; permission not automated",
+    "ui_clicks": "Actual fresh Desktop UI prompts10/11/12; no automated permission clicks",
     "production_code_changed": true,
     "os_isolation": "NOT_TESTED",
     "network_audit": "NOT_PERFORMED",
@@ -559,10 +656,11 @@
     "production_adapter_enabled": false,
     "synthetic_read_connector_added": true,
     "private_history_read": false,
-    "model_call_count_scope": "Two authorized user task prompts; total requests including background probes and fees UNKNOWN",
-    "user_task_prompts_sent": 2,
+    "model_call_count_scope": "Three user task prompts; total/background requests and fees UNKNOWN",
+    "user_task_prompts_sent": 3,
     "background_inference_requests": "UNKNOWN",
-    "total_model_cost": "UNKNOWN"
+    "total_model_cost": "UNKNOWN",
+    "real_tool_calls": 1
   },
   "references": {
     "orca_commit": "af82fa8634e19c0376738ad636237aac847b2179",
@@ -625,12 +723,21 @@
         "unread_files": 0,
         "reparse_entries_not_followed": 0,
         "scope": "Only stopped fresh attempt11 profile; no original history read"
+      },
+      {
+        "at": "2026-11-16T00:33:07.573Z",
+        "attempt": 12,
+        "scanned_files": 369,
+        "gateway_token_matches": 0,
+        "unread_files": 0,
+        "reparse_entries_not_followed": 0,
+        "scope": "Only stopped fresh attempt12 profile; no original history read"
       }
     ],
     "scope": "Exact gateway token scan within own stopped acceptance profiles only; no original history read",
     "original_configuration_unchanged_at_route_correction": true,
     "latest_original_configurations": {
-      "at": "2026-11-16T00:21:15.365Z",
+      "at": "2026-11-16T00:33:09.571Z",
       "original_configurations": [
         {
           "index": 1,

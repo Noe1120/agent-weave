@@ -4,6 +4,7 @@ import { Store } from "./store.ts";
 import { CoreService } from "./service.ts";
 import { createServer } from "./http.ts";
 import { WorkspaceService } from "./workspace-service.ts";
+import { listenLoopback } from "./loopback-listener.ts";
 const runtime = process.versions.node.split(".").map(Number);
 if (runtime[0] !== 24 || runtime[1]! < 14)
   throw new Error(
@@ -18,12 +19,14 @@ const store = new Store(filename);
 const workspace = new WorkspaceService(store);
 const pairing = workspace.auth.newPairing();
 const server = createServer(new CoreService(store), workspace);
-server.on("error", () => {
+function startupFailure() {
   console.error("Local core server could not start.");
   store.close();
   process.exitCode = 1;
-});
-server.listen(Number(portText), "127.0.0.1", () => {
+}
+try {
+  await listenLoopback(server, Number(portText));
+  server.on("error", startupFailure);
   const address = server.address();
   if (address && typeof address !== "string") {
     console.log(
@@ -42,7 +45,9 @@ server.listen(Number(portText), "127.0.0.1", () => {
         pairing.code,
     );
   }
-});
+} catch {
+  startupFailure();
+}
 let stopping = false;
 function shutdown() {
   if (stopping) return;

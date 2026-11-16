@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { once } from "node:events";
+import { listenLoopback } from "../packages/service/src/loopback-listener.ts";
 import { randomUUID } from "node:crypto";
 import { Store } from "../packages/service/src/store.ts";
 import { CoreService } from "../packages/service/src/service.ts";
@@ -10,8 +10,7 @@ async function setup() {
   const s = new Store(),
     w = new WorkspaceService(s),
     server = createServer(new CoreService(s), w);
-  server.listen(0, "127.0.0.1");
-  await once(server, "listening");
+  await listenLoopback(server);
   const address = server.address();
   if (!address || typeof address === "string")
     throw new Error("missing address");

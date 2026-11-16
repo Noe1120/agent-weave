@@ -11,12 +11,12 @@
       "result": "PASS_FOR_OWN_STOPPED_PROFILES"
     },
     {
-      "check": "All eleven real attempts retain separate results and hashes; earlier failures preserved",
+      "check": "All twelve real attempts retain separate results and hashes; earlier failures preserved",
       "result": "PASS"
     },
     {
       "check": "Real Desktop MCP initializes and discovers the compiled read connector",
-      "result": "PASS_REAL_DISCOVERY_ONLY; tool_calls=0"
+      "result": "PASS_REAL_DISCOVERY; earlier tool_calls0 superseded by attempt12 one real synthetic read"
     },
     {
       "check": "HTTP reads preserve service grant/policy/run/ACL checks; no dynamic URL/token/project or shell/write tools",
@@ -85,22 +85,30 @@
     {
       "check": "Test resource contention repeat experiment and bounded scheduling; assertions and production deadlines unchanged",
       "result": "Runner contention supported (16 concurrent failures vs16 bounded passes); original DSH monitor exact failure remains unconfirmed; diagnostic assertion added"
+    },
+    {
+      "check": "Attempt12 original Desktop one tool call, service read, exact final task reply, permission response once, roots notification, cleanup and369-file token scan",
+      "result": "PASS_REAL_SINGLE_SYNTHETIC_ROUNDTRIP; no assistant permission click; no production/OS qualification"
+    },
+    {
+      "check": "Automatic local HTTP ports remain Fetch-compatible even with customized OS ephemeral range; collision/explicit failure behavior preserved",
+      "result": "PORT10080_BAD_PORT_REPRODUCED_AND_RED_GREEN; original full-run fetch cause not captured, not retroactively asserted; no OS change or security bypass"
     }
   ],
   "remaining_actions": [
-    "No live approval window remains. Need specific renewed authorization for one synthetic task (previous one consumed), empty original-client inventory, and user participation for Allow once. Never take over original instance.",
+    "Real one-task read acceptance complete; no additional prompt authorized. Continue production provisioning and lifecycle design without widening data/client/OS permissions.",
     "Complete production provisioning/provider-bound disclosure and same-configuration Windows isolation before sensitive or writing access.",
     "Validate Desktop response states/cancel/recovery without unsupported hooks or client substitution."
   ],
   "not_claimed": [
     "Full Claude integration",
-    "real model task/tool roundtrip",
     "native click acceptance",
     "Windows security isolation",
     "network/file access audit",
     "production egress enforcement",
     "independent review",
-    "coordinator implementation"
+    "coordinator implementation",
+    "All native UI flows or production client qualification"
   ],
   "source_review": {
     "orca_commit": "af82fa8634e19c0376738ad636237aac847b2179",
