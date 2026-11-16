@@ -138,6 +138,8 @@ qa-runtime/
 !/evidence/codex/COMPLETION.md
 !/evidence/codex/verification-summary.json
 !/evidence/codex/real-attempt-report.json
+!/evidence/codex/walkthrough-2026-11-16.json
+!/evidence/codex/vendor-tool-surface-20261116.json
 !/evidence/codex/vendor-attempt-report.json
 !/evidence/codex/preflight/
 /evidence/codex/preflight/*

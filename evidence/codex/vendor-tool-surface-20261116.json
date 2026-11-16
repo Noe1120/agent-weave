@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "observed_at": "2026-11-16T03:08:25.320Z",
+  "client_version": "0.167.0-alpha.3.2",
+  "model": "gpt-6.1-sol",
+  "isolated_home": "fresh per launch; identifier not published",
+  "tokens_this_turn": 17865,
+  "namespaces": [
+    {
+      "type": "namespace",
+      "name": "functions",
+      "tools": [
+        "exec",
+        "wait",
+        "request_user_input",
+        "request_user_input_async"
+      ]
+    },
+    {
+      "type": "namespace",
+      "name": "clock",
+      "tools": [
+        "sleep"
+      ]
+    },
+    {
+      "type": "namespace",
+      "name": "collaboration",
+      "tools": [
+        "followup_task",
+        "interrupt_agent",
+        "list_agents",
+        "send_message",
+        "spawn_agent",
+        "wait_agent"
+      ]
+    }
+  ],
+  "mcp_namespace_declared": false,
+  "exec_mentions_nested_tools": "- All nested tools are available on the global `tools` object, for example `await tools.exec_command(...)`. Tool names are exposed as normalized JavaScript identifiers, for example `await tools.mcp__ologs__get_profile(..",
+  "tool_count": 3,
+  "source": "the client's own session rollout inside the isolated home; no chat text copied",
+  "conclusion": "the MCP namespace was not declared to the model; only the code-mode namespaces were offered"
+}
