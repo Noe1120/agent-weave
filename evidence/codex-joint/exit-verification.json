@@ -1,0 +1,22 @@
+{
+  "baseline": "a60b984c42ddf98b282ce7294db1b5591de3c327",
+  "service_verify": { "passed": 610, "failed": 0, "skipped": 0, "build_smoke": "PASS" },
+  "native": { "tests": 14, "static": 1, "status": "PASS", "clicks": "NOT_RUN" },
+  "package": { "files": 989, "status": "PASS", "rebuilt": false },
+  "design": { "files": 59, "hashes": 58, "status": "PASS", "p0_tests": 13, "product_cases": "NOT_RUN" },
+  "new_real_instances": 1,
+  "new_threads": 1,
+  "prompts_sent": 0,
+  "provider_sink_requests": 0,
+  "provider_credentials_reused": false,
+  "bridge_os_exit_code": 1,
+  "host_os_exit_code": 0,
+  "bridge_eof": false,
+  "historical_joint_verdict": "FAILED_UNCHANGED",
+  "original_diagnostic_verdict": "DIAGNOSTIC_FAILED_PRESERVED_COUNTER_ASSERTION_ERROR",
+  "counter_fix_verified_with": "LOCAL_PROTOCOL_FIXTURE_ONLY",
+  "report_polling_race_repetitions_after_protocol_barrier": 12,
+  "cleanup": { "deleted": 2, "scanned": 75, "residual_files": 0 },
+  "handoff_sha256": "9E057D55395FAABD77A175B64042F18DF24A7AC53334C10A0A370D3F06DF0586",
+  "review": "AUTHOR_SELF_REVIEW_NOT_INDEPENDENT"
+}

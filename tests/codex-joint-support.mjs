@@ -14,6 +14,16 @@ export function operatorJson(text) {
   return JSON.parse(text.replace(/^\uFEFF/, ""));
 }
 
+export function noModelThread(statistics, bridge) {
+  return (
+    statistics.generation === 0 &&
+    statistics.turn === null &&
+    statistics.requests === 1 &&
+    statistics.last_method === "thread/start" &&
+    bridge.tool_calls === 0
+  );
+}
+
 export async function taskRelay({ path, entryToken, read }) {
   let grant,
     reads = 0;

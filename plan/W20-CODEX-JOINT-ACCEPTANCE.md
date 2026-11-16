@@ -24,3 +24,9 @@ TDD验证默认拒绝、受限许可、过期/配置/任务不符、第二turn�
 只读复查同报告仍false，未发现本次bridge进程。零成本MCP子进程对照：正常stdin.end写入true，abrupt kill保留false。由此把问题定位到原客户端与MCP桥的退出协议/证据边界；未捕获厂商具体终止动作，不能将推测视为已证实根因。下一步需要新的无模型自有原客户端thread/MCP退出诊断授权；若以后需真实模型复验，仍需另批，不能复用本次授权。证据见根evidence/codex-joint。
 
 此前仅启动前BOM解析失败，未创建client-data/turn标记，0客户端/模型。新增反例后修复，不修改原配置；保留原失败报告及原错误的摘要未测量判定。marker移至真实start前独占写入；旧前置marker存档而非删除。
+
+## 无模型退出诊断增量
+
+用户另批一个独立原客户端实例、无模型thread/MCP退出诊断，不复用provider凭据。已执行：固定同exe，provider指向本地拒绝端点（请求0），仅initialize/thread/start。独立Windows观察器在退出前持有宿主及其实际MCP子进程句柄，记录桥exit1、宿主exit0，桥无EOF/无已保存fault；不是PID消失推断。原12进程保持，清理通过。真实桥异常收尾已复现，但具体厂商内部终止机制未取证；后续需设计明确的桥收尾协议与进程证明，不能把exit1算成功或删除EOF断言。
+
+原诊断脚本no_turn计数假设错误（初始化不计入statistics.requests）；用合成协议夹具红灯复现后修复，保存原诊断报告并说明，未追加真实运行。测试活跃报告读取又复现Windows rename竞争MCP_REPORT_WRITE/MCP_IO，改用协议屏障而不是重复读文件；诊断读取使用FileShare.Delete避免影响被观察方。原联合付费记录仍FAILED，任何新的真实客户端/模型复验需新授权。

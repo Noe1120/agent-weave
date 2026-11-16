@@ -1,5 +1,13 @@
 # Team · 原生 Windows 工作台
 
+## 最新诊断 · W20 MCP退出（无模型，已执行）
+
+本次新授权仅启动1个独立Codex实例并创建1个thread；没有prompt/turn、没有复用provider凭据。本地拒绝端点请求数0，MCP工具调用0。通过退出前持有Windows进程句柄观测：发出宿主stdin EOF后，**MCP桥exit 1（10:39:50.621Z），宿主exit 0（10:39:50.655Z）**，桥报告仍stdin_eof=false/fault=null，宿主非强制退出。这排除了“桥只是还没退出”解释，证明宿主正常退出不能代表MCP正常收尾；尚无厂商内部调用栈，不把exit1单独断言成具体TerminateProcess调用。
+
+原12进程保持，2份临时配置已删除、75文件扫描零桥凭据残留，未读取原聊天或全局provider配置。原诊断报告误将initialize计入requests，导致no_turn=false：已用真实本项目协议夹具复现并纠正计数（initialize独立，thread/start使requests=1），保留原报告、不再启动真实客户端补测。另修复测试读取活跃report引起Windows rename竞争：用MCP ping协议屏障替代轮询；12次合成重复通过。详见[退出诊断](evidence/codex-joint/EXIT-DIAGNOSIS.md)。W20真实联合验收仍FAILED，不拼接无模型证据升级；HANDOFF保持冻结，管家不构建。
+
+本轮全量610/610（0失败/0跳过）、原生14+1、旧包989文件、P0 13项及设计校验通过。固定本地schema存在thread/unsubscribe，可作为下一无模型收尾实验候选；尚未调用，不声称已修复真实退出。
+
 ## 当前构建 · W20（真实只读/撤权闭环已验证，严格收尾验收未通过）
 
 用户同意沿用现有CC Switch路由、必要凭据复用至新隔离home、一个自有Codex实例、最多一次合成task_get turn、联合撤权/退出/清理；30,000 tokens软停止，失败不付费重试。不动已有实例/历史/全局配置，不改HANDOFF.md。先零成本回归与只读本机配置摘要核对，再消耗本次授权；金额UNKNOWN。

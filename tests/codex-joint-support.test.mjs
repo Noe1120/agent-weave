@@ -8,6 +8,7 @@ import {
   readFileSync,
   rmSync,
   symlinkSync,
+  existsSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -15,6 +16,82 @@ import { spawn } from "node:child_process";
 import { createInterface } from "node:readline";
 import { once } from "node:events";
 import { resolve } from "node:path";
+
+test("no-model diagnosis counts thread/start but not the separate initialize handshake", async () => {
+  const { CodexAppServer } =
+    await import("../packages/service/src/codex-app-server.ts");
+  const { noModelThread } = await import("./codex-joint-support.mjs");
+  const child = spawn(
+    process.execPath,
+    [resolve("tests/fixtures/codex-app-server-fixture.mjs"), "success"],
+    { windowsHide: true, stdio: ["pipe", "pipe", "pipe"] },
+  );
+  const handle = new CodexAppServer(child);
+  try {
+    await handle.ready;
+    await handle.startThread(resolve("tests/fixtures"));
+    assert.equal(noModelThread(handle.statistics, { tool_calls: 0 }), true);
+    assert.equal(
+      noModelThread({ ...handle.statistics, generation: 1 }, { tool_calls: 0 }),
+      false,
+    );
+    assert.equal(noModelThread(handle.statistics, { tool_calls: 1 }), false);
+  } finally {
+    handle.close();
+    await handle.closed;
+  }
+});
+
+test(
+  "retained Windows process handle observes a real child exit code, not a reused PID",
+  { skip: process.platform !== "win32" },
+  async () => {
+    const root = mkdtempSync(join(tmpdir(), "aw-exit-watch-"));
+    const output = join(root, "exit.json");
+    const child = spawn(
+      process.execPath,
+      [
+        "-e",
+        "process.stdin.resume();process.stdin.on('end',()=>process.exit(7));",
+      ],
+      { windowsHide: true, stdio: ["pipe", "pipe", "pipe"] },
+    );
+    const childEnd = once(child, "close");
+    const watcher = spawn(
+      "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+      [
+        "-NoProfile",
+        "-File",
+        resolve("tests/watch-owned-exit.ps1"),
+        "-TargetId",
+        String(child.pid),
+        "-OutputFile",
+        output,
+      ],
+      { windowsHide: true, stdio: ["ignore", "pipe", "pipe"] },
+    );
+    const watcherEnd = once(watcher, "close");
+    try {
+      const deadline = Date.now() + 10000;
+      while (!existsSync(output + ".ready")) {
+        assert.ok(Date.now() < deadline);
+        await new Promise((r) => setTimeout(r, 20));
+      }
+      child.stdin.end();
+      assert.equal((await childEnd)[0], 7);
+      assert.equal((await watcherEnd)[0], 0);
+      const record = JSON.parse(readFileSync(output, "utf8"));
+      assert.equal(record.exit_observed, true);
+      assert.equal(record.exit_code, 7);
+    } finally {
+      if (child.exitCode === null) child.kill();
+      if (watcher.exitCode === null) watcher.kill();
+      await childEnd;
+      await watcherEnd;
+      rmSync(root, { recursive: true, force: true });
+    }
+  },
+);
 
 for (const shutdown of ["eof", "abrupt"])
   test(`MCP report records graceful EOF but never invents it after ${shutdown} termination`, async () => {
@@ -53,6 +130,10 @@ for (const shutdown of ["eof", "abrupt"])
     const ended = once(child, "close"),
       lines = createInterface({ input: child.stdout });
     const timer = setTimeout(() => child.kill(), 5000);
+    let stderr = "";
+    child.stderr.on("data", (bytes) => {
+      stderr += bytes.toString();
+    });
     try {
       const reply = once(lines, "line");
       child.stdin.write(
@@ -74,11 +155,13 @@ for (const shutdown of ["eof", "abrupt"])
           method: "notifications/initialized",
         }) + "\n",
       );
-      const deadline = Date.now() + 3000;
-      while (!JSON.parse(readFileSync(report, "utf8")).initialized) {
-        assert.ok(Date.now() < deadline);
-        await new Promise((r) => setTimeout(r, 10));
-      }
+      // A protocol barrier proves the prior initialized frame was saved. Polling
+      // the live JSON opened it during Windows rename and could itself cause IO failure.
+      const pong = once(lines, "line");
+      child.stdin.write(
+        JSON.stringify({ jsonrpc: "2.0", id: 2, method: "ping" }) + "\n",
+      );
+      assert.deepEqual(JSON.parse((await pong)[0]).result, {}, stderr);
       if (shutdown === "eof") child.stdin.end();
       else child.kill();
       await ended;
