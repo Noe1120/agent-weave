@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "generated_at": "2026-11-16T01:16:42.6344835Z",
+  "generated_by": "DSH (team lead) read-only preflight; no client, CLI or model execution",
+  "scope": "read-only; no client, CLI, app-server or model execution",
+  "os": {
+    "caption": "Microsoft Windows 11 家庭中文版",
+    "version": "10.0.22631",
+    "build": "22631"
+  },
+  "desktop_app": {
+    "name": "OpenAI.Codex",
+    "version": "26.1103.4239.0",
+    "package_full_name": "OpenAI.Codex_26.1103.4239.0_x64__2p2nqsd0c76g0",
+    "install_location": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.1103.4239.0_x64__2p2nqsd0c76g0",
+    "main_process": "ChatGPT.exe",
+    "main_executable_relative": "app\\ChatGPT.exe"
+  },
+  "cli": {
+    "path": "C:\\Users\\1\\AppData\\Local\\OpenAI\\Codex\\bin\\f71a721e0e6193a9\\codex.exe",
+    "bytes": 369018160,
+    "sha256": "4b3286e35d7fe866c6b0eb3f07d7a4cdb5e96489576170dfd6b3a15aa1c67382",
+    "last_write_utc": "2026-11-08T13:48:36.6437278Z",
+    "configured_by": "config.toml [mcp_servers.node_repl.env].CODEX_CLI_PATH"
+  },
+  "codex_home": {
+    "path": "C:\\Users\\1\\.codex",
+    "config_toml": {
+      "path": "C:\\Users\\1\\.codex\\config.toml",
+      "bytes": 3463,
+      "sha256": "e520bd83528feefbcdc4e63944b83079c8c50698e4f15f37773e84018886ef8c",
+      "contains_credential": true,
+      "credential_read": false,
+      "credential_printed": false
+    }
+  },
+  "metadata_observed": {
+    "model_provider": "custom",
+    "model": "gpt-6.1-sol",
+    "provider_base_url": "http://127.0.0.1:15721/v1",
+    "wire_api": "responses",
+    "requires_openai_auth": false,
+    "bearer_token_present": true,
+    "bearer_token_value_read": false,
+    "configured_mcp_servers": [
+      "node_repl"
+    ],
+    "plugin_marketplaces": 2,
+    "windows_sandbox": "elevated"
+  },
+  "read_only_static_support_probe": {
+    "method": "byte scan of the fixed CLI with ripgrep -a -F (no execution of the binary)",
+    "hits": {
+      "app-server": 1007,
+      "app_server": 238,
+      "codex app-server": 17,
+      "jsonrpc": 17,
+      "thread/start": 37,
+      "turn/start": 29,
+      "turn/completed": 3,
+      "thread/resume": 22,
+      "turn/interrupt": 6,
+      "item/tool/requestUserInput": 3
+    },
+    "conclusion": "The fixed CLI build contains an app-server implementation and the documented method names; this proves presence of code and strings only, not a working handshake, schema, or a supported entry point for this product."
+  },
+  "process_counts": {
+    "chatgpt": 11,
+    "codex": 1,
+    "computer_use": 2,
+    "sandbox_service": 1,
+    "total": 15
+  },
+  "process_identifiers_published": false,
+  "unknown": [
+    "Whether the installed app-server accepts the documented initialize/thread/start/turn/start frames on this build (needs an authorized launch).",
+    "The exact JSON Schema of this build (generation requires executing the binary).",
+    "Whether the desktop app OpenAI.Codex 26.1103.4239.0 and the CLI at the pinned hash are always launched together or can drift.",
+    "Model request count and cost of any real turn through the loopback provider at 127.0.0.1:15721."
+  ],
+  "not_run": [
+    "app-server launch",
+    "initialize",
+    "thread/start",
+    "turn/start",
+    "MCP attach",
+    "model call",
+    "window operation",
+    "OS policy change"
+  ],
+  "note": "Per-process identifiers, start times and full paths stay in the local copy; this summary keeps counts and fixed identities only."
+}

@@ -28,6 +28,10 @@
 
 [W12 DSH独立新会话探针](W12-DSH-SESSION-PREFLIGHT.md)已获单独授权并完成一次真实新建/关闭/EOF验收，35项合成测试覆盖异常与启动边界。没有prompt、旧凭据或Desktop附着；生产适配器仍为initialize-only，模型任务与OS/窗口验收未升级。
 
+## Codex接入增量 · 2026-11-16
+
+[W14 Codex app-server接入](W14-CODEX-APP-SERVER.md)已实现固定CLI身份/摘要校验的启动器、有界app-server协议状态机、复用W08授权/CAS/幂等的运行时控制器，以及MCP只读桥的Codex目标；30项合成回归通过，DSH/Claude接入无回归。本机真实握手、新thread、合成turn与平台工具往返仍NOT_RUN：缺具体授权，启动器固定空`CODEX_HOME`且不含凭据复用路径。独立新thread不等于已有桌面聊天附着；原客户端实例未被启动或改写，UI最后、管家不构建。
+
 ## 阅读与交接
 
 本设计包以用户已经明确的目标为基准：用户创建项目群、邀请 Codex / Claude Desktop / DeepSeek Harness 等 agent、自行分配职责；同群共享项目知识、协作数据和成果，agent 可以相互求助，共同完成项目。

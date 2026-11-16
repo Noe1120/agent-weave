@@ -1,3 +1,13 @@
+# W14 Codex接入合成实现 · 2026-11-16
+
+- 按根 connect.md §6 接手Codex接入。C1只读预检固定MSIX包`OpenAI.Codex 26.1103.4239.0`、CLI `codex.exe`路径/大小/SHA-256、`config.toml`元数据（bearer token未读取未打印）与在运行`ChatGPT.exe`/`codex.exe`清单；二进制静态字符串只作候选依据。
+- 新增`codex-app-server.ts`：四项固定配置、非链接/父目录可信校验、启动前后哈希与授权复核、空`CODEX_HOME`、固定参数`["app-server"]`；有界JSONL（1MiB/stdout、256KiB/帧、64KiB/stderr、5000入帧、1000出帧、20s请求、5s关闭后仅强杀自有句柄）。
+- 仅四类客户端请求：initialize、thread/start、turn/start、turn/interrupt。服务器发起请求一律`-32601`拒绝并计数；未知通知只计数；`turn/completed`才改变终态；超时与无终态一律unknown，不重发。
+- 新增`codex-runtime.ts`：`CodexRuntimeController`复用W08 `adapter_runtime`资源与动作幂等/CAS，绑定原生thread（只投影SHA-256摘要），`session_id`恒null，能力全关、资格UNVERIFIED；合成turn指令固定为`synthetic_task_get/1`且任务ID必须已在grant资源内；interrupt、关闭、独立撤权维护与未知退出不释锁。
+- MCP只读桥`target`扩展为`claude_desktop|codex`并保留枚举校验，连接统计记录target，避免两个原客户端证据合并。
+- 30项合成回归（协议10、控制器16、连接器4）通过；Codex+Claude+DSH合并196/196无回归。新增`test:codex`/`test:codex:live`，真实入口默认不进入verify且需三级独立开关。
+- 真实握手、真实新thread、合成turn与平台工具往返全部NOT_RUN：缺具体授权，且空home启动器不含凭据复用路径。原客户端未启动/附着/读取/改写；UI、Windows隔离、管家均未变。
+
 # W13 CC Switch原配置核实、真实MCP与只读桥 · 2026-11-16
 
 ## 2026-11-16：Claude me路由核对修正

@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "stage": "W14 codex app-server synthetic implementation",
+  "observed_at": "2026-11-16T01:34:36.025Z",
+  "real_client_operations": 0,
+  "real_model_requests": 0,
+  "qualification": "UNVERIFIED",
+  "status": "PASS_SYNTHETIC",
+  "preflight": {
+    "evidence": "evidence/codex/preflight/2026-11-16-readonly/preflight-summary.json",
+    "desktop_app": "OpenAI.Codex 26.1103.4239.0 (MSIX OpenAI.Codex_26.1103.4239.0_x64__2p2nqsd0c76g0)",
+    "cli_sha256": "4b3286e35d7fe866c6b0eb3f07d7a4cdb5e96489576170dfd6b3a15aa1c67382",
+    "cli_bytes": 369018160,
+    "configuration_credential_read": false,
+    "original_processes_touched": 0
+  },
+  "synthetic_tests": {
+    "protocol": 10,
+    "controller": 16,
+    "read_connector": 4,
+    "total": 30
+  },
+  "commands": [
+    {
+      "command": "node --test --test-concurrency=1 tests/codex-app-server.test.ts",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "10/10"
+    },
+    {
+      "command": "node --test --test-concurrency=1 tests/codex-runtime.test.ts",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "16/16"
+    },
+    {
+      "command": "node --test --test-concurrency=1 tests/codex-read-connector.test.ts",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "4/4"
+    },
+    {
+      "command": "node --test --test-concurrency=2 tests/codex*.test.ts tests/claude*.test.ts tests/dsh*.test.ts",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "196/196"
+    },
+    {
+      "command": "npm run verify",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "469/469 tests, format/type/web/build/smoke ok"
+    },
+    {
+      "command": "npm run test:native",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "14/14 C# + 1 WPF static"
+    },
+    {
+      "command": "npm run test:native:package",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "989 files PASS"
+    },
+    {
+      "command": "python plan/tools/test_p0_readiness.py -v",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "command": "python plan/tools/verify_design.py --refresh-combined --write-report --refresh-manifest",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "command": "python plan/tools/verify_design.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "document_checks PASS; AT 190 / CA 60 all NOT_RUN"
+    }
+  ],
+  "not_run": [
+    "real app-server initialize",
+    "real thread/start",
+    "real synthetic turn",
+    "real task_get via MCP from a Codex thread",
+    "codex --version / --help execution",
+    "attached_session to the existing desktop chat",
+    "Windows isolation",
+    "native UI and click acceptance"
+  ],
+  "boundaries": {
+    "commands_sent": [
+      "initialize",
+      "thread/start",
+      "turn/start",
+      "turn/interrupt"
+    ],
+    "generic_rpc_passthrough": false,
+    "server_initiated_requests": "refused with -32601 and counted",
+    "unknown_results": "never retried, never unlocked",
+    "session_id": "always null; only native thread digest projected",
+    "capabilities": "all disabled with reason UNVERIFIED",
+    "credential_path": "not implemented; launcher uses an empty CODEX_HOME"
+  },
+  "author_self_review": true,
+  "independent_review": false
+}

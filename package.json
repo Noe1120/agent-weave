@@ -38,7 +38,9 @@
     "test:dsh:session:live": "node tests/dsh-session-live.mjs",
     "test:claude": "node --test tests/claude*.test.ts",
     "test:claude:live": "node tests/claude-desktop-live.mjs",
-    "test:claude:read:walkthrough": "npm run build && node --test tests/claude-read-walkthrough.test.mjs && node tests/claude-read-walkthrough.mjs"
+    "test:claude:read:walkthrough": "npm run build && node --test tests/claude-read-walkthrough.test.mjs && node tests/claude-read-walkthrough.mjs",
+    "test:codex": "node --test tests/codex*.test.ts",
+    "test:codex:live": "node tests/codex-live-walkthrough.mjs"
   },
   "dependencies": {
     "ajv": "8.20.0",

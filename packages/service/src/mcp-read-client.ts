@@ -4,7 +4,7 @@ import { validateCore, validateResource } from "../../contracts/src/index.ts";
 
 interface Config {
   version: 1;
-  target: "claude_desktop";
+  target: "claude_desktop" | "codex";
   service_origin: string;
   project_id: string;
   token: string;
@@ -17,6 +17,8 @@ interface Config {
     expires_at: string;
   };
 }
+/** Each original client keeps its own configuration and evidence, never a shared identity. */
+export const mcpTargets = ["claude_desktop", "codex"] as const;
 function record(v: unknown): v is Record<string, unknown> {
   return v !== null && typeof v === "object" && !Array.isArray(v);
 }
@@ -34,6 +36,8 @@ const ids = (v: unknown): v is string[] =>
 export class McpReadClient {
   private readonly config: Config;
   private readonly now: () => number;
+  /** The original client this connection is configured for; never inferred. */
+  readonly target: Config["target"];
   constructor(config: unknown, now: () => number = Date.now) {
     if (
       !record(config) ||
@@ -49,7 +53,7 @@ export class McpReadClient {
         "egress",
       ]) ||
       config.version !== 1 ||
-      config.target !== "claude_desktop" ||
+      !mcpTargets.includes(config.target as (typeof mcpTargets)[number]) ||
       typeof config.service_origin !== "string" ||
       !/^http:\/\/127\.0\.0\.1:[1-9][0-9]{0,4}$/.test(config.service_origin) ||
       Number(config.service_origin.split(":").at(-1)) > 65535 ||
@@ -73,6 +77,7 @@ export class McpReadClient {
     )
       throw new Error("MCP_CONFIG");
     this.config = structuredClone(config) as unknown as Config;
+    this.target = this.config.target;
     this.now = now;
   }
   checkDisclosure() {

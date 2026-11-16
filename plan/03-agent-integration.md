@@ -74,6 +74,12 @@ GO 条件：固定版本下通过测试；如果产品要作为对外生产服�
 
 正式阶段计划由DSH在plan内建立：分别登记握手、真实单任务、生命周期、原生UI与Windows强制隔离门槛。取消/恢复/忙碌排队/未知退出等先合成验证，再按具体授权补真实验收。进度读取不得调用turn/start、turn/steer或thread/resume；可只读也不代表可以读取用户私有thread。严格写入、生产外发、完整L1–L3与平台整体完成仍按本章及09/12逐项验收，UI最后、管家不构建。
 
+### 4.2 W14本机实施状态（2026-11-16）
+
+[W14](W14-CODEX-APP-SERVER.md)已完成Codex接入选定范围的合成部分：固定CLI身份/摘要校验的启动器、有界app-server协议状态机（仅initialize/thread/start/turn/start/turn/interrupt，拒绝服务器发起请求，未知通知与超时一律不升级为成功）、复用W08授权/CAS/幂等的`CodexRuntimeController`（`adapter_runtime`、`target="codex"`、原生thread摘要与turn投影、撤权收束）、以及MCP只读桥显式支持`codex`目标并保留原有目标校验。30项合成回归通过，DSH/Claude既有接入测试无回归。
+
+本机真实握手、真实新thread、合成turn与平台工具往返仍为NOT_RUN：缺对应具体授权，且启动器固定使用空`CODEX_HOME`，凭据复用路径未实现。只读预检已固定MSIX包`OpenAI.Codex 26.1103.4239.0`、CLI路径与SHA-256、配置元数据（凭据未读取）与在运行实例清单；二进制静态字符串只作候选依据，不替代本机schema。独立新thread不等于已有桌面聊天附着；原客户端实例未被启动、附着或改写。
+
 ## 5. Claude Desktop
 
 官方文档支持通过本地 MCP server/桌面扩展连接外部能力 [E03]。已有社区连接器展示了群聊天工具接入，但它们不构成官方对全生命周期自动唤醒的承诺 [P02][P04]。

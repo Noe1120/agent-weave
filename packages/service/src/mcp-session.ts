@@ -3,6 +3,7 @@ export class McpSession {
   private readonly client: McpReadClient;
   private state: "new" | "initializing" | "ready" = "new";
   readonly stats = {
+    target: "unset",
     initialize_requests: 0,
     initialized: false,
     tools_list_requests: 0,
@@ -14,6 +15,8 @@ export class McpSession {
   };
   constructor(client: McpReadClient) {
     this.client = client;
+    // Recorded so two original clients can never share one evidence record.
+    this.stats.target = client.target;
   }
   async receive(value: unknown): Promise<any> {
     const f = value as Record<string, any>;

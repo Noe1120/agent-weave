@@ -130,3 +130,15 @@ qa-runtime/
 !/evidence/claude-desktop/author-self-review.json
 !/evidence/claude-desktop/preflight-report.json
 !/evidence/claude-desktop/real-attempt-report.json
+
+# Reviewed W14 Codex read-only preflight and synthetic summaries only; raw logs, the
+# full per-process preflight copy and any client data stay local.
+!/evidence/codex/
+/evidence/codex/*
+!/evidence/codex/COMPLETION.md
+!/evidence/codex/verification-summary.json
+!/evidence/codex/preflight/
+/evidence/codex/preflight/*
+!/evidence/codex/preflight/2026-11-16-readonly/
+/evidence/codex/preflight/2026-11-16-readonly/*
+!/evidence/codex/preflight/2026-11-16-readonly/preflight-summary.json
