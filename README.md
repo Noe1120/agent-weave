@@ -8,9 +8,15 @@
 
 当前已继续完成[W08能力与适配基础](plan/W08-ADAPTER-FOUNDATION.md)、[W09依赖与授权资料](plan/W09-DEPENDENCIES-KNOWLEDGE.md)、[W10本机离线灾备基础](plan/W10-OFFLINE-RECOVERY.md)，停在管家Agent之前。后续工作直接沿用[AGENTS.md](AGENTS.md)，不重复确认既有要求。
 
+## 原客户端接入交接 · 2026-11-16
+
+**下一位实施者 DSH 请从 [connect.md](connect.md) 开始。** 文档整理 W11/W12 的 DSH 接入方法、W13 的 Claude Desktop＋CC Switch me 路由接入步骤、真实验收与失败经验，并给出 Codex 接入任务和完成判据。DSH 是开发实施者，Codex 是被接入对象；本轮只整理文档，不启动原客户端。
+
+当前 DSH 已验证初始化及独立空会话；Claude 已完成一次真实合成 task_get 往返，仍不是完整生产连接器。Codex 专项接入尚未实现，下一阶段由 DSH 在既有授权和设计边界内推进。原生 UI 最后，管家不构建。
+
 ## 管家方案版本
 
-用户已确认修改后的[管家方案](plan/11-coordinator-agent.md)及关联源章为最新版（coordinator-core-review-1），本分支已纳入；这是设计确认，不是开始构建管家的授权。后续继续DSH接入，原生UI最后设计。
+用户已确认修改后的[管家方案](plan/11-coordinator-agent.md)及关联源章为最新版（coordinator-core-review-1），本分支已纳入；这是设计确认，不是开始构建管家的授权。后续接入顺序以最新交接和 connect.md 为准，原生UI最后设计。
 
 ## DSH 接入增量 · 2026-11-15
 

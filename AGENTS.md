@@ -21,7 +21,7 @@
 ## 不可放宽的边界
 
 - 保留Codex、Claude Desktop、DeepSeek Harness原身份，不以Claude Code/SDK或一般模型API替代指定原客户端。
-- Claude Desktop按用户指定的CC Switch me分组＋路由模式接入。先核对live-state的proxy_route与me元数据；旧official选择器、is_current或gateway文件单独不足以证明活动上游。不切官方模式、不要求官方登录。一次独立窗口合成任务已获授权；不据此接管/关闭既有实例，不读取私有历史，不把MCP发现当模型任务成功。
+- Claude Desktop按用户指定的CC Switch me分组＋路由模式接入。先核对live-state的proxy_route与me元数据；旧official选择器、is_current或gateway文件单独不足以证明活动上游。不切官方模式、不要求官方登录。第十二轮一次真实合成工具往返已完成，既往单次任务授权已使用；不据此追加模型任务或接管/关闭既有实例，不读取私有历史，不把MCP发现当模型任务成功。
 - 不擅自启动/重启/安装/接管原客户端，不调用计费模型或读取原客户端私有历史。新增真实客户端操作、敏感数据外发、费用、系统身份/ACL/网络策略或破坏性操作，若没有对应授权，只询问缺失的具体授权，不重问整个方案。
 - 进度查询只读已有状态；不得顺带prompt、resume、steer、cancel或额外模型回合。普通消息、有效等待回答和审批走各自通道。
 - 可见性在服务/资源/派生内容层校验；grant、policy、run、资源权限求交。未知、过期和失联不等于停止，未可靠撤写不能释放逻辑锁。

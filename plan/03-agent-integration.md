@@ -4,7 +4,7 @@
 
 > 2026-11-15：W11已用本机官方DeepSeek Harness 0.2.1-rc.3完成独立ACP initialize生命周期实测，ACP协议1/bridge 0.0.1；没有session/prompt或原Desktop附着。声明能力不是可执行资格，详见[W11](W11-DSH-ACP-LIFECYCLE.md)。
 
-本文件优先保留用户明确点名的 Codex、Claude Desktop 和 DeepSeek Harness。DSH初始化/新会话与下述W13 Claude MCP发现已有分项实测；完整原客户端任务能力仍未验收。03 与 05 的门槛是实施团队必须完成的验证工作。
+本文件优先保留用户明确点名的 Codex、Claude Desktop 和 DeepSeek Harness。DSH初始化/独立新会话及W13 Claude一次真实合成只读工具往返已有分项实测；完整生产接入仍未验收。03 与 05 的门槛是实施团队必须完成的验证工作。
 
 ## 1. 接入等级与发布口径
 
@@ -62,6 +62,18 @@ GO 条件：固定版本下通过测试；如果产品要作为对外生产服�
 
 降级：按需求接受官方 SDK/非交互入口时，创建独立的 adapter 类型并重新验收。不得声称 SDK 已接管原来的桌面聊天。
 
+### 4.1 交给DSH的下一接入任务（2026-11-16）
+
+用户要求由其使用的DSH学习已完成的DSH/Claude接入过程，继续实现Codex接入；根目录[connect.md](../connect.md)是操作教程和任务交接，不替代本目录设计。当前轮仅整理交接，不启动DSH或Codex。DSH是下一阶段实施者，Codex是被接入对象；不是重新完成DSH自身的模型接入，也不启动管家。
+
+目标先完成官方Codex独立会话的最小可用闭环：固定本机身份/版本/真实配置 → 合成协议与授权回归 → 获准的真实握手 → 新会话中的一条合成任务 → 一次平台只读工具调用及可核对回复 → 纯只读进度 → 所属连接关闭/退出对账、撤权与凭据清理。复用W08授权/幂等/配置失效与现有只读服务，不以单独演示脚本、工具列表或模型自述代替平台接入。尚无Codex专项运行模块或真实验收结果。
+
+优先调查官方stdio app-server与本地MCP的组合，但必须核实它与本机原Codex的发行来源、配置/账户和会话归属关系。官方新会话不等于已有桌面聊天附着；若不能证明用户指定原客户端身份，或需要改用SDK/API/另一发行版，应停在该边界并提出具体差异，不偷偷替换。新进程/会话、凭据复用、模型费用、窗口操作和OS策略分别核对授权；以前的DSH/Claude单次授权不转移到Codex。
+
+2026-11-16实际读取的官方[App Server文档](https://learn.chatgpt.com/docs/app-server)描述initialize→initialized、thread/start、turn/start与结构化事件；stdio使用JSONL，示例省略jsonrpc字段，WebSocket仍标实验性且不受支持。[MCP文档](https://learn.chatgpt.com/docs/extend/mcp?surface=cli)描述Codex作为MCP客户端配置stdio服务。两页分别由developers.openai.com/codex/app-server/与codex/mcp/重定向取得。它们只作候选接口依据，不能取代本机固定版本schema、实际探针、认证授权或稳定性处置；本轮没有运行这些接口，不更新旧E系列来源日期。
+
+正式阶段计划由DSH在plan内建立：分别登记握手、真实单任务、生命周期、原生UI与Windows强制隔离门槛。取消/恢复/忙碌排队/未知退出等先合成验证，再按具体授权补真实验收。进度读取不得调用turn/start、turn/steer或thread/resume；可只读也不代表可以读取用户私有thread。严格写入、生产外发、完整L1–L3与平台整体完成仍按本章及09/12逐项验收，UI最后、管家不构建。
+
 ## 5. Claude Desktop
 
 官方文档支持通过本地 MCP server/桌面扩展连接外部能力 [E03]。已有社区连接器展示了群聊天工具接入，但它们不构成官方对全生命周期自动唤醒的承诺 [P02][P04]。
@@ -84,13 +96,13 @@ GO 条件：固定版本下通过测试；如果产品要作为对外生产服�
 
 ### 5.1 W13本机实施记录（2026-11-16）
 
-用户明确指定CC Switch的me分组＋路由模式。2026-11-16只读复核发现live-state为proxy/attached，proxy_route匹配me；settings旧选择器仍为official、数据库is_current仍为cc7，二者不能替代活动路由证据。此前仅固定Desktop网关文件，未固定me，相关结论已收窄为MCP传输通过。第八次测试窗口发现MCP但未发送prompt、tool_calls=0，模型不可用提示未解决；测试实例退出与凭据清除已核实。现在第三方准备入口要求绑定路由目标、live-state及provider元数据摘要，并在启动前再次核对；这仍不是运行时provider外发证明。用户已授权一次独立窗口合成任务，不重复索取；当前已有用户Claude实例，不能接管或重启，下一次真实尝试尚未启动。
+用户明确指定CC Switch的me分组＋路由模式。只读复核live-state为proxy/attached、proxy_route匹配me；旧official选择器或数据库is_current不能替代活动路由证据。第十二轮已完成一条合成prompt→一次task_get→服务queued结果→窗口准确回复；任务与发现连接独立报告，合法roots变化通知正常处理。两条MCP均EOF、所属根进程exit0且Job为空，复制令牌清除、369文件扫描零匹配，原四配置摘要不变。累计三条已授权用户prompt，总模型请求/费用未知；这些单次授权已使用，不授权下次启动或任务。真实记录见W13及其证据。
 
 固定官方Desktop 5.11492.2的CC Switch第三方gateway路由已实际通过本地stdio MCP initialize/initialized及tools/resources/prompts发现。旧空profile缺少第三方连接，不能据此要求官方登录。普通--user-data-dir不足以定位3p配置；本机安装会使用LOCALAPPDATA/Claude-3p/configLibrary中_meta.json选定的条目。测试仅在全新标准Windows profile复用获准的本机gateway令牌，不复制上游provider密钥/历史/cookie，不改现有模式或配置。
 
 实现一个合成验收专用的固定project/read-only grant桥：task_get读取新增task安全投影，project_progress只查get_plan_progress，message_poll可选且由执行feed检查grant绑定。固定配置拒绝动态URL/token/project，逐次复核服务权限和声明的披露到期时间，拒绝重定向、超限响应与未知字段；stdout只承载JSONL。协议会话上限1000帧/1MiB，每帧64KiB，单次HTTP超时5秒，响应64KiB。它不是长期运行的生产connector。
 
-synthetic_only与provider_fingerprint当前是可信验收配置声明，不提供生产数据分类或实际provider网络绑定；不得据此放行真实私密数据。尚未接入邀请、受保护凭据配置、实际原生会话绑定或服务端外发策略。两次真实发现均tool_calls=0；编译连接器读取/重连/撤权属于合成MCP客户端走查，不提升L1–L3。严格写入、真实任务/自动唤醒、窗口与OS隔离仍待验收。见[W13](W13-CLAUDE-DESKTOP-MCP-PROBE.md)。
+synthetic_only与provider_fingerprint当前是可信验收配置声明，不提供生产数据分类或实际provider网络绑定；不得据此放行真实私密数据。尚未接入邀请、受保护凭据配置、实际原生会话绑定或服务端外发策略。早期发现tool_calls=0与第十二轮一次真实调用分开保存；编译读取/重连/撤权是合成走查，不提升完整L1–L3。严格写入、自动唤醒、完整窗口流程与OS隔离仍待验收。见[W13](W13-CLAUDE-DESKTOP-MCP-PROBE.md)。
 
 ## 6. Claude Code / Agent SDK 是独立选项
 
