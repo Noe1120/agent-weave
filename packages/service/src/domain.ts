@@ -17,6 +17,7 @@ export type Action =
   | "runner_stop"
   | "adapter_configure"
   | "adapter_read"
+  | "runtime_control"
   | "dependency_capture"
   | "dependency_read"
   | "knowledge_read";

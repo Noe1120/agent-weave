@@ -1,5 +1,7 @@
 # 03 Agent 接入、兼容性与 Windows 验证
 
+> 2026-11-16 W15：已有 DSH initialize-only / Codex app-server 控制器新增受保护 HTTP 生命周期通路，见 [W15](W15-RUNTIME-GATEWAY.md)。GET 只读投影关联成员/run；POST start/close 需 grant 与 policy 同时具有 runtime_control，且仍通过 adapter_configure、scope/CAS/幂等校验。启动器只来自可信服务装配，正常服务默认无启动器；无持有控制器的活动记录为 unknown。HTTP 不开放 prompt/turn/interrupt/附着，也不因此提升真实客户端或 Windows 资格。
+
 > 2026-11-14：开发实现增量：W08仅可信进程内登记、能力原因投影、配置失效与本地detach。普通调用方不能自报VERIFIED或注入执行命令；真实发送/回答/审批/打断未开放，详见W08-ADAPTER-FOUNDATION.md。
 
 > 2026-11-15：W11已用本机官方DeepSeek Harness 0.2.1-rc.3完成独立ACP initialize生命周期实测，ACP协议1/bridge 0.0.1；没有session/prompt或原Desktop附着。声明能力不是可执行资格，详见[W11](W11-DSH-ACP-LIFECYCLE.md)。

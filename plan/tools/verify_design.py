@@ -205,7 +205,7 @@ report = {"date": DATE, "timezone": "Asia/Tokyo", "design_version": VERSION, "co
     "cleanup_result": old.get("cleanup_result", {}),
     "source_retrieval_summary": {"applies_to":"prior v1.6 content revision, not this directory reorganization","official_sources_read":1,"source_ids":["E33"],"method":"Approved read-only HTTP after empty web output","all_http_200":True,"raw_page_files_persisted":False}}
 if a.write_report:
-    (ROOT / "verification-report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2)+"\n", encoding="utf-8")
+    (ROOT / "verification-report.json").write_bytes((json.dumps(report, ensure_ascii=False, indent=2)+"\n").encode("utf-8"))
 # Refresh checksums only after report/combined writes, then verify the stored bytes.
 # A plain run stays read-only. Reports intentionally do not self-hash.
 files = {p.relative_to(ROOT).as_posix(): p.read_bytes() for p in ROOT.rglob("*") if p.is_file() and "__pycache__" not in p.parts}

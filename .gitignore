@@ -144,6 +144,11 @@ qa-runtime/
 !/evidence/codex/real-vendor-directonly-2026-11-16.json
 !/evidence/codex/preflight-code-mode-2026-11-16.json
 !/evidence/codex/vendor-tool-registration-2026-11-16.json
+
+# W15 reviewed summary only; raw process/log data remains local.
+!/evidence/runtime-gateway/
+/evidence/runtime-gateway/*
+!/evidence/runtime-gateway/COMPLETION.md
 !/evidence/codex/vendor-attempt-report.json
 !/evidence/codex/preflight/
 /evidence/codex/preflight/*

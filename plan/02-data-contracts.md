@@ -1,5 +1,7 @@
 # 02 数据、状态与接口契约
 
+> 2026-11-16 W15：新增 runtime/0.1 后端边界，沿用现有 adapter_runtime 资源与 schema4。只读 `GET /v1/projects/:project/runtimes/:runtime` 使用 adapter_read；生命周期 `POST /v1/runtimes/:target/{start|close}` 另需 runtime_control 且经原控制器鉴权。成员/run 从认证上下文派生；task 引用逐次校验权限。只投影状态、版本、指纹、原生 thread 摘要和退出观察，不返回原生标识/消息/路径/凭据；状态读取无 DB 写入、无原客户端操作。详见 [W15](W15-RUNTIME-GATEWAY.md)，不修改 core/1.0。
+
 > 2026-11-14：开发实现增量：W09在现有resources表保存任务DAG、不可变输入快照与授权资料；Broker/排队/评审等待重新校验完整上游版本。核心wire与迁移不改，详见W09-DEPENDENCIES-KNOWLEDGE.md。
 
 本文件规定领域行为，示例是设计契约，不是已实现接口。运行连接器详见 03，恢复与安全见 04。最小跨模块结构已在 contracts/core.schema.json（core/1.0）冻结为设计基线，配套正反例与第 12 章状态/等待规则；完整 API 的 OpenAPI、传输绑定与生成客户端类型仍由 P0 扩展并验证，不能把设计 Schema 当成已实现接口。

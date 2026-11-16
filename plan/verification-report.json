@@ -1454,6 +1454,8 @@
     "W12-DSH-SESSION-PREFLIGHT.md",
     "W13-CLAUDE-DESKTOP-MCP-PROBE.md",
     "W14-CODEX-APP-SERVER.md",
+    "W15-RUNTIME-GATEWAY.md",
+    "WINDOWS-ISOLATION-DECISION.md",
     "contracts/core.schema.json",
     "contracts/error-mapping.json",
     "contracts/resource.schema.json",

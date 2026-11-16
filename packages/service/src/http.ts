@@ -16,9 +16,12 @@ import { ExecutionFeed } from "./workspace-feed.ts";
 import { WorkspaceFault } from "./workspace-auth.ts";
 import { ServiceFault } from "./errors.ts";
 import { randomUUID } from "node:crypto";
+import { RuntimeGateway } from "./runtime-gateway.ts";
+import { AdapterFault } from "./adapter-contract.ts";
 export function createServer(
   service: CoreService,
   workspace = new WorkspaceService(service.store, service.now),
+  runtimes = new RuntimeGateway(service.store, {}, service.now),
 ) {
   const feed = new ExecutionFeed(service.store, service.now);
   const server = nodeServer(
@@ -49,6 +52,44 @@ export function createServer(
         );
         if (!credential) throw new TransportFault(401, "UNAUTHENTICATED");
         const token = credential[1]!;
+        const runtimeCommand =
+          /^\/v1\/runtimes\/(codex|deepseek_harness)\/(start|close)$/.exec(
+            req.url,
+          );
+        if (runtimeCommand) {
+          if (req.method !== "POST")
+            throw new TransportFault(405, "METHOD_NOT_ALLOWED");
+          send(res, 200, {
+            contract_version: "runtime/0.1",
+            kind: "runtime_result",
+            data: await runtimes.command(
+              token,
+              runtimeCommand[1]!,
+              runtimeCommand[2]!,
+              await body(req),
+            ),
+          });
+          return;
+        }
+        const runtime =
+          /^\/v1\/projects\/([0-9a-fA-F-]{36})\/runtimes\/([0-9a-fA-F-]{36})$/.exec(
+            req.url,
+          );
+        if (runtime) {
+          if (req.method !== "GET")
+            throw new TransportFault(405, "METHOD_NOT_ALLOWED");
+          if (
+            req.headers["transfer-encoding"] ||
+            Number(req.headers["content-length"] ?? 0) !== 0
+          )
+            throw new TransportFault(400, "BAD_REQUEST");
+          send(res, 200, {
+            contract_version: "runtime/0.1",
+            kind: "runtime_result",
+            data: runtimes.read(token, runtime[1]!, runtime[2]!),
+          });
+          return;
+        }
         if (req.url === "/v1/feed") {
           if (req.method !== "POST")
             throw new TransportFault(405, "METHOD_NOT_ALLOWED");
@@ -100,7 +141,18 @@ export function createServer(
       })().catch((e: unknown) => {
         const isWorkspace =
           req.url?.startsWith("/v1/console") || req.url === "/v1/feed";
-        if (e instanceof WorkspaceFault) {
+        const isRuntime = req.url?.includes("/runtimes/");
+        if (isRuntime && e instanceof ServiceFault) {
+          send(res, errorMapping[e.code].http_status, {
+            kind: "runtime_error",
+            code: e.code,
+          });
+        } else if (isRuntime && e instanceof AdapterFault) {
+          send(res, e.code === "ADAPTER_CONTRACT" ? 400 : 409, {
+            kind: "runtime_error",
+            code: e.code,
+          });
+        } else if (e instanceof WorkspaceFault) {
           send(res, e.status, { kind: "workspace_error", code: e.code });
         } else if (isWorkspace && e instanceof ServiceFault) {
           send(res, errorMapping[e.code].http_status, {

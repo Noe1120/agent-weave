@@ -11,6 +11,12 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class P0ReadinessTests(unittest.TestCase):
+    def test_generated_report_uses_portable_lf_bytes(self):
+        report = (ROOT / "verification-report.json").read_bytes()
+        self.assertEqual(report.count(b"\r"), 0, "Report writer must not translate LF to CRLF")
+        self.assertTrue(report.endswith(b"\n"))
+        self.assertIsInstance(json.loads(report.decode("utf-8")), dict)
+
     def text(self, relative):
         path = ROOT / relative
         self.assertTrue(path.is_file(), f"Missing design material: {relative}")
