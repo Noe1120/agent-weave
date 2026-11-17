@@ -228,6 +228,8 @@ W21桥生命周期设计：原客户端宿主退出不能代替MCP子进程正�
 
 W22追加离线认证转发装配：回环TCP一次能力绑定、单在途请求与双向累计上限、写回调背压和截止期限；意外断开失败，不自动重连/重放，重启后旧能力拒绝。桥证明通过后再通知转发端关闭，核对转发端实际exit0后才能关闭自有宿主；最终响应写出失败不能因收到closed而被吞掉。只完成tests合成链，不是厂商客户端资格、部署ACL或生产入口，见[W22](W22-LOCAL-BRIDGE-RELAY.md)。
 
+W23将上述三个模块迁入service而不复制实现，新增默认不注册的固定本项目入口装配。启动前复验本地代码摘要、授权和合成披露；只有完成relay认证才返回可用handle；报告普通单链接/大小校验，stop/abort首次失败保留，终态删本次固定凭据文件、不删证据。源码/编译链分别合成验证，不升级生产签名、Windows隔离或真实厂商资格，见[W23](W23-OWNED-BRIDGE-RUNTIME.md)。
+
 W07仅启用固定哈希配置的 development_fixture，以 owned_process 绑定平台自有测试进程；可信进程内RunnerController负责授权、持久化和Broker调用，worker只提交严格JSONL事件。原生RunnerHost的Job生命周期管理不构成安全沙箱：以当前用户运行的进程仍可能访问同用户资源，合作式等待begin的fixture不能推广为任意原客户端的启动隔离证明。
 
 后续 attached_session 必须区分断开连接、中断回合、退出客户端；不得把自有进程的Terminate路径用于用户原客户端。参考[Agents Anywhere定向研究](research/2026-11-14-agents-anywhere.md)只提供源码线索，Claude SDK不能替代Claude Desktop。能力发现/配置校验与会话读写分别实现；只读查询不能顺手resume/接管，未知发送结果不能自动重发。实际适配入口仍需本章与09/12规定的固定版本、明确授权和同配置证据。

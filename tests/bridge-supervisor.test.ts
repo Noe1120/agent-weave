@@ -2,13 +2,13 @@ import test, { type TestContext } from "node:test";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, linkSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { createServer } from "node:http";
 import { fixture } from "./helpers.ts";
 import { tempWorkspace } from "./temp.ts";
 import { listenLoopback } from "../packages/service/src/loopback-listener.ts";
-import { BridgeSupervisor } from "./bridge-supervisor.ts";
+import { BridgeSupervisor } from "../packages/service/src/bridge-supervisor.ts";
 
 function deferred() {
   let resolve!: () => void;
@@ -307,4 +307,19 @@ test("draining never extends revoked task access or masks tool errors", async (t
   await stopped;
   assert.equal(f.reads(), 0);
   assert.equal(f.supervisor.snapshot().state, "failed");
+});
+
+test("final bridge report hardlink is rejected despite otherwise valid exit evidence", async (t) => {
+  const f = await setup(t);
+  await f.initialize();
+  f.child.once("close", () => linkSync(f.reportPath, f.reportPath + ".alias"));
+  let host = 0;
+  await assert.rejects(
+    f.supervisor.stop(async () => {
+      host++;
+      return { code: 0, exit_observed: true, forced: false };
+    }),
+    /BRIDGE_EVIDENCE/,
+  );
+  assert.equal(host, 0);
 });

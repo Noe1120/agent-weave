@@ -1,4 +1,4 @@
-import { runRelay } from "../bridge-relay.ts";
+import { runRelay } from "../../packages/service/src/bridge-relay.ts";
 try {
   const descriptor = JSON.parse(process.env.TEAM_RELAY ?? "null");
   delete process.env.TEAM_RELAY;

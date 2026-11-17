@@ -1,4 +1,4 @@
-import { openRelayEndpoint } from "../bridge-relay.ts";
+import { openRelayEndpoint } from "../../packages/service/src/bridge-relay.ts";
 // Crash transport fixture only: no MCP responses, no successful bridge evidence.
 const endpoint = await openRelayEndpoint(
   {

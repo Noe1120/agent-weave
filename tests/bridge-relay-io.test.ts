@@ -1,7 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { Readable, Writable } from "node:stream";
-import { readFrames, writeFrame } from "./bridge-relay-io.ts";
+import {
+  readFrames,
+  writeFrame,
+} from "../packages/service/src/bridge-relay-io.ts";
 
 async function collect(input: Readable, frame = 64, total = 128) {
   const result = [];

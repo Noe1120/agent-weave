@@ -10,9 +10,15 @@ import { join, resolve } from "node:path";
 import { fixture } from "./helpers.ts";
 import { tempWorkspace } from "./temp.ts";
 import { listenLoopback } from "../packages/service/src/loopback-listener.ts";
-import { BridgeSupervisor } from "./bridge-supervisor.ts";
-import { openRelayEndpoint, runRelay } from "./bridge-relay.ts";
-import { readFrames, writeFrame } from "./bridge-relay-io.ts";
+import { BridgeSupervisor } from "../packages/service/src/bridge-supervisor.ts";
+import {
+  openRelayEndpoint,
+  runRelay,
+} from "../packages/service/src/bridge-relay.ts";
+import {
+  readFrames,
+  writeFrame,
+} from "../packages/service/src/bridge-relay-io.ts";
 
 async function setup(
   t: TestContext,

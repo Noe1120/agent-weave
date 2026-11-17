@@ -1,11 +1,11 @@
 import type { ChildProcessWithoutNullStreams } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { readFileSync, lstatSync } from "node:fs";
 export type HostExit = {
   code: number | null;
   exit_observed: boolean;
   forced: boolean;
 };
-/** Offline prototype only. The caller owns the child; no PID attachment or launch API. */
+/** Trusted owned-child supervisor; no PID attachment or arbitrary launch API. */
 export class BridgeSupervisor {
   private readonly child: ChildProcessWithoutNullStreams;
   private readonly options: { reportPath: string; deadlineMs: number };
@@ -179,6 +179,14 @@ export class BridgeSupervisor {
       if (this.buffer.length) throw new Error("BRIDGE_PROTOCOL");
       let report: any;
       try {
+        const stat = lstatSync(this.options.reportPath);
+        if (
+          !stat.isFile() ||
+          stat.isSymbolicLink() ||
+          stat.nlink !== 1 ||
+          stat.size > 65536
+        )
+          throw new Error("BRIDGE_EVIDENCE");
         report = JSON.parse(readFileSync(this.options.reportPath, "utf8"));
       } catch {
         throw new Error("BRIDGE_EVIDENCE");

@@ -88,10 +88,17 @@ export async function openRelayEndpoint(
     active: Promise<void> = Promise.resolve(),
     stopping: Promise<void> | undefined,
     expectedClose = false;
+  let resolveReady!: () => void, rejectReady!: (error: Error) => void;
+  const ready = new Promise<void>((resolve, reject) => {
+    resolveReady = resolve;
+    rejectReady = reject;
+  });
+  void ready.catch(() => {});
   const sockets = new Set<Socket>(),
     seen = new Set<string>();
   function fail(error: unknown) {
     fault ??= reason(error);
+    rejectReady(new Error(fault));
     state = "failed";
     peer?.destroy();
   }
@@ -140,6 +147,7 @@ export async function openRelayEndpoint(
       peer = socket;
       state = "open";
       await writeFrame(socket, { type: "ready" }, options.deadlineMs);
+      resolveReady();
       for (;;) {
         const next = await frames.next();
         if (next.done) {
@@ -217,6 +225,7 @@ export async function openRelayEndpoint(
   const descriptor = { port: address.port, instance, token };
   return {
     descriptor,
+    ready,
     snapshot: () => ({ state, fault, consumed, sealed }),
     stop(
       waitRelay: () => Promise<HostExit>,

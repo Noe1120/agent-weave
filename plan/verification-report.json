@@ -1462,6 +1462,7 @@
     "W20-CODEX-JOINT-ACCEPTANCE.md",
     "W21-BRIDGE-SUPERVISION.md",
     "W22-LOCAL-BRIDGE-RELAY.md",
+    "W23-OWNED-BRIDGE-RUNTIME.md",
     "WINDOWS-ISOLATION-DECISION.md",
     "contracts/core.schema.json",
     "contracts/error-mapping.json",

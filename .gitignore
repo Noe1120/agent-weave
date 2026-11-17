@@ -193,3 +193,7 @@ qa-runtime/
 /evidence/bridge-relay/*
 !/evidence/bridge-relay/COMPLETION.md
 !/evidence/bridge-relay/verification-summary.json
+
+!/evidence/owned-bridge/
+/evidence/owned-bridge/*
+!/evidence/owned-bridge/COMPLETION.md
