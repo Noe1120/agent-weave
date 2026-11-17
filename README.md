@@ -1,5 +1,11 @@
 # Team · 原生 Windows 工作台
 
+## 最新验证 · W24 真实无模型生命周期通过（限定本次固定配置）
+
+已按本次单独授权完成一个新隔离Codex 0.167.0-alpha.3.2实例及一个thread：真正桥初始化/工具发现各1次，工具调用0、turn=null、generation=0、回环provider请求0。桥stdin_eof=true且自然exit0；持有Windows实际进程句柄证明relay先自然exit0，再关闭Codex根进程并观察exit0/非强制。原客户端清单保持，未读取用户历史/复用provider凭据/改CC Switch。删除隔离home能力配置1份（桥配置由工厂另清除），限定扫描75文件零残留。
+
+全量675/675（0失败/0取消/0跳过），原生14+1、旧包989文件、P0 13项及设计校验通过。本次授权已使用，不追加实例或turn；没有付费调用。见[真实记录](evidence/codex-relay-binding/NO-MODEL-ACCEPTANCE.md)与[脱敏报告](evidence/codex-relay-binding/no-model-report.json)。**W20仍FAILED**：此次证明新方案的固定配置无模型收尾，不是旧联合验收补签，也不证明所有重连/崩溃情形。下一关为同配置真实单任务只读＋撤权＋严格退出联合验收，涉及必要provider复用和一次计费turn，须另有具体授权/预算，当前不执行。HANDOFF冻结，管家未构建。
+
 ## 当前阶段 · W24 原客户端 relay 绑定准备（离线完成，真实验收待授权）
 
 在D盘主工作区继续完成W23/W24：平台拥有真正MCP桥，Codex仅通过固定relay入口连接；新增默认关闭的`relay_binding`与`prepareClient`，不替换原客户端、不切换既有接入。未认证显示waiting，未消费能力到期明确失败；有序关闭必须取得桥EOF/exit0、外部relay独立OS退出证明，再关闭自有宿主。合成走查完成实际本项目任务读取与凭据清理，不代表真实Codex已通过。

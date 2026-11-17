@@ -1,5 +1,7 @@
 # 03 Agent 接入、兼容性与 Windows 验证
 
+> W24真实增量：固定Codex 0.167.0-alpha.3.2一次无模型验收通过，真正桥EOF/exit0、relay与宿主分别持Windows句柄观察正常退出且顺序正确。原实例清单保持，空home配置能力副本已清除；没有turn或业务工具调用。只能登记该固定配置无模型生命周期通过，不追认W20、不推导L1–L3/强制隔离资格。该次真实授权已消耗。
+
 > W24：新增默认关闭的Codex relay_binding（固定本项目入口与环境能力，不接受自由命令）和平台拥有桥的prepareClient装配。外部relay停止必须提供独立OS退出证明，不能以socket EOF代替；业务桥凭据与隔离home能力副本分别清理。仅合成/禁止spawn配置预检通过，原默认接入未切换，W20真实失败不升级。下一无模型原客户端门槛及具体操作范围见[W24](W24-CODEX-RELAY-BINDING.md)。
 
 > W19：Codex控制器新增仅development_fixture可用的可信只读观测工厂，固定instance/native thread并逐次校验所属句柄与授权，为W17提供合成集成；不启动客户端、不发送turn、不开放真实配置，未知不等于停止。见[W19](W19-CONTROLLER-OBSERVATION.md)。
