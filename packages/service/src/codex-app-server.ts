@@ -915,7 +915,19 @@ function reuseProvider(reuse: CodexProfile["provider_reuse"]): {
  * configuration, credential, session or database of the installed client is
  * read or reused.
  */
-export function officialCodexLauncher(input: unknown): CodexLauncher {
+export interface CodexLaunchLifecycle {
+  prepare(workDirectory: string): Promise<{
+    attach(
+      host: CodexHandle,
+      child: ChildProcessWithoutNullStreams,
+    ): CodexHandle;
+    abort(): Promise<void>;
+  }>;
+}
+export function officialCodexLauncher(
+  input: unknown,
+  lifecycle?: CodexLaunchLifecycle,
+): CodexLauncher {
   const o = object(input),
     required = [
       "installation_root",
@@ -1116,37 +1128,51 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
           flag: "wx",
         });
       }
-      if (!stillAuthorized())
-        throw new AdapterFault("CODEX_AUTHORIZATION_CHANGED");
-      const system = process.env.SystemRoot ?? process.env.SYSTEMROOT;
-      contract(system && isAbsolute(system));
-      const env = {
-        SystemRoot: system,
-        WINDIR: system,
-        ComSpec: join(system, "System32", "cmd.exe"),
-        PATH: join(system, "System32"),
-        PATHEXT: ".COM;.EXE;.BAT;.CMD",
-        OS: "Windows_NT",
-        USERPROFILE: dirs.user,
-        HOME: dirs.user,
-        APPDATA: dirs.appdata,
-        LOCALAPPDATA: dirs.localappdata,
-        TEMP: dirs.temp,
-        TMP: dirs.temp,
-        CODEX_HOME: dirs.home,
-        NO_COLOR: "1",
-      };
-      const child = spawn(executable, ["app-server"], {
-        cwd: dirs.work,
-        env,
-        windowsHide: true,
-        shell: false,
-        stdio: ["pipe", "pipe", "pipe"],
-      });
-      return new CodexAppServer(child, {
-        workDirectory: dirs.work,
-        onStderr: (bytes) => appendFileSync(diagnostic, bytes),
-      });
+      const prepared = await lifecycle?.prepare(dirs.work);
+      let host: CodexAppServer | undefined;
+      try {
+        if (!stillAuthorized())
+          throw new AdapterFault("CODEX_AUTHORIZATION_CHANGED");
+        const system = process.env.SystemRoot ?? process.env.SYSTEMROOT;
+        contract(system && isAbsolute(system));
+        const env = {
+          SystemRoot: system,
+          WINDIR: system,
+          ComSpec: join(system, "System32", "cmd.exe"),
+          PATH: join(system, "System32"),
+          PATHEXT: ".COM;.EXE;.BAT;.CMD",
+          OS: "Windows_NT",
+          USERPROFILE: dirs.user,
+          HOME: dirs.user,
+          APPDATA: dirs.appdata,
+          LOCALAPPDATA: dirs.localappdata,
+          TEMP: dirs.temp,
+          TMP: dirs.temp,
+          CODEX_HOME: dirs.home,
+          NO_COLOR: "1",
+        };
+        const child = spawn(executable, ["app-server"], {
+          cwd: dirs.work,
+          env,
+          windowsHide: true,
+          shell: false,
+          stdio: ["pipe", "pipe", "pipe"],
+        });
+        host = new CodexAppServer(child, {
+          workDirectory: dirs.work,
+          onStderr: (bytes) => appendFileSync(diagnostic, bytes),
+        });
+        return prepared ? prepared.attach(host, child) : host;
+      } catch (error) {
+        if (host) {
+          host.close();
+          const exit = await host.closed;
+          if (!exit.exit_observed)
+            throw new AdapterFault("CODEX_LAUNCH_EXIT_UNKNOWN");
+        }
+        await prepared?.abort();
+        throw error;
+      }
     },
   });
 }

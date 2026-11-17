@@ -230,6 +230,8 @@ UNKNOWN/NOT_RUN 不形成资格；LIMITED 列出人工步骤及禁用能力。�
 
 ## 16. W07开发运行器与未来附着边界（实施注记）
 
+W29加入显式受信officialCodexRelayLauncher组合，不进入默认HTTP配置。官方启动器在新home配置写完、spawn之前由受信prepare捕获清理；attach只接受该次真实ChildProcess，错误路径先确认宿主退出再清配置，未知保留。Windows观察通过持父句柄、唯一精确Node入口匹配、持子句柄后二次父子核对提供退出证明；不接客户端自报PID。配置fingerprint在桥准备前后复验原provider摘要，桥target必须codex。源/编译Node链验证不等于真实厂商命令行匹配通过；新增无模型实测需另授权。见[W29](W29-TRUSTED-RELAY-LAUNCHER.md)。
+
 W28提供独立OS观察原语：固定PowerShell程序核对PID与OS启动ticks，持Process.Handle至退出，只有辅助程序正常退出且严格JSONL证明完整才返回exit_observed。观察器dispose不得杀目标；它不验证父子归属，不接受公共HTTP PID输入，必须由可信启动装配提供独立发现身份。仅Node合成/编译链验证，不等于原客户端或Windows强制隔离资格，见[W28](W28-WINDOWS-EXIT-OBSERVER.md)。
 
 W27为W26提供固定布局配置清理回调：启动前受信捕获dataRoot直属codex-init-*下home/config.toml身份/摘要，退出后复验再unlink。拒绝路径/链接/身份/内容变化，保留未知结果与人工核对责任；不允许任意files列表或递归删除，不保证同用户恶意竞态的原子OS隔离，也不等于全目录残留扫描。当前默认官方启动器仍未装配，见[W27](W27-CODEX-HOME-CLEANUP.md)。

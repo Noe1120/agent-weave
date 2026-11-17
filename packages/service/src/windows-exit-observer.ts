@@ -1,4 +1,5 @@
-import { spawn } from "node:child_process";
+import { spawn, type ChildProcess } from "node:child_process";
+import { isAbsolute } from "node:path";
 import type { RelayExitObservation } from "./codex-relay-handle.ts";
 import type { HostExit } from "./bridge-supervisor.ts";
 
@@ -30,6 +31,54 @@ try {
   [Console]::Out.Flush()
 } catch { exit 1 } finally { if ($null -ne $p) { $p.Dispose() } }
 `;
+  return runObserver(script);
+}
+
+/** Only accepts an owned live ChildProcess, never a client-supplied parent PID. */
+export async function observeWindowsChildExit(
+  parent: ChildProcess,
+  entry: string,
+): Promise<RelayExitObservation> {
+  if (
+    process.platform !== "win32" ||
+    !parent.pid ||
+    parent.exitCode !== null ||
+    parent.signalCode !== null ||
+    !isAbsolute(entry)
+  )
+    throw new Error("WINDOWS_EXIT_OPTIONS");
+  const encoded = (s: string) => Buffer.from(s, "utf8").toString("base64");
+  const script = `
+$ErrorActionPreference = 'Stop'
+$parent = $null; $p = $null
+try {
+  $parent = Get-Process -Id ${parent.pid}
+  $null = $parent.Handle
+  $exe = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${encoded(process.execPath)}'))
+  $entry = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${encoded(entry)}'))
+  $commands = @(('"' + $exe + '" "' + $entry + '"'), ('"' + $exe + '" ' + $entry), ($exe + ' "' + $entry + '"'), ($exe + ' ' + $entry))
+  $matches = @(Get-CimInstance Win32_Process -Filter 'ParentProcessId = ${parent.pid}' | Where-Object { $_.ExecutablePath -eq $exe -and $commands -contains $_.CommandLine })
+  if ($matches.Count -ne 1 -or $parent.HasExited) { throw 'AMBIGUOUS' }
+  $p = Get-Process -Id $matches[0].ProcessId
+  $null = $p.Handle
+  $again = Get-CimInstance Win32_Process -Filter ('ProcessId = ' + $p.Id)
+  if ($parent.HasExited -or $p.StartTime -lt $parent.StartTime -or $again.ParentProcessId -ne $parent.Id -or $again.ExecutablePath -ne $exe -or $commands -notcontains $again.CommandLine) { throw 'IDENTITY' }
+  [Console]::Out.WriteLine('{"kind":"ready"}')
+  [Console]::Out.Flush()
+  $p.WaitForExit()
+  [Console]::Out.WriteLine((@{kind='exit';code=$p.ExitCode} | ConvertTo-Json -Compress))
+  [Console]::Out.Flush()
+} catch { exit 1 } finally { if ($null -ne $p) { $p.Dispose() }; if ($null -ne $parent) { $parent.Dispose() } }
+`;
+  const observer = await runObserver(script);
+  if (parent.exitCode !== null || parent.signalCode !== null) {
+    await observer.dispose();
+    throw new Error("WINDOWS_EXIT_PARENT_CLOSED");
+  }
+  return observer;
+}
+
+async function runObserver(script: string): Promise<RelayExitObservation> {
   const child = spawn(
     "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
     ["-NoProfile", "-NonInteractive", "-Command", script],

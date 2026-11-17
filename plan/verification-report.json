@@ -1468,6 +1468,7 @@
     "W26-CODEX-RELAY-LIFECYCLE.md",
     "W27-CODEX-HOME-CLEANUP.md",
     "W28-WINDOWS-EXIT-OBSERVER.md",
+    "W29-TRUSTED-RELAY-LAUNCHER.md",
     "WINDOWS-ISOLATION-DECISION.md",
     "contracts/core.schema.json",
     "contracts/error-mapping.json",
