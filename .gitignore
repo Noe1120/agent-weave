@@ -208,3 +208,7 @@ qa-runtime/
 /evidence/codex-relay-joint/*
 !/evidence/codex-relay-joint/COMPLETION.md
 !/evidence/codex-relay-joint/real-attempt-report.json
+
+!/evidence/codex-relay-lifecycle/
+/evidence/codex-relay-lifecycle/*
+!/evidence/codex-relay-lifecycle/COMPLETION.md

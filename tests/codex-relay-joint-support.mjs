@@ -1,5 +1,6 @@
 // Trusted acceptance composition only. Not a default production launcher.
 import assert from "node:assert/strict";
+import { composeCodexRelayHandle } from "../dist/packages/service/src/codex-relay-handle.js";
 import { spawn, execFileSync } from "node:child_process";
 import { once } from "node:events";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
@@ -35,8 +36,6 @@ export function relayJointComposition(
     ended,
     frames,
     serial = 0,
-    stopping,
-    failure = null,
     watcher;
   const facts = {};
   const rpc = async (method, params = {}) => {
@@ -55,24 +54,16 @@ export function relayJointComposition(
     source: base.source,
     async launch(allowed) {
       raw = await base.launch(allowed);
-      const closed = raw.closed.then(async (exit) => {
-        if (stopping) await stopping;
-        else {
-          failure = "RELAY_HOST_EARLY_EXIT";
-          await prepared.abort();
-        }
-        return { ...exit, fault: failure ?? exit.fault };
-      });
-      return {
+      const host = {
         get status() {
-          return stopping ? { state: "closing", fault: failure } : raw.status;
+          return raw.status;
         },
         get statistics() {
           return raw.statistics;
         },
         workDirectory: raw.workDirectory,
         ready: raw.ready,
-        closed,
+        closed: raw.closed,
         async startThread(cwd) {
           const thread = await raw.startThread(cwd);
           if (synthetic) {
@@ -109,43 +100,41 @@ export function relayJointComposition(
         startTurn: (...args) => raw.startTurn(...args),
         interruptTurn: (...args) => raw.interruptTurn(...args),
         close() {
-          if (stopping) return;
-          stopping = (async () => {
-            try {
-              await prepared.stop(
-                async () => {
-                  if (!watcher) throw new Error("RELAY_PROOF_MISSING");
-                  await until(() => existsSync(watcher.path));
-                  assert.equal((await watcher.ended)[0], 0);
-                  facts.relay_os_exit = JSON.parse(
-                    readFileSync(watcher.path, "utf8"),
-                  );
-                  return {
-                    code: facts.relay_os_exit.exit_code,
-                    exit_observed: facts.relay_os_exit.exit_observed,
-                    forced: false,
-                  };
-                },
-                async () => {
-                  facts.host_close_requested_at = new Date().toISOString();
-                  raw.close();
-                  return await raw.closed;
-                },
-              );
-            } catch {
-              failure = "RELAY_JOINT_CLOSE_FAILED";
-              try {
-                await prepared.abort();
-              } catch {
-                failure = "RELAY_JOINT_CLEANUP_FAILED";
-              }
-              raw.close();
-              await raw.closed;
-            }
-            facts.snapshot = prepared.snapshot();
-          })();
+          facts.host_close_requested_at ??= new Date().toISOString();
+          raw.close();
         },
       };
+      return composeCodexRelayHandle({
+        host,
+        bridge: prepared,
+        stillAuthorized: allowed,
+        // Watcher is armed near revocation, avoiding its 60s wait during a turn.
+        observeRelay: async () => ({
+          async waitExit() {
+            if (!watcher) throw new Error("RELAY_PROOF_MISSING");
+            await until(() => existsSync(watcher.path));
+            assert.equal((await watcher.ended)[0], 0);
+            facts.relay_os_exit = JSON.parse(
+              readFileSync(watcher.path, "utf8"),
+            );
+            return {
+              code: facts.relay_os_exit.exit_code,
+              exit_observed: facts.relay_os_exit.exit_observed,
+              forced: false,
+            };
+          },
+          async dispose() {
+            if (watcher) {
+              if (watcher.child.exitCode === null) watcher.child.kill();
+              await watcher.ended;
+            }
+          },
+        }),
+        // The acceptance harness owns home cleanup after controller disposal.
+        cleanup: async () => {
+          facts.snapshot = prepared.snapshot();
+        },
+      });
     },
   };
   return {
@@ -153,7 +142,7 @@ export function relayJointComposition(
     facts,
     rpc,
     async arm() {
-      assert.ok(raw && !watcher && !stopping);
+      assert.ok(raw && !watcher && raw.status.state !== "closed");
       let pid = relay?.pid;
       if (!synthetic) {
         const entry = prepared.launch.args[0].replaceAll("'", "''");

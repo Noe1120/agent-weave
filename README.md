@@ -1,5 +1,11 @@
 # Team · 原生 Windows 工作台
 
+## 当前构建 · W26 Codex生命周期服务装配
+
+已将桥排空/EOF→独立relay退出证明→宿主退出→所属配置清理的组合提炼为service内类型化包装器。关闭同步封住新操作；授权变化、未知退出、清理失败和准备期间宿主早退均不伪装成功。W25验收helper现在使用同一内核，默认HTTP/官方启动器不自动启用。当前复验与分层记录见[W26](plan/W26-CODEX-RELAY-LIFECYCLE.md)，真实客户端与模型未新增调用，HANDOFF冻结。
+
+全量689/689（0失败/0取消/0跳过），新专项12项；编译合成用户流程10项检查通过，原生14+1、旧包989文件、P0 13项通过。修复未知退出误报closed和观察器双释放/早退泄漏，未绕过校验。[分层证据](evidence/codex-relay-lifecycle/COMPLETION.md)。下一步继续所属home清理与OS观察器受信装配的离线开发，不自动启用原客户端。
+
 ## 最新完成 · W25 同配置真实单任务/撤权/严格退出联合验收
 
 **PASSED_FIXED_CONFIG**：一个新官方Codex实例、一次真实gpt-6.1-sol turn，沿用CC Switch既有路由及direct_only配置。邀请→兑换→新原生thread→单任务grant→task_get恰好1次/0错误→原生复述同task与draft→turn completed→撤连接后旧授权拒绝→撤控制grant→真正桥EOF/exit0→relay持Windows句柄exit0→宿主exit0/非强制，在同一次尝试内通过。1000次进度查询零DB写入，真实读取零业务写入。

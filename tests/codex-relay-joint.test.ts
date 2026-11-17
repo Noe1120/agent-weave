@@ -63,7 +63,7 @@ test(
       handle.close();
       const exit = await handle.closed;
       assert.equal(exit.code, 0);
-      assert.equal(exit.fault, "RELAY_JOINT_CLOSE_FAILED");
+      assert.equal(exit.fault, "CODEX_RELAY_CLOSE");
       assert.equal(composed.facts.snapshot?.state, "failed");
     } finally {
       await composed.cleanup();
