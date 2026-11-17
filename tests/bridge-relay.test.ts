@@ -566,3 +566,13 @@ test("request arriving after stop fence fails instead of reaching bridge", async
   assert.equal(host, 0);
   assert.equal(f.endpoint.snapshot().state, "failed");
 });
+
+test(
+  "unbound endpoint ready rejects at capability expiry without fake readiness",
+  { timeout: 3000 },
+  async (t) => {
+    const f = await setup(t, 30);
+    await assert.rejects(f.endpoint.ready, /RELAY_AUTH_EXPIRED/);
+    assert.equal(f.endpoint.snapshot().consumed, false);
+  },
+);

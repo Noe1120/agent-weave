@@ -106,110 +106,113 @@ export function createOwnedBridgeFactory(input: unknown) {
   const suffix = extname(import.meta.filename),
     bridgeEntry = join(import.meta.dirname, "mcp-entry" + suffix),
     relayEntry = join(import.meta.dirname, "bridge-relay-entry" + suffix);
-  return Object.freeze({
-    fingerprint,
-    async launch(stillAuthorized: () => boolean) {
-      const authorized = () => {
-        if (stillAuthorized() !== true)
-          throw new Error("BRIDGE_AUTHORIZATION_CHANGED");
-      };
-      authorized();
-      plain(dataRoot, false);
-      if (codeDigest() !== pinned) throw new Error("BRIDGE_CONFIG_CHANGED");
-      new McpReadClient(config).checkDisclosure();
-      authorized();
-      const root = mkdtempSync(join(dataRoot, "owned-bridge-")),
-        configPath = join(root, "bridge.json"),
-        reportPath = join(root, "report.json");
-      let bridge: ReturnType<typeof own> | undefined,
-        relay: ReturnType<typeof own> | undefined,
-        endpoint: Awaited<ReturnType<typeof openRelayEndpoint>> | undefined;
-      let fault: string | null = null,
-        state = "starting",
-        credentialsCleared = false,
-        stopping: Promise<void> | undefined,
-        aborting: Promise<void> | undefined;
-      const clean = () => {
-        try {
-          plain(root, false);
-          plain(configPath, true);
-          unlinkSync(configPath);
-          credentialsCleared = true;
-        } catch (error) {
-          if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-            credentialsCleared = true;
-            return;
-          }
-          throw new Error("BRIDGE_CREDENTIAL_CLEANUP");
-        }
-      };
-      const abort = () => {
-        if (aborting) return aborting;
-        aborting = (async () => {
-          if (state !== "closed") {
-            fault ??= "BRIDGE_ABORTED";
-            state = "failed";
-          }
-          const errors = [];
-          try {
-            await endpoint?.dispose();
-          } catch (error) {
-            errors.push(error);
-          }
-          for (const process of [relay, bridge])
-            try {
-              await process?.terminate();
-            } catch (error) {
-              errors.push(error);
-            }
-          try {
-            clean();
-          } catch (error) {
-            errors.push(error);
-          }
-          if (errors.length) {
-            fault = safeReason(errors[0]);
-            state = "failed";
-            throw new Error(fault);
-          }
-        })();
-        return aborting;
-      };
+  async function create(
+    stillAuthorized: () => boolean,
+    external: boolean,
+  ): Promise<any> {
+    const authorized = () => {
+      if (stillAuthorized() !== true)
+        throw new Error("BRIDGE_AUTHORIZATION_CHANGED");
+    };
+    authorized();
+    plain(dataRoot, false);
+    if (codeDigest() !== pinned) throw new Error("BRIDGE_CONFIG_CHANGED");
+    new McpReadClient(config).checkDisclosure();
+    authorized();
+    const root = mkdtempSync(join(dataRoot, "owned-bridge-")),
+      configPath = join(root, "bridge.json"),
+      reportPath = join(root, "report.json");
+    let bridge: ReturnType<typeof own> | undefined,
+      relay: ReturnType<typeof own> | undefined,
+      endpoint: Awaited<ReturnType<typeof openRelayEndpoint>> | undefined;
+    let externalExit: HostExit | null = null;
+    let fault: string | null = null,
+      state = "starting",
+      credentialsCleared = false,
+      stopping: Promise<void> | undefined,
+      aborting: Promise<void> | undefined;
+    const clean = () => {
       try {
-        writeFileSync(configPath, JSON.stringify(config), { flag: "wx" });
-        authorized();
-        const env = {
-          ...(process.env.SystemRoot
-            ? { SystemRoot: process.env.SystemRoot }
-            : {}),
-          TEMP: root,
-          TMP: root,
-          HOME: root,
-          USERPROFILE: root,
-          NO_COLOR: "1",
-        };
-        bridge = own(
-          spawn(
-            process.execPath,
-            [bridgeEntry, "--config", configPath, "--report", reportPath],
-            {
-              cwd: root,
-              env,
-              windowsHide: true,
-              shell: false,
-              stdio: ["pipe", "pipe", "pipe"],
-            },
-          ),
-        );
-        const supervisor = new BridgeSupervisor(bridge.child, {
-          reportPath,
-          deadlineMs: 15000,
-        });
-        endpoint = await openRelayEndpoint(supervisor, {
-          deadlineMs: 5000,
-          ttlMs: 30000,
-        });
-        authorized();
+        plain(root, false);
+        plain(configPath, true);
+        unlinkSync(configPath);
+        credentialsCleared = true;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+          credentialsCleared = true;
+          return;
+        }
+        throw new Error("BRIDGE_CREDENTIAL_CLEANUP");
+      }
+    };
+    const abort = () => {
+      if (aborting) return aborting;
+      aborting = (async () => {
+        if (state !== "closed") {
+          fault ??= "BRIDGE_ABORTED";
+          state = "failed";
+        }
+        const errors = [];
+        try {
+          await endpoint?.dispose();
+        } catch (error) {
+          errors.push(error);
+        }
+        for (const process of [relay, bridge])
+          try {
+            await process?.terminate();
+          } catch (error) {
+            errors.push(error);
+          }
+        try {
+          clean();
+        } catch (error) {
+          errors.push(error);
+        }
+        if (errors.length) {
+          fault = safeReason(errors[0]);
+          state = "failed";
+          throw new Error(fault);
+        }
+      })();
+      return aborting;
+    };
+    try {
+      writeFileSync(configPath, JSON.stringify(config), { flag: "wx" });
+      authorized();
+      const env = {
+        ...(process.env.SystemRoot
+          ? { SystemRoot: process.env.SystemRoot }
+          : {}),
+        TEMP: root,
+        TMP: root,
+        HOME: root,
+        USERPROFILE: root,
+        NO_COLOR: "1",
+      };
+      bridge = own(
+        spawn(
+          process.execPath,
+          [bridgeEntry, "--config", configPath, "--report", reportPath],
+          {
+            cwd: root,
+            env,
+            windowsHide: true,
+            shell: false,
+            stdio: ["pipe", "pipe", "pipe"],
+          },
+        ),
+      );
+      const supervisor = new BridgeSupervisor(bridge.child, {
+        reportPath,
+        deadlineMs: 15000,
+      });
+      endpoint = await openRelayEndpoint(supervisor, {
+        deadlineMs: 5000,
+        ttlMs: 30000,
+      });
+      authorized();
+      if (!external)
         relay = own(
           spawn(process.execPath, [relayEntry], {
             cwd: root,
@@ -219,12 +222,13 @@ export function createOwnedBridgeFactory(input: unknown) {
             stdio: ["pipe", "pipe", "pipe"],
           }),
         );
-        relay.child.stderr.resume();
+      if (relay) relay.child.stderr.resume();
+      if (!external) {
         let readyTimer: NodeJS.Timeout | undefined;
         try {
           await Promise.race([
             endpoint.ready,
-            relay.closed.then(() => {
+            relay!.closed.then(() => {
               throw new Error("RELAY_EARLY_EXIT");
             }),
             new Promise<never>((_, reject) => {
@@ -237,52 +241,85 @@ export function createOwnedBridgeFactory(input: unknown) {
         } finally {
           clearTimeout(readyTimer);
         }
-        authorized();
-        state = "open";
-        const ownedRelay = relay,
-          ownedBridge = bridge,
-          transport = endpoint;
-        return {
-          input: ownedRelay.child.stdin,
-          output: ownedRelay.child.stdout,
-          snapshot: () => ({
-            state:
-              state === "open" && transport.snapshot().state === "failed"
-                ? "failed"
-                : state,
-            fault: fault ?? transport.snapshot().fault,
-            credentials_cleared: credentialsCleared,
-            bridge_exit: ownedBridge.snapshot(),
-            relay_exit: ownedRelay.snapshot(),
-          }),
-          stop(closeHost: () => Promise<HostExit>): Promise<void> {
-            if (stopping) return stopping;
-            if (state !== "open")
-              return Promise.reject(new Error(fault ?? "BRIDGE_NOT_OPEN"));
-            state = "draining";
-            stopping = (async () => {
-              try {
-                await transport.stop(() => ownedRelay.closed, closeHost);
-                await transport.dispose();
-                clean();
-                if (fault) throw new Error(fault);
-                state = "closed";
-              } catch (error) {
-                fault ??= safeReason(error);
-                state = "failed";
-                await abort();
-                throw new Error(fault!);
-              }
-            })();
-            return stopping;
-          },
-          abort,
-        };
-      } catch (error) {
-        fault = safeReason(error);
-        await abort();
-        throw new Error(fault);
       }
-    },
+      authorized();
+      state = "open";
+      const ownedRelay = relay,
+        ownedBridge = bridge,
+        transport = endpoint;
+      return {
+        ...(ownedRelay
+          ? { input: ownedRelay.child.stdin, output: ownedRelay.child.stdout }
+          : {
+              launch: {
+                command: process.execPath,
+                args: [relayEntry],
+                env: { TEAM_RELAY: JSON.stringify(transport.descriptor) },
+              },
+              ready: transport.ready,
+            }),
+        snapshot: () => ({
+          state:
+            state === "open" && transport.snapshot().state === "failed"
+              ? "failed"
+              : state === "open" &&
+                  external &&
+                  transport.snapshot().state === "waiting"
+                ? "waiting"
+                : state,
+          fault: fault ?? transport.snapshot().fault,
+          credentials_cleared: credentialsCleared,
+          bridge_exit: ownedBridge.snapshot(),
+          relay_exit:
+            ownedRelay?.snapshot() ??
+            (externalExit ? { ...externalExit } : null),
+        }),
+        stop(
+          first: () => Promise<HostExit>,
+          second?: () => Promise<HostExit>,
+        ): Promise<void> {
+          const closeHost = external ? second : first;
+          if (!closeHost)
+            return Promise.reject(new Error("BRIDGE_HOST_REQUIRED"));
+          if (stopping) return stopping;
+          if (state !== "open")
+            return Promise.reject(new Error(fault ?? "BRIDGE_NOT_OPEN"));
+          state = "draining";
+          stopping = (async () => {
+            try {
+              await transport.stop(
+                ownedRelay
+                  ? () => ownedRelay.closed
+                  : async () => {
+                      externalExit = { ...(await first()) };
+                      return externalExit;
+                    },
+                closeHost,
+              );
+              await transport.dispose();
+              clean();
+              if (fault) throw new Error(fault);
+              state = "closed";
+            } catch (error) {
+              fault ??= safeReason(error);
+              state = "failed";
+              await abort();
+              throw new Error(fault!);
+            }
+          })();
+          return stopping;
+        },
+        abort,
+      };
+    } catch (error) {
+      fault = safeReason(error);
+      await abort();
+      throw new Error(fault);
+    }
+  }
+  return Object.freeze({
+    fingerprint,
+    launch: (authorized: () => boolean) => create(authorized, false),
+    prepareClient: (authorized: () => boolean) => create(authorized, true),
   });
 }

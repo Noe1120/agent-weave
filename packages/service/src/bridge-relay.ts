@@ -94,9 +94,13 @@ export async function openRelayEndpoint(
     rejectReady = reject;
   });
   void ready.catch(() => {});
+  const expiry = setTimeout(() => {
+    if (!consumed) fail(new Error("RELAY_AUTH_EXPIRED"));
+  }, options.ttlMs);
   const sockets = new Set<Socket>(),
     seen = new Set<string>();
   function fail(error: unknown) {
+    clearTimeout(expiry);
     fault ??= reason(error);
     rejectReady(new Error(fault));
     state = "failed";
@@ -142,6 +146,7 @@ export async function openRelayEndpoint(
         state !== "waiting"
       )
         throw new Error("RELAY_AUTH");
+      clearTimeout(expiry);
       consumed = true;
       authenticated = true;
       peer = socket;
@@ -269,6 +274,7 @@ export async function openRelayEndpoint(
       return stopping;
     },
     async dispose() {
+      clearTimeout(expiry);
       if (state !== "closed") fail(new Error("RELAY_DISCONNECTED"));
       for (const s of sockets) s.destroy();
       await new Promise<void>((resolve) => server.close(() => resolve()));

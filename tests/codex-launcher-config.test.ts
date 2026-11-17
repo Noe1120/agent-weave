@@ -276,3 +276,72 @@ test("a changed operator configuration is refused at launch, not silently reused
       error instanceof AdapterFault && error.code === "CODEX_CONFIG_CHANGED",
   );
 });
+
+test("relay configuration uses fixed entry and capability environment, not secret args", () => {
+  const relay_binding = {
+    port: 50123,
+    instance: "b".repeat(32),
+    token: "a".repeat(64),
+  };
+  const text = codexHomeConfig({ relay_binding } as any);
+  assert.equal(
+    tomlSectionValue(text, "mcp_servers.agent-weave-probe", "command"),
+    process.execPath,
+  );
+  assert.match(text, /bridge-relay-entry\.js/);
+  const args = text.split("\n").find((l) => l.startsWith("args = "))!;
+  assert.ok(args);
+  assert.equal(args.includes(relay_binding.token), false);
+  const env = tomlSectionValue(
+    text,
+    "mcp_servers.agent-weave-probe.env",
+    "TEAM_RELAY",
+  );
+  assert.ok(env);
+  assert.deepEqual(JSON.parse(env), relay_binding);
+  assert.equal(text.includes("bridge.json"), false);
+});
+test("relay descriptor validation cannot enable arbitrary command or coexist with direct bridge", () => {
+  const valid = {
+    port: 50123,
+    instance: "b".repeat(32),
+    token: "a".repeat(64),
+  };
+  for (const relay_binding of [
+    { ...valid, port: 0 },
+    { ...valid, token: "bad" },
+    { ...valid, host: "remote" },
+    { ...valid, command: "cmd.exe" },
+  ])
+    assert.throws(() => codexHomeConfig({ relay_binding } as any));
+  assert.throws(() =>
+    officialCodexLauncher({
+      ...profile,
+      relay_binding: valid,
+      bridge: { config_path: resolve("x.json"), report_dir: resolve("tests") },
+    }),
+  );
+  assert.throws(() =>
+    codexHomeConfig({
+      relay_binding: valid,
+      bridge: { command: process.execPath, args: [] },
+    } as any),
+  );
+});
+test("relay-only launcher configuration is valid but authorization refusal never starts it", async () => {
+  const relay_binding = {
+    port: 50123,
+    instance: "b".repeat(32),
+    token: "a".repeat(64),
+  };
+  const launcher = officialCodexLauncher({ ...profile, relay_binding });
+  assert.equal(launcher.source, "official_codex");
+  assert.notEqual(
+    launcher.fingerprint,
+    officialCodexLauncher(profile).fingerprint,
+  );
+  await assert.rejects(
+    launcher.launch(() => false),
+    /CODEX_AUTHORIZATION_CHANGED/,
+  );
+});

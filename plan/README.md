@@ -1,5 +1,7 @@
 # 群聊式 Agent 协作平台：实施设计包 v1.6
 
+当前入口：[W24 原客户端relay绑定准备](W24-CODEX-RELAY-BINDING.md)。已实现默认关闭的Codex固定relay配置与prepareClient；平台拥有真正桥，外部relay必须另有OS退出证明。仅合成流程及禁止spawn的编译配置预检，不启动原客户端或模型。下一门槛为另行授权的一次独立Codex无模型生命周期验收，W20仍FAILED。最新结果见根README；HANDOFF冻结。
+
 当前入口：[W23 受信桥运行装配](W23-OWNED-BRIDGE-RUNTIME.md)。W21/W22模块迁入service构建，固定入口、代码摘要、最小环境、授权复查、所属句柄清理与凭据删除已合成验证；默认不启用，不构成真实原客户端资格。后续继续客户端装配准备，HANDOFF冻结。
 
 当前增量：[W22 认证本机转发](W22-LOCAL-BRIDGE-RELAY.md)，仅离线合成装配：一次能力绑定、单在途背压、正常收尾与崩溃后拒绝续接。生产原客户端启动器未改，真实资格不升级。实时结果见根README，HANDOFF继续冻结。

@@ -197,3 +197,7 @@ qa-runtime/
 !/evidence/owned-bridge/
 /evidence/owned-bridge/*
 !/evidence/owned-bridge/COMPLETION.md
+
+!/evidence/codex-relay-binding/
+/evidence/codex-relay-binding/*
+!/evidence/codex-relay-binding/COMPLETION.md

@@ -1463,6 +1463,7 @@
     "W21-BRIDGE-SUPERVISION.md",
     "W22-LOCAL-BRIDGE-RELAY.md",
     "W23-OWNED-BRIDGE-RUNTIME.md",
+    "W24-CODEX-RELAY-BINDING.md",
     "WINDOWS-ISOLATION-DECISION.md",
     "contracts/core.schema.json",
     "contracts/error-mapping.json",

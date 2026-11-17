@@ -679,6 +679,24 @@ function errorCode(method: string | null) {
 function countOnce(list: string[], method: string) {
   if (list.length < 20 && !list.includes(method)) list.push(method);
 }
+export interface CodexRelayBinding {
+  port: number;
+  instance: string;
+  token: string;
+}
+function relayBinding(value: unknown): asserts value is CodexRelayBinding {
+  const b = object(value);
+  contract(
+    Object.keys(b).sort().join(",") === "instance,port,token" &&
+      Number.isInteger(b.port) &&
+      Number(b.port) > 0 &&
+      Number(b.port) <= 65535 &&
+      typeof b.instance === "string" &&
+      /^[a-f0-9]{32}$/.test(b.instance) &&
+      typeof b.token === "string" &&
+      /^[a-f0-9]{64}$/.test(b.token),
+  );
+}
 interface CodexProfile {
   installation_root: string;
   data_root: string;
@@ -686,6 +704,7 @@ interface CodexProfile {
   executable_sha256: string;
   model_provider?: { base_url: string; model: string };
   bridge?: { config_path: string; report_dir: string };
+  relay_binding?: CodexRelayBinding;
   code_mode?: CodexCodeMode;
   provider_reuse?: {
     source_config: string;
@@ -768,8 +787,10 @@ export function codexHomeConfig(input: {
     label?: string;
   };
   bridge?: { command: string; args: string[] };
+  relay_binding?: CodexRelayBinding;
   code_mode?: CodexCodeMode;
 }): string {
+  contract(!(input.bridge && input.relay_binding));
   const lines: string[] = [];
   if (input.model_provider) {
     const { base_url, model, bearer_token, label: name } = input.model_provider;
@@ -822,6 +843,20 @@ export function codexHomeConfig(input: {
           excluded_tool_namespaces.map((n) => JSON.stringify(n)).join(", ") +
           "]",
       );
+  }
+  if (input.relay_binding) {
+    relayBinding(input.relay_binding);
+    if (lines.length) lines.push("");
+    lines.push(
+      "[mcp_servers.agent-weave-probe]",
+      "command = " + JSON.stringify(process.execPath),
+      "args = [" +
+        JSON.stringify(join(import.meta.dirname, "bridge-relay-entry.js")) +
+        "]",
+      "startup_timeout_sec = 30",
+      "[mcp_servers.agent-weave-probe.env]",
+      "TEAM_RELAY = " + JSON.stringify(JSON.stringify(input.relay_binding)),
+    );
   }
   if (input.bridge) {
     const { command, args } = input.bridge;
@@ -888,7 +923,13 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
       "client_version",
       "executable_sha256",
     ],
-    optional = ["model_provider", "bridge", "provider_reuse", "code_mode"];
+    optional = [
+      "model_provider",
+      "bridge",
+      "provider_reuse",
+      "code_mode",
+      "relay_binding",
+    ];
   contract(
     required.every((k) => Object.hasOwn(o, k)) &&
       Object.keys(o).length <= required.length + optional.length &&
@@ -943,6 +984,10 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
           namespaceList(m.excluded_tool_namespaces)),
     );
   }
+  if (o.relay_binding !== undefined) {
+    relayBinding(o.relay_binding);
+    contract(o.bridge === undefined);
+  }
   if (o.bridge !== undefined) {
     const b = object(o.bridge);
     contract(
@@ -980,10 +1025,16 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
   );
   const executable = join(p.installation_root, "codex.exe");
   const bridgeEntry = join(import.meta.dirname, "mcp-entry.js");
+  const relayEntry = join(import.meta.dirname, "bridge-relay-entry.js");
+  const relaySha =
+    p.relay_binding && existsSync(relayEntry)
+      ? createHash("sha256").update(readFileSync(relayEntry)).digest("hex")
+      : null;
   const fp = createHash("sha256")
     .update(
       canonical({
         profile: p,
+        ...(p.relay_binding ? { relay_entry_sha256: relaySha } : {}),
         protocol: "codex-app-server/1",
         policy: "fresh-home-platform-config-only/1",
       }),
@@ -1009,6 +1060,11 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
       await unlinked(executable, true);
       if ((await hash(executable)) !== p.executable_sha256)
         throw new AdapterFault("CODEX_CONFIG_CHANGED");
+      if (p.relay_binding) {
+        await unlinked(relayEntry, true);
+        if (!relaySha || (await hash(relayEntry)) !== relaySha)
+          throw new AdapterFault("CODEX_CONFIG_CHANGED");
+      }
       if (p.bridge) {
         // The bridge inputs are re-verified before every launch: a moved file or
         // directory invalidates the configuration instead of being guessed at.
@@ -1035,10 +1091,11 @@ export function officialCodexLauncher(input: unknown): CodexLauncher {
       for (const d of Object.values(dirs)) await mkdir(d);
       const diagnostic = join(root, "stderr.log");
       await writeFile(diagnostic, "", { flag: "wx" });
-      if (modelProvider || p.bridge || p.code_mode) {
+      if (modelProvider || p.bridge || p.code_mode || p.relay_binding) {
         const config = codexHomeConfig({
           ...(modelProvider ? { model_provider: modelProvider } : {}),
           ...(p.code_mode ? { code_mode: p.code_mode } : {}),
+          ...(p.relay_binding ? { relay_binding: p.relay_binding } : {}),
           ...(p.bridge
             ? {
                 bridge: {

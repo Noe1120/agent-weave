@@ -1,5 +1,7 @@
 # 03 Agent 接入、兼容性与 Windows 验证
 
+> W24：新增默认关闭的Codex relay_binding（固定本项目入口与环境能力，不接受自由命令）和平台拥有桥的prepareClient装配。外部relay停止必须提供独立OS退出证明，不能以socket EOF代替；业务桥凭据与隔离home能力副本分别清理。仅合成/禁止spawn配置预检通过，原默认接入未切换，W20真实失败不升级。下一无模型原客户端门槛及具体操作范围见[W24](W24-CODEX-RELAY-BINDING.md)。
+
 > W19：Codex控制器新增仅development_fixture可用的可信只读观测工厂，固定instance/native thread并逐次校验所属句柄与授权，为W17提供合成集成；不启动客户端、不发送turn、不开放真实配置，未知不等于停止。见[W19](W19-CONTROLLER-OBSERVATION.md)。
 
 > W18：登记诊断与重新邀请仅为主人连接管理后端；不触发原客户端启动/停止、观测或模型。新登记不能复活W17旧任务授权；真实控制器健康与执行资格仍需独立集成验证。见[W18](W18-CONNECTION-REINVITE.md)。

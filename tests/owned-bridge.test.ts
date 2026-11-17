@@ -1,3 +1,5 @@
+import { spawn } from "node:child_process";
+import { once } from "node:events";
 import test, { type TestContext } from "node:test";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
@@ -334,4 +336,84 @@ test("authorization revoked after bridge creation still cleans its owned resourc
   );
   for (const dir of readdirSync(f.dataRoot))
     assert.equal(existsSync(join(f.dataRoot, dir, "bridge.json")), false);
+});
+
+test("client relay preparation keeps platform bridge owned while external relay exit is independently proven", async (t) => {
+  const f = await setup(t),
+    factory = await factoryAtRuntime({
+      dataRoot: f.dataRoot,
+      config: f.config,
+    });
+  const prepared = await factory.prepareClient(() => true);
+  t.after(() => prepared.abort());
+  assert.equal(prepared.snapshot().state, "waiting");
+  assert.deepEqual(Object.keys(prepared.launch.env), ["TEAM_RELAY"]);
+  assert.equal(prepared.launch.command, process.execPath);
+  assert.equal(prepared.launch.args.length, 1);
+  assert.doesNotMatch(JSON.stringify(prepared.launch), new RegExp(f.token));
+  const relay = spawn(prepared.launch.command, prepared.launch.args, {
+    windowsHide: true,
+    stdio: ["pipe", "pipe", "pipe"],
+    env: { SystemRoot: process.env.SystemRoot!, ...prepared.launch.env },
+  });
+  const ended = once(relay, "close");
+  relay.stderr.resume();
+  t.after(async () => {
+    if (relay.exitCode === null && relay.signalCode === null) relay.kill();
+    await ended;
+  });
+  await prepared.ready;
+  const frames = readFrames(relay.stdout, 131072, 1048576);
+  let id = 0;
+  const rpc = async (method: string, params: unknown = {}) => {
+    await writeFrame(
+      relay.stdin,
+      { jsonrpc: "2.0", id: ++id, method, params },
+      3000,
+    );
+    return (await frames.next()).value;
+  };
+  await rpc("initialize", {
+    protocolVersion: "2025-06-18",
+    capabilities: {},
+    clientInfo: { name: "w24", version: "1" },
+  });
+  await writeFrame(
+    relay.stdin,
+    { jsonrpc: "2.0", method: "notifications/initialized", params: {} },
+    3000,
+  );
+  const response = await rpc("tools/call", {
+    name: "task_get",
+    arguments: { task_id: f.ids.task },
+  });
+  assert.equal(response.result.isError, false);
+  let host = 0;
+  await prepared.stop(
+    async () => {
+      const [code] = await ended;
+      return { code, exit_observed: true, forced: false };
+    },
+    async () => {
+      host++;
+      assert.equal(relay.exitCode, 0);
+      return normal();
+    },
+  );
+  assert.equal(host, 1);
+  assert.equal(prepared.snapshot().state, "closed");
+  assert.equal(prepared.snapshot().credentials_cleared, true);
+  assert.equal(prepared.snapshot().relay_exit.code, 0);
+});
+test("client preparation unauthorized creates no resources and never exposes capability", async (t) => {
+  const f = await setup(t),
+    factory = await factoryAtRuntime({
+      dataRoot: f.dataRoot,
+      config: f.config,
+    });
+  await assert.rejects(
+    factory.prepareClient(() => false),
+    /BRIDGE_AUTHORIZATION_CHANGED/,
+  );
+  assert.deepEqual(readdirSync(f.dataRoot), []);
 });
