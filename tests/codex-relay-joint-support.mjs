@@ -1,6 +1,7 @@
 // Trusted acceptance composition only. Not a default production launcher.
 import assert from "node:assert/strict";
 import { composeCodexRelayHandle } from "../dist/packages/service/src/codex-relay-handle.js";
+import { observeWindowsExit } from "../dist/packages/service/src/windows-exit-observer.js";
 import { spawn, execFileSync } from "node:child_process";
 import { once } from "node:events";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
@@ -36,7 +37,9 @@ export function relayJointComposition(
     ended,
     frames,
     serial = 0,
-    watcher;
+    watcher,
+    osObserver,
+    startedTicks;
   const facts = {};
   const rpc = async (method, params = {}) => {
     await writeFrame(
@@ -111,6 +114,17 @@ export function relayJointComposition(
         // Watcher is armed near revocation, avoiding its 60s wait during a turn.
         observeRelay: async () => ({
           async waitExit() {
+            if (synthetic) {
+              if (!osObserver) throw new Error("RELAY_PROOF_MISSING");
+              const exit = await osObserver.waitExit();
+              facts.relay_os_exit = {
+                exit_code: exit.code,
+                exit_observed: exit.exit_observed,
+                started_at: startedTicks,
+                observed_at: new Date().toISOString(),
+              };
+              return exit;
+            }
             if (!watcher) throw new Error("RELAY_PROOF_MISSING");
             await until(() => existsSync(watcher.path));
             assert.equal((await watcher.ended)[0], 0);
@@ -124,6 +138,7 @@ export function relayJointComposition(
             };
           },
           async dispose() {
+            if (osObserver) await osObserver.dispose();
             if (watcher) {
               if (watcher.child.exitCode === null) watcher.child.kill();
               await watcher.ended;
@@ -142,8 +157,24 @@ export function relayJointComposition(
     facts,
     rpc,
     async arm() {
-      assert.ok(raw && !watcher && raw.status.state !== "closed");
+      assert.ok(
+        raw && !watcher && !osObserver && raw.status.state !== "closed",
+      );
       let pid = relay?.pid;
+      if (synthetic) {
+        startedTicks = execFileSync(
+          ps,
+          [
+            "-NoProfile",
+            "-NonInteractive",
+            "-Command",
+            `(Get-Process -Id ${pid}).StartTime.ToUniversalTime().Ticks.ToString()`,
+          ],
+          { encoding: "utf8", windowsHide: true },
+        ).trim();
+        osObserver = await observeWindowsExit({ pid, startedTicks });
+        return;
+      }
       if (!synthetic) {
         const entry = prepared.launch.args[0].replaceAll("'", "''");
         const children = [].concat(
@@ -184,6 +215,7 @@ export function relayJointComposition(
     },
     async cleanup() {
       await prepared.abort();
+      if (osObserver) await osObserver.dispose();
       if (relay) {
         if (relay.exitCode === null && relay.signalCode === null) relay.kill();
         await ended;

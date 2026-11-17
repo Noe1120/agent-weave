@@ -1466,6 +1466,8 @@
     "W24-CODEX-RELAY-BINDING.md",
     "W25-CODEX-RELAY-JOINT.md",
     "W26-CODEX-RELAY-LIFECYCLE.md",
+    "W27-CODEX-HOME-CLEANUP.md",
+    "W28-WINDOWS-EXIT-OBSERVER.md",
     "WINDOWS-ISOLATION-DECISION.md",
     "contracts/core.schema.json",
     "contracts/error-mapping.json",

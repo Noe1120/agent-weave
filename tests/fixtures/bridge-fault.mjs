@@ -3,6 +3,9 @@ import { createInterface } from "node:readline";
 import { writeFileSync } from "node:fs";
 const mode = process.argv[2],
   report = process.argv[3];
+// Deterministic cold-start latency for distinguishing startup from drain time.
+if (process.argv[4])
+  await new Promise((r) => setTimeout(r, Number(process.argv[4])));
 createInterface({ input: process.stdin }).on("line", (text) => {
   const frame = JSON.parse(text);
   if (frame.id === undefined) return;
@@ -35,3 +38,4 @@ process.stdin.on("end", () => {
     );
   process.exit(mode === "nonzero" ? 8 : 0);
 });
+process.stderr.write("fixture-ready\n");

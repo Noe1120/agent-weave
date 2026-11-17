@@ -82,10 +82,39 @@ async function setup(t: TestContext, mode = "real", deadlineMs = 3000) {
           "--report",
           reportPath,
         ]
-      : [resolve("tests/fixtures/bridge-fault.mjs"), mode, reportPath],
+      : [
+          resolve("tests/fixtures/bridge-fault.mjs"),
+          mode,
+          reportPath,
+          mode === "exit" ? "400" : "0",
+        ],
     { windowsHide: true, stdio: ["pipe", "pipe", "pipe"] },
   );
   const ended = once(child, "close");
+  const fixtureReady =
+    mode === "real"
+      ? Promise.resolve()
+      : new Promise<void>((resolve, reject) => {
+          let text = "";
+          const finish = (error?: Error) => {
+            clearTimeout(timer);
+            child.stderr.off("data", data);
+            child.off("close", closed);
+            error ? reject(error) : resolve();
+          };
+          const data = (bytes: Buffer) => {
+            text += bytes.toString();
+            if (text.includes("fixture-ready\n")) finish();
+          };
+          const closed = () =>
+            finish(new Error("Fixture exited before readiness"));
+          const timer = setTimeout(
+            () => finish(new Error("Fixture readiness timeout")),
+            5000,
+          );
+          child.stderr.on("data", data);
+          child.once("close", closed);
+        });
   const supervisor = new BridgeSupervisor(child, { reportPath, deadlineMs });
   t.after(async () => {
     release.resolve();
@@ -96,6 +125,7 @@ async function setup(t: TestContext, mode = "real", deadlineMs = 3000) {
     f.close();
     temp.dispose();
   });
+  await fixtureReady;
   const initialize = async () => {
     await supervisor.request("initialize", {
       protocolVersion: "2025-06-18",

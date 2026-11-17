@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
 import { resolve } from "node:path";
+import { mkdirSync, writeFileSync, existsSync } from "node:fs";
 import { tempWorkspace } from "./temp.ts";
 import { fixture } from "./helpers.ts";
 import { CodexAppServer } from "../packages/service/src/codex-app-server.ts";
@@ -12,6 +13,7 @@ import {
   writeFrame,
 } from "../packages/service/src/bridge-relay-io.ts";
 import { composeCodexRelayHandle } from "../packages/service/src/codex-relay-handle.ts";
+import { captureCodexHomeCleanup } from "../packages/service/src/codex-home-cleanup.ts";
 
 async function setup(
   t: TestContext,
@@ -26,6 +28,13 @@ async function setup(
 ) {
   const temp = tempWorkspace(),
     f = fixture();
+  const home = resolve(temp.directory, "codex-init-fixture", "home");
+  const work = resolve(temp.directory, "codex-init-fixture", "work");
+  mkdirSync(home, { recursive: true });
+  mkdirSync(work);
+  const config = resolve(home, "config.toml");
+  writeFileSync(config, "synthetic-only");
+  const cleanHome = await captureCodexHomeCleanup(temp.directory, work);
   const bridge = await createOwnedBridgeFactory({
     dataRoot: temp.directory,
     config: {
@@ -128,6 +137,7 @@ async function setup(
       assert.equal(child.exitCode, 0);
       cleaned++;
       if (options.cleanupFail) throw new Error("secret detail");
+      await cleanHome();
     },
   });
   t.after(async () => {
@@ -145,6 +155,7 @@ async function setup(
     raw,
     child,
     bridge,
+    config,
     cleaned: () => cleaned,
     released: () => released,
     revoke: () => {
@@ -168,6 +179,7 @@ test("composed handle closes bridge then relay then host, cleans once and return
   assert.equal(f.cleaned(), 1);
   assert.equal(f.released(), 1);
   assert.equal(f.handle.status.state, "closed");
+  assert.equal(existsSync(f.config), false);
 });
 for (const proof of ["unknown", "forced", "error"])
   test(`external relay ${proof} cannot become successful host exit`, async (t) => {
@@ -213,6 +225,7 @@ test("unknown host exit blocks credential cleanup and does not advertise stopped
   const exit = await f.handle.closed;
   assert.equal(exit.exit_observed, false);
   assert.equal(f.cleaned(), 0);
+  assert.equal(existsSync(f.config), true);
   assert.notEqual(f.handle.status.state, "closed");
 });
 

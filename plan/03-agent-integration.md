@@ -230,6 +230,10 @@ UNKNOWN/NOT_RUN 不形成资格；LIMITED 列出人工步骤及禁用能力。�
 
 ## 16. W07开发运行器与未来附着边界（实施注记）
 
+W28提供独立OS观察原语：固定PowerShell程序核对PID与OS启动ticks，持Process.Handle至退出，只有辅助程序正常退出且严格JSONL证明完整才返回exit_observed。观察器dispose不得杀目标；它不验证父子归属，不接受公共HTTP PID输入，必须由可信启动装配提供独立发现身份。仅Node合成/编译链验证，不等于原客户端或Windows强制隔离资格，见[W28](W28-WINDOWS-EXIT-OBSERVER.md)。
+
+W27为W26提供固定布局配置清理回调：启动前受信捕获dataRoot直属codex-init-*下home/config.toml身份/摘要，退出后复验再unlink。拒绝路径/链接/身份/内容变化，保留未知结果与人工核对责任；不允许任意files列表或递归删除，不保证同用户恶意竞态的原子OS隔离，也不等于全目录残留扫描。当前默认官方启动器仍未装配，见[W27](W27-CODEX-HOME-CLEANUP.md)。
+
 W26将W25关闭顺序提炼为service内CodexHandle组合：同步关闭准入、桥EOF与退出、独立relay OS证明、宿主退出、所属配置清理。未知宿主退出不得显示closed或清除home配置，故障不泄漏原始异常详情；准备过程中晚到的观察器必须释放且只能释放一次。OS观察器与home清理器由受信装配提供，接口存在不是产品实现证明；默认控制器/HTTP不启用，新组合仅合成验证，不追认W25真实结果适用于新实现。见[W26](W26-CODEX-RELAY-LIFECYCLE.md)。
 
 W21桥生命周期设计：原客户端宿主退出不能代替MCP子进程正常退出证据。平台持有真正桥的stdio时，应先关闭请求准入、排空已接收请求，再发送EOF并同时检查桥真实退出及最终报告，最后关闭自有宿主。排空不延长业务grant，也不释放逻辑写锁；超时/非零/缺证据保持失败。当前仅tests离线原型，尚无真实客户端转发端及认证通道，见[W21](W21-BRIDGE-SUPERVISION.md)。

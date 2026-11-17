@@ -212,3 +212,5 @@ qa-runtime/
 !/evidence/codex-relay-lifecycle/
 /evidence/codex-relay-lifecycle/*
 !/evidence/codex-relay-lifecycle/COMPLETION.md
+!/evidence/codex-relay-lifecycle/HOME-CLEANUP.md
+!/evidence/codex-relay-lifecycle/WINDOWS-OBSERVER.md

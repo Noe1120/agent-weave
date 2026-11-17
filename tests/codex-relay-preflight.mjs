@@ -5,11 +5,12 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
-  unlinkSync,
+  existsSync,
 } from "node:fs";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
 import { tempWorkspace } from "./temp.ts";
+import { captureCodexHomeCleanup } from "../dist/packages/service/src/codex-home-cleanup.js";
 import {
   officialCodexLauncher,
   tomlSectionValue,
@@ -66,7 +67,12 @@ try {
     ),
     relay_binding,
   );
-  unlinkSync(path);
+  const cleanup = await captureCodexHomeCleanup(
+    data,
+    join(data, dirs[0], "work"),
+  );
+  await cleanup();
+  assert.equal(existsSync(path), false);
   console.log(
     JSON.stringify({
       compiled_launcher_preflight: "PASS",
