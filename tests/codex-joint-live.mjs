@@ -31,10 +31,13 @@ import { createServer } from "../dist/packages/service/src/http.js";
 import { listenLoopback } from "../dist/packages/service/src/loopback-listener.js";
 import { McpSession } from "../dist/packages/service/src/mcp-session.js";
 import { McpReadClient } from "../dist/packages/service/src/mcp-read-client.js";
+import { createOwnedBridgeFactory } from "../dist/packages/service/src/owned-bridge.js";
+import { relayJointComposition } from "./codex-relay-joint-support.mjs";
 
 const { values } = parseArgs({
   options: {
     fixture: { type: "boolean" },
+    relay: { type: "boolean" },
     "allow-once-vendor": { type: "boolean" },
     output: { type: "string" },
     config: { type: "string" },
@@ -43,6 +46,7 @@ const { values } = parseArgs({
   strict: true,
 });
 const synthetic = values.fixture === true;
+const relayMode = values.relay === true;
 assert.ok(
   synthetic !== (values["allow-once-vendor"] === true),
   "Choose fixture OR explicitly authorized vendor",
@@ -59,7 +63,7 @@ const root = resolve(values.output);
 assert.ok(!existsSync(root), "Output exists: refusing reuse");
 mkdirSync(root);
 const report = {
-  stage: "W20",
+  stage: relayMode ? "W25" : "W20",
   mode: synthetic ? "SYNTHETIC_ONLY" : "REAL_VENDOR",
   started_at: new Date().toISOString(),
   checks: [],
@@ -102,6 +106,7 @@ let controller,
   bridge,
   processStarted = false;
 let fixtureSession;
+let prepared, composition, relaySecret;
 const entryToken = randomBytes(32).toString("base64url");
 try {
   before = synthetic ? [] : inventory();
@@ -215,8 +220,14 @@ try {
       expires_at: new Date(now() + 300000).toISOString(),
     },
   };
-  writeFileSync(bridgeConfig, JSON.stringify(bridge), { flag: "wx" });
-  const launcher = synthetic
+  if (relayMode) {
+    prepared = await createOwnedBridgeFactory({
+      dataRoot: reportDir,
+      config: bridge,
+    }).prepareClient(() => true);
+    relaySecret = JSON.parse(prepared.launch.env.TEAM_RELAY).token;
+  } else writeFileSync(bridgeConfig, JSON.stringify(bridge), { flag: "wx" });
+  const baseLauncher = synthetic
     ? {
         fingerprint: "a".repeat(64),
         clientVersion: "fixture-1",
@@ -239,7 +250,9 @@ try {
     : officialCodexLauncher({
         ...operator,
         data_root: dataRoot,
-        bridge: { config_path: bridgeConfig, report_dir: reportDir },
+        ...(relayMode
+          ? { relay_binding: JSON.parse(prepared.launch.env.TEAM_RELAY) }
+          : { bridge: { config_path: bridgeConfig, report_dir: reportDir } }),
         provider_reuse: {
           source_config: values["provider-config"],
           provider_id: "custom",
@@ -247,6 +260,13 @@ try {
         },
         code_mode: { direct_only_tool_namespaces: ["mcp__agent_weave_probe"] },
       });
+  if (relayMode)
+    composition = relayJointComposition(prepared, baseLauncher, {
+      root,
+      bridgeData: reportDir,
+      synthetic,
+    });
+  const launcher = composition?.launcher ?? baseLauncher;
   report.facts.configuration_fingerprint = launcher.fingerprint;
   const invite = await call(
     "/v1/console/connections/invite",
@@ -288,9 +308,13 @@ try {
   // preflight does not consume a model turn; any start attempt remains exclusive.
   if (!synthetic)
     writeFileSync(
-      resolve(".runtime/w20/authorization-used.json"),
+      resolve(
+        relayMode
+          ? ".runtime/w25/authorization-used.json"
+          : ".runtime/w20/authorization-used.json",
+      ),
       JSON.stringify({
-        stage: "W20",
+        stage: relayMode ? "W25" : "W20",
         at: new Date().toISOString(),
         max_instances: 1,
         max_turns: 1,
@@ -367,7 +391,17 @@ try {
       );
     }
   };
-  if (synthetic) {
+  if (synthetic && relayMode) {
+    const result = await composition.rpc("tools/call", {
+      name: "task_get",
+      arguments: { task_id: f.ids.task },
+    });
+    assert.equal(result.result.isError, false);
+    assert.equal(
+      JSON.parse(result.result.content[0].text).data.status,
+      "draft",
+    );
+  } else if (synthetic) {
     // Rehearsal explicitly calls the real MCP session; no claim of model selection.
     fixtureSession = new McpSession(new McpReadClient(bridge));
     await fixtureSession.receive({
@@ -469,6 +503,7 @@ try {
     headers: { authorization: "Bearer " + entryToken },
   });
   check("revoke", denied.status === 404 && relayDenied.status === 404);
+  if (composition) await composition.arm();
   s.updateGrant({ ...f.g, state: "revoked" });
   assert.throws(view, /GRANT_REVOKED/);
   controller.reconcileAuthorization();
@@ -485,11 +520,16 @@ try {
     "exit",
     end?.code === 0 && end?.exit_observed === true && end?.forced === false,
   );
-  const reports = synthetic
-    ? [fixtureSession.stats]
-    : readdirSync(reportDir).map((name) =>
-        JSON.parse(readFileSync(join(reportDir, name, "report.json"), "utf8")),
-      );
+  if (composition) report.facts.relay_lifecycle = composition.facts;
+  const reports = composition
+    ? composition.reports()
+    : synthetic
+      ? [fixtureSession.stats]
+      : readdirSync(reportDir).map((name) =>
+          JSON.parse(
+            readFileSync(join(reportDir, name, "report.json"), "utf8"),
+          ),
+        );
   report.facts.bridge = reports.map((r) => ({
     initialized: r.initialized,
     tool_calls: r.tool_calls,
@@ -505,10 +545,18 @@ try {
           r.initialized &&
           !r.fault &&
           r.tool_errors === 0 &&
-          (synthetic || r.stdin_eof === true),
+          ((!relayMode && synthetic) || r.stdin_eof === true),
       ) &&
       reports.reduce((n, r) => n + r.tool_calls, 0) === 1,
   );
+  if (composition)
+    check(
+      "relay_exit",
+      composition.facts.snapshot?.state === "closed" &&
+        composition.facts.relay_os_exit?.exit_code === 0 &&
+        Date.parse(composition.facts.relay_os_exit.observed_at) <=
+          Date.parse(composition.facts.host_close_requested_at),
+    );
 } catch (error) {
   // Error messages/stack from local files or a provider may contain private data.
   report.error = {
@@ -525,6 +573,12 @@ try {
     await controller?.dispose();
   } catch {
     check("dispose", false);
+  }
+  try {
+    if (composition) await composition.cleanup();
+    else await prepared?.abort();
+  } catch {
+    check("relay_cleanup", false);
   }
   try {
     await relay?.close();
@@ -552,7 +606,11 @@ try {
         const config = join(dataRoot, name, "home", "config.toml");
         if (existsSync(config)) files.push(config);
       }
-    report.facts.cleanup = cleanCredentials(root, files, [secret, entryToken]);
+    report.facts.cleanup = cleanCredentials(root, files, [
+      secret,
+      entryToken,
+      relaySecret,
+    ]);
     check("cleanup", report.facts.cleanup.residual_files === 0);
   } catch (error) {
     report.facts.cleanup_error_sha256 = hash(String(error));

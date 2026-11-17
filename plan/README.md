@@ -1,5 +1,9 @@
 # 群聊式 Agent 协作平台：实施设计包 v1.6
 
+最新结果：[W25](W25-CODEX-RELAY-JOINT.md)同配置真实联合验收通过：真实task_get一次、原生复述、撤连接与控制授权、桥EOF/exit0→relay实际退出→宿主正常退出、凭据清理与原实例保持均在同一次运行内验证。18,196 tokens/金额UNKNOWN，授权已消耗；生产默认组合仍不启用，W20旧失败保留。下一步仅继续受信产品装配的合成开发，真实追加操作另授权。
+
+当前入口：[W25 Codex relay联合验收](W25-CODEX-RELAY-JOINT.md)。用户另行批准既有路由/必要凭据临时复用、一个实例、一次合成task_get turn、30,000 tokens软停止，随后联合撤权/严格退出/清理；失败不付费重试。下方“待授权”保留历史范围，本次仅授权W25独占attempt，不追认W20。
+
 最新验证：[W24](W24-CODEX-RELAY-BINDING.md)已按单独授权完成一次固定版真实Codex无模型生命周期：桥EOF/exit0→relay实际OS句柄exit0→宿主exit0，原实例保持、凭据副本清除；无turn/工具调用/provider请求。该授权已消耗，下一真实单任务/撤权联合验收涉及provider和费用，仍需另行授权。下方“待授权”保留历史语境，W20 FAILED不升级。
 
 当前入口：[W24 原客户端relay绑定准备](W24-CODEX-RELAY-BINDING.md)。已实现默认关闭的Codex固定relay配置与prepareClient；平台拥有真正桥，外部relay必须另有OS退出证明。仅合成流程及禁止spawn的编译配置预检，不启动原客户端或模型。下一门槛为另行授权的一次独立Codex无模型生命周期验收，W20仍FAILED。最新结果见根README；HANDOFF冻结。

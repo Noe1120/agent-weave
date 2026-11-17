@@ -203,3 +203,8 @@ qa-runtime/
 !/evidence/codex-relay-binding/COMPLETION.md
 !/evidence/codex-relay-binding/NO-MODEL-ACCEPTANCE.md
 !/evidence/codex-relay-binding/no-model-report.json
+
+!/evidence/codex-relay-joint/
+/evidence/codex-relay-joint/*
+!/evidence/codex-relay-joint/COMPLETION.md
+!/evidence/codex-relay-joint/real-attempt-report.json

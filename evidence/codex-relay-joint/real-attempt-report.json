@@ -1,0 +1,124 @@
+{
+  "stage": "W25",
+  "mode": "REAL_VENDOR",
+  "started_at": "2026-11-17T10:22:14.689Z",
+  "checks": [
+    {
+      "name": "native",
+      "passed": true
+    },
+    {
+      "name": "turn",
+      "passed": true
+    },
+    {
+      "name": "task",
+      "passed": true
+    },
+    {
+      "name": "read_only",
+      "passed": true
+    },
+    {
+      "name": "revoke",
+      "passed": true
+    },
+    {
+      "name": "exit",
+      "passed": true
+    },
+    {
+      "name": "bridge",
+      "passed": true
+    },
+    {
+      "name": "relay_exit",
+      "passed": true
+    },
+    {
+      "name": "cleanup",
+      "passed": true
+    },
+    {
+      "name": "preserved",
+      "passed": true
+    }
+  ],
+  "facts": {
+    "source_config_sha256": "a83f46880d2f255d3fba142facf8815973fc220a393160af21480db1dc94a9db",
+    "executable_sha256": "4b3286e35d7fe866c6b0eb3f07d7a4cdb5e96489576170dfd6b3a15aa1c67382",
+    "configuration_fingerprint": "bcbde99c0ae3a61265a75d42ad06309f774b1904b36799c2cd15a2c76066a5ed",
+    "task_id": "3a6201d6-b4d2-4fbe-86f9-66a40134ef10",
+    "task_status": "draft",
+    "turn": {
+      "id_sha256": "c2d9e795968cece537da64a58177fb35467acba731e813313ada3474bcb579a5",
+      "generation": 1,
+      "state": "completed",
+      "started_at": "2026-11-17T10:22:16.592Z",
+      "completed_at": "2026-11-17T10:22:23.704Z",
+      "stale_terminal_notifications": 0
+    },
+    "token_usage": {
+      "total": 18196,
+      "input": 18084,
+      "output": 112
+    },
+    "threshold_interrupted": false,
+    "native_reply_matches": true,
+    "task_reads": 1,
+    "exit": {
+      "code": 0,
+      "signal": null,
+      "exit_observed": true,
+      "forced": false,
+      "fault": null
+    },
+    "relay_lifecycle": {
+      "relay_os_exit": {
+        "observed_at": "2026-11-17T10:22:24.7593744Z",
+        "started_at": "2026-11-17T10:22:16.3965272Z",
+        "exit_observed": true,
+        "exit_code": 0
+      },
+      "host_close_requested_at": "2026-11-17T10:22:24.816Z",
+      "snapshot": {
+        "state": "closed",
+        "fault": null,
+        "credentials_cleared": true,
+        "bridge_exit": {
+          "code": 0,
+          "exit_observed": true,
+          "forced": false
+        },
+        "relay_exit": {
+          "code": 0,
+          "exit_observed": true,
+          "forced": false
+        }
+      }
+    },
+    "bridge": [
+      {
+        "initialized": true,
+        "tool_calls": 1,
+        "tool_errors": 0,
+        "fault": null,
+        "stdin_eof": true
+      }
+    ],
+    "cleanup": {
+      "deleted": 1,
+      "scanned": 78,
+      "residual_files": 0
+    },
+    "original_process_count": 12,
+    "original_processes_unchanged": true,
+    "source_config_unchanged": true,
+    "controller_start_attempted": true
+  },
+  "cost": "UNKNOWN",
+  "soft_token_threshold": 30000,
+  "limit_is_hard": false,
+  "status": "PASSED_FIXED_CONFIG",
+  "finished_at": "2026-11-17T10:22:25.822Z"
+}

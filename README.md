@@ -1,5 +1,13 @@
 # Team · 原生 Windows 工作台
 
+## 最新完成 · W25 同配置真实单任务/撤权/严格退出联合验收
+
+**PASSED_FIXED_CONFIG**：一个新官方Codex实例、一次真实gpt-6.1-sol turn，沿用CC Switch既有路由及direct_only配置。邀请→兑换→新原生thread→单任务grant→task_get恰好1次/0错误→原生复述同task与draft→turn completed→撤连接后旧授权拒绝→撤控制grant→真正桥EOF/exit0→relay持Windows句柄exit0→宿主exit0/非强制，在同一次尝试内通过。1000次进度查询零DB写入，真实读取零业务写入。
+
+本次18,196 tokens（输入18,084/输出112），30,000软阈值未触发，金额UNKNOWN，不主张费用未超。原12进程清单及用户配置摘要不变；桥配置由工厂清除，隔离home凭据/relay能力配置另删1份，限定78文件扫描零残留。仅一次真实尝试，本次授权已消耗。
+
+全量677/677，0失败/0取消/0跳过；原生14+1、旧包989文件、P0 13项、设计64文件/63摘要通过。见[W25方案](plan/W25-CODEX-RELAY-JOINT.md)、[验收证据](evidence/codex-relay-joint/COMPLETION.md)。旧W20 FAILED保留为旧配置历史，不追认；新方案单独登记通过。当前是受信验收装配，生产服务默认仍未启用组合，不等于Codex整体接入或产品完成。下一开发入口是将已验证关闭组合接到明确的受信产品配置，先合成反例，不追加原客户端/模型。HANDOFF冻结、管家不构建；Windows隔离、附着、原生点击、生产灾备/签名升级及250项产品验收仍未完成。
+
 ## 最新验证 · W24 真实无模型生命周期通过（限定本次固定配置）
 
 已按本次单独授权完成一个新隔离Codex 0.167.0-alpha.3.2实例及一个thread：真正桥初始化/工具发现各1次，工具调用0、turn=null、generation=0、回环provider请求0。桥stdin_eof=true且自然exit0；持有Windows实际进程句柄证明relay先自然exit0，再关闭Codex根进程并观察exit0/非强制。原客户端清单保持，未读取用户历史/复用provider凭据/改CC Switch。删除隔离home能力配置1份（桥配置由工厂另清除），限定扫描75文件零残留。

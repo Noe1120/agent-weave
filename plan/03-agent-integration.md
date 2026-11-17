@@ -1,5 +1,7 @@
 # 03 Agent 接入、兼容性与 Windows 验证
 
+> W25真实增量：既有CC Switch路由/gpt-6.1-sol/direct_only配置下的一次联合验收已通过，真实task_get恰好1次、0错误，原生复述同任务与draft；连接撤销拒绝旧授权，控制grant撤销触发验收组合依次关闭真正桥/relay/宿主，正常退出与清理有证据。新增组合当前只在tests受信装配，不默认启用产品控制器，不升级强制隔离/附着或L1–L3整体资格；旧W20历史失败不追认。见[W25](W25-CODEX-RELAY-JOINT.md)。
+
 > W24真实增量：固定Codex 0.167.0-alpha.3.2一次无模型验收通过，真正桥EOF/exit0、relay与宿主分别持Windows句柄观察正常退出且顺序正确。原实例清单保持，空home配置能力副本已清除；没有turn或业务工具调用。只能登记该固定配置无模型生命周期通过，不追认W20、不推导L1–L3/强制隔离资格。该次真实授权已消耗。
 
 > W24：新增默认关闭的Codex relay_binding（固定本项目入口与环境能力，不接受自由命令）和平台拥有桥的prepareClient装配。外部relay停止必须提供独立OS退出证明，不能以socket EOF代替；业务桥凭据与隔离home能力副本分别清理。仅合成/禁止spawn配置预检通过，原默认接入未切换，W20真实失败不升级。下一无模型原客户端门槛及具体操作范围见[W24](W24-CODEX-RELAY-BINDING.md)。
