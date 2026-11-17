@@ -1,0 +1,135 @@
+{
+  "stage": "W22",
+  "qualification": "OFFLINE_AUTHENTICATED_RELAY_SYNTHETIC_ONLY",
+  "outcome": "PASS_WITH_SCOPE",
+  "base_commit": "43a1e99f22a6f32a98337f08b41cc82bfff9c371",
+  "original_clients_started": 0,
+  "model_calls": 0,
+  "user_credentials_reused": 0,
+  "production_code_changed": false,
+  "review": "AUTHOR_SELF_REVIEW_NOT_INDEPENDENT",
+  "handoff_sha256": "9E057D55395FAABD77A175B64042F18DF24A7AC53334C10A0A370D3F06DF0586",
+  "checks": [
+    {
+      "command": "npm run verify",
+      "skipped": 0,
+      "exit_code": 0,
+      "passed": 654,
+      "failed": 0
+    },
+    {
+      "command": "node --test tests/bridge-relay-io.test.ts tests/bridge-relay.test.ts",
+      "exit_code": 0,
+      "passed": 29,
+      "failed": 0
+    },
+    {
+      "command": "W22_COMPILED=1 node --test tests/bridge-relay-io.test.ts tests/bridge-relay.test.ts",
+      "exit_code": 0,
+      "passed": 29,
+      "failed": 0
+    },
+    {
+      "command": "npm run test:native",
+      "exit_code": 0,
+      "static_passed": 1,
+      "csharp_passed": 14
+    },
+    {
+      "command": "npm run test:native:package",
+      "files": 989,
+      "exit_code": 0
+    },
+    {
+      "command": "python -B plan/tools/test_p0_readiness.py",
+      "exit_code": 0,
+      "passed": 13
+    },
+    {
+      "command": "python -B plan/tools/verify_design.py",
+      "files": 61,
+      "manifest_entries": 60,
+      "exit_code": 0
+    }
+  ],
+  "historical_real_w20": "FAILED_UNCHANGED",
+  "product_tests": "AT190_CA60_NOT_RUN",
+  "limits": [
+    "test-only composition; no product launcher",
+    "loopback bearer capability is not Windows user isolation",
+    "restart means deny stale identity; no automatic resume",
+    "compiled variant uses dist MCP only",
+    "trusted fresh report directory; production ACL/ownership unverified",
+    "no real vendor relay restart or lifecycle evidence"
+  ],
+  "failure_fixes": [
+    "test cleanup registered before failing endpoint construction",
+    "revocation test must perform initialized notification",
+    "write timeout listener cleanup and output byte budget",
+    "connection reset classified as disconnected",
+    "closed control must not suppress actual stdout write failure",
+    "relay callback preserves original failure before W21 normalization"
+  ],
+  "logs": [
+    {
+      "path": ".runtime/w22/io-red.log",
+      "sha256": "1f173d28da8b47e215fe2f2e72b7f7f12c6ea510134a117fcf5c6d16f2d6241e"
+    },
+    {
+      "path": ".runtime/w22/io-green.log",
+      "sha256": "16a5d8ce224cfb0d83ab7eea010e01b310d6440e113e53074f5f9ab6fdbfe478"
+    },
+    {
+      "path": ".runtime/w22/relay-red.log",
+      "sha256": "d5060bd19ca262fd360a07e3cb96679169c82de8223f45febfe6597d75ce3569"
+    },
+    {
+      "path": ".runtime/w22/relay-first.log",
+      "sha256": "ba09d10f14d0bcf81f204fe15c735606a8107d6baf37cf3d07b84bde56b2dce2"
+    },
+    {
+      "path": ".runtime/w22/expanded-red.log",
+      "sha256": "38e1a9f37951d2ac35682386cff3b0b9488777aa58f4b99a6aecf465c4bc7942"
+    },
+    {
+      "path": ".runtime/w22/output-limit-red.log",
+      "sha256": "253b7101813d8d428e1c5c417b6bacbf3c9bcae50b72ddf6f79de1632e490906"
+    },
+    {
+      "path": ".runtime/w22/closed-output-red.log",
+      "sha256": "f1064c1e2586df556c45962a68d88daa354f906d51464c3ef1d0fc475593bcf6"
+    },
+    {
+      "path": ".runtime/w22/exit-reason-red.log",
+      "sha256": "2ee33adeb81c8721435be3fe331946c33234072b8eb8ef9b99538f5e686160b1"
+    },
+    {
+      "path": ".runtime/w22/specialist-release.log",
+      "sha256": "23923920005822571b1fa7dd867f442ab3551b9d253c59c462a577d9fdb65be5"
+    },
+    {
+      "path": ".runtime/w22/compiled-final.log",
+      "sha256": "c47b0256331b388230d9652d6e01dab8fc896a30b106283fefd97da9132fa723"
+    },
+    {
+      "path": ".runtime/w22/verify-final.log",
+      "sha256": "87aca8fe6c8bd6180a430c3e4fd064bf06556a09585792273cb11fbcd0160f58"
+    },
+    {
+      "path": ".runtime/w22/native.log",
+      "sha256": "559d786e0022bc7424877b563b5e7d3124ff773567da148acd6210a33f9477f7"
+    },
+    {
+      "path": ".runtime/w22/package.log",
+      "sha256": "77c06975809839528ad44681a225adfd36628db49898b4eac30815809a5f75dd"
+    },
+    {
+      "path": ".runtime/w22/p0.log",
+      "sha256": "70cb7f59e9495105d98213f3d81f6d2f0708e55b330a13759116f937a70c0afa"
+    },
+    {
+      "path": ".runtime/w22/design.log",
+      "sha256": "581724d13f7171ba8059d94c135a8a45dff51e5f3965528a67d42d5e6513a3d6"
+    }
+  ]
+}

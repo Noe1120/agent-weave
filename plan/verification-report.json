@@ -1461,6 +1461,7 @@
     "W19-CONTROLLER-OBSERVATION.md",
     "W20-CODEX-JOINT-ACCEPTANCE.md",
     "W21-BRIDGE-SUPERVISION.md",
+    "W22-LOCAL-BRIDGE-RELAY.md",
     "WINDOWS-ISOLATION-DECISION.md",
     "contracts/core.schema.json",
     "contracts/error-mapping.json",

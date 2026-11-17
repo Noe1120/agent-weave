@@ -187,3 +187,9 @@ qa-runtime/
 /evidence/bridge-supervision/*
 !/evidence/bridge-supervision/COMPLETION.md
 !/evidence/bridge-supervision/verification-summary.json
+
+# W22 reviewed offline relay results only, no capability tokens or raw logs.
+!/evidence/bridge-relay/
+/evidence/bridge-relay/*
+!/evidence/bridge-relay/COMPLETION.md
+!/evidence/bridge-relay/verification-summary.json
