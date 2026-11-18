@@ -1,5 +1,11 @@
 # Team · 原生 Windows 工作台
 
+## W33 · 新版 Codex 真实单任务只读验收通过
+
+官方 `0.169.0-alpha.11.1` 使用既有 CC Switch 路由和 `gpt-6.1-sol`，在一次真实回合中调用 `task_get` 恰好一次，原生回复与获准任务的 ID、`draft` 状态一致。连接撤销后，原凭据在服务和转发入口均被拒绝；再撤销控制授权，所属进程正常退出。12 个原有进程和用户配置保持不变，限定范围扫描无令牌残留。
+
+本次用量 18,158 tokens，金额未知，无重试。仅该固定版本和配置通过，不开放默认启动、长期凭据复用或写权限。[阶段记录](plan/W33-CODEX-TRUSTED-READ-ONLY.md) · [真实验收报告](evidence/codex-relay-lifecycle/real-task-new-pin.json)。以下阶段按当时证据保留。
+
 ## W31–W32 · 新版 Codex：无模型生命周期已实测，单任务链已离线验证
 
 官方 Codex `0.169.0-alpha.11.1` 在批准的新指纹下启动了一个独立实例，发现本地 MCP 工具后正常退出。真实运行中无 turn、无工具调用、无模型端点请求；原有进程未变，本次两个配置文件已清除。[一次性运行证据](evidence/codex-relay-lifecycle/no-model-new-pin.json)

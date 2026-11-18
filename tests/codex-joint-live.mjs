@@ -33,11 +33,13 @@ import { McpSession } from "../dist/packages/service/src/mcp-session.js";
 import { McpReadClient } from "../dist/packages/service/src/mcp-read-client.js";
 import { createOwnedBridgeFactory } from "../dist/packages/service/src/owned-bridge.js";
 import { relayJointComposition } from "./codex-relay-joint-support.mjs";
+import { officialCodexRelayLauncher } from "../dist/packages/service/src/codex-relay-launcher.js";
 
 const { values } = parseArgs({
   options: {
     fixture: { type: "boolean" },
     relay: { type: "boolean" },
+    "trusted-new-pin": { type: "boolean" },
     "allow-once-vendor": { type: "boolean" },
     output: { type: "string" },
     config: { type: "string" },
@@ -47,6 +49,18 @@ const { values } = parseArgs({
 });
 const synthetic = values.fixture === true;
 const relayMode = values.relay === true;
+const trusted = values["trusted-new-pin"] === true;
+if (trusted) {
+  assert.ok(!synthetic && !relayMode && !values.config);
+  assert.equal(
+    resolve(values.output),
+    resolve(import.meta.dirname, "../.runtime/w33/vendor-once"),
+  );
+  assert.equal(
+    resolve(values["provider-config"]),
+    resolve(process.env.USERPROFILE, ".codex/config.toml"),
+  );
+}
 assert.ok(
   synthetic !== (values["allow-once-vendor"] === true),
   "Choose fixture OR explicitly authorized vendor",
@@ -56,14 +70,14 @@ assert.ok(
   "absolute new output required",
 );
 if (!synthetic) {
-  assert.ok(values.config && isAbsolute(values.config));
+  assert.ok(trusted || (values.config && isAbsolute(values.config)));
   assert.ok(values["provider-config"] && isAbsolute(values["provider-config"]));
 }
 const root = resolve(values.output);
 assert.ok(!existsSync(root), "Output exists: refusing reuse");
 mkdirSync(root);
 const report = {
-  stage: relayMode ? "W25" : "W20",
+  stage: trusted ? "W33" : relayMode ? "W25" : "W20",
   mode: synthetic ? "SYNTHETIC_ONLY" : "REAL_VENDOR",
   started_at: new Date().toISOString(),
   checks: [],
@@ -115,12 +129,24 @@ try {
     // Read the source digest before profile parsing so preflight failures do not
     // falsely assert that an unmeasured source was modified.
     sourceHash = hash(readFileSync(values["provider-config"]));
-    operator = operatorJson(readFileSync(values.config, "utf8"));
-    assert.equal(operator.client_version, "0.167.0-alpha.3.2");
-    assert.equal(
-      operator.executable_sha256,
-      "4b3286e35d7fe866c6b0eb3f07d7a4cdb5e96489576170dfd6b3a15aa1c67382",
-    );
+    if (trusted) {
+      operator = {
+        installation_root: join(
+          process.env.LOCALAPPDATA,
+          "OpenAI/Codex/bin/c38161ad8494f88c",
+        ),
+        client_version: "0.169.0-alpha.11.1",
+        executable_sha256:
+          "094d4db493de22025712cc5963854e7654b7c97f4cee795e3e986270a0f4f6b4",
+      };
+    } else {
+      operator = operatorJson(readFileSync(values.config, "utf8"));
+      assert.equal(operator.client_version, "0.167.0-alpha.3.2");
+      assert.equal(
+        operator.executable_sha256,
+        "4b3286e35d7fe866c6b0eb3f07d7a4cdb5e96489576170dfd6b3a15aa1c67382",
+      );
+    }
     const text = readFileSync(values["provider-config"], "utf8");
     sourceHash = hash(Buffer.from(text));
     assert.equal(tomlSectionValue(text, null, "model_provider"), "custom");
@@ -226,7 +252,18 @@ try {
       config: bridge,
     }).prepareClient(() => true);
     relaySecret = JSON.parse(prepared.launch.env.TEAM_RELAY).token;
-  } else writeFileSync(bridgeConfig, JSON.stringify(bridge), { flag: "wx" });
+  } else if (!trusted)
+    writeFileSync(bridgeConfig, JSON.stringify(bridge), { flag: "wx" });
+  const vendorProfile = !synthetic && {
+    ...operator,
+    data_root: dataRoot,
+    provider_reuse: {
+      source_config: values["provider-config"],
+      provider_id: "custom",
+      model: "gpt-6.1-sol",
+    },
+    code_mode: { direct_only_tool_namespaces: ["mcp__agent_weave_probe"] },
+  };
   const baseLauncher = synthetic
     ? {
         fingerprint: "a".repeat(64),
@@ -247,19 +284,17 @@ try {
           );
         },
       }
-    : officialCodexLauncher({
-        ...operator,
-        data_root: dataRoot,
-        ...(relayMode
-          ? { relay_binding: JSON.parse(prepared.launch.env.TEAM_RELAY) }
-          : { bridge: { config_path: bridgeConfig, report_dir: reportDir } }),
-        provider_reuse: {
-          source_config: values["provider-config"],
-          provider_id: "custom",
-          model: "gpt-6.1-sol",
-        },
-        code_mode: { direct_only_tool_namespaces: ["mcp__agent_weave_probe"] },
-      });
+    : trusted
+      ? officialCodexRelayLauncher(vendorProfile, {
+          dataRoot: reportDir,
+          config: bridge,
+        })
+      : officialCodexLauncher({
+          ...vendorProfile,
+          ...(relayMode
+            ? { relay_binding: JSON.parse(prepared.launch.env.TEAM_RELAY) }
+            : { bridge: { config_path: bridgeConfig, report_dir: reportDir } }),
+        });
   if (relayMode)
     composition = relayJointComposition(prepared, baseLauncher, {
       root,
@@ -309,12 +344,14 @@ try {
   if (!synthetic)
     writeFileSync(
       resolve(
-        relayMode
-          ? ".runtime/w25/authorization-used.json"
-          : ".runtime/w20/authorization-used.json",
+        trusted
+          ? join(root, "../authorization-used.json")
+          : relayMode
+            ? ".runtime/w25/authorization-used.json"
+            : ".runtime/w20/authorization-used.json",
       ),
       JSON.stringify({
-        stage: relayMode ? "W25" : "W20",
+        stage: report.stage,
         at: new Date().toISOString(),
         max_instances: 1,
         max_turns: 1,
@@ -335,6 +372,26 @@ try {
   const view = () => controller.read(f.token, f.ids.project, f.binding);
   assert.equal(view().state, "ready");
   assert.ok(view().native_thread_sha256);
+  if (trusted) {
+    const homes = readdirSync(dataRoot);
+    assert.equal(homes.length, 1);
+    const config = readFileSync(
+      join(dataRoot, homes[0], "home/config.toml"),
+      "utf8",
+    );
+    relaySecret = JSON.parse(
+      tomlSectionValue(
+        config,
+        "mcp_servers.agent-weave-probe.env",
+        "TEAM_RELAY",
+      ),
+    ).token;
+    assert.match(relaySecret, /^[a-f0-9]{64}$/);
+    assert.ok(
+      config.includes("request_max_retries = 0") &&
+        config.includes("stream_max_retries = 0"),
+    );
+  }
   check("native", true);
   const permit = {
     connection_id: connectionId,
@@ -502,7 +559,14 @@ try {
   const relayDenied = await fetch(relay.origin + taskPath, {
     headers: { authorization: "Bearer " + entryToken },
   });
-  check("revoke", denied.status === 404 && relayDenied.status === 404);
+  check(
+    "revoke",
+    denied.status === 404 &&
+      relayDenied.status === 404 &&
+      (!trusted ||
+        (denied.body.code === "NOT_FOUND_OR_DENIED" &&
+          (await relayDenied.json()).code === "NOT_FOUND_OR_DENIED")),
+  );
   if (composition) await composition.arm();
   s.updateGrant({ ...f.g, state: "revoked" });
   assert.throws(view, /GRANT_REVOKED/);
@@ -518,7 +582,10 @@ try {
   };
   check(
     "exit",
-    end?.code === 0 && end?.exit_observed === true && end?.forced === false,
+    end?.code === 0 &&
+      end?.exit_observed === true &&
+      end?.forced === false &&
+      (!trusted || end.fault === null),
   );
   if (composition) report.facts.relay_lifecycle = composition.facts;
   const reports = composition
@@ -611,6 +678,16 @@ try {
       entryToken,
       relaySecret,
     ]);
+    if (trusted)
+      check(
+        "production_config_cleanup",
+        !!relaySecret &&
+          files.length === 0 &&
+          readdirSync(join(root, "bridge-reports")).every(
+            (name) =>
+              !existsSync(join(root, "bridge-reports", name, "bridge.json")),
+          ),
+      );
     check("cleanup", report.facts.cleanup.residual_files === 0);
   } catch (error) {
     report.facts.cleanup_error_sha256 = hash(String(error));

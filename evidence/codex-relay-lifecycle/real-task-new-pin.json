@@ -1,0 +1,100 @@
+{
+  "stage": "W33",
+  "mode": "REAL_VENDOR",
+  "started_at": "2026-11-18T08:58:51.078Z",
+  "checks": [
+    {
+      "name": "native",
+      "passed": true
+    },
+    {
+      "name": "turn",
+      "passed": true
+    },
+    {
+      "name": "task",
+      "passed": true
+    },
+    {
+      "name": "read_only",
+      "passed": true
+    },
+    {
+      "name": "revoke",
+      "passed": true
+    },
+    {
+      "name": "exit",
+      "passed": true
+    },
+    {
+      "name": "bridge",
+      "passed": true
+    },
+    {
+      "name": "production_config_cleanup",
+      "passed": true
+    },
+    {
+      "name": "cleanup",
+      "passed": true
+    },
+    {
+      "name": "preserved",
+      "passed": true
+    }
+  ],
+  "facts": {
+    "source_config_sha256": "84267adf7ea88303fccc58890c6337791d69212475c84f5d7ef6156a58a51ee9",
+    "executable_sha256": "094d4db493de22025712cc5963854e7654b7c97f4cee795e3e986270a0f4f6b4",
+    "configuration_fingerprint": "dba4c2ebd670b4b8247e0633b49e6fa98bd0c149d506bd506fb280579b0008eb",
+    "task_id": "94294867-ae07-43ec-a265-8459b222dd03",
+    "task_status": "draft",
+    "turn": {
+      "id_sha256": "afed880f585aa5d38e3177e178f1d50159ccbc2e4f2bf50f93fc6ac7e6b035bc",
+      "generation": 1,
+      "state": "completed",
+      "started_at": "2026-11-18T08:58:53.337Z",
+      "completed_at": "2026-11-18T08:58:59.082Z",
+      "stale_terminal_notifications": 0
+    },
+    "token_usage": {
+      "total": 18158,
+      "input": 18061,
+      "output": 97
+    },
+    "threshold_interrupted": false,
+    "native_reply_matches": true,
+    "task_reads": 1,
+    "exit": {
+      "code": 0,
+      "signal": null,
+      "exit_observed": true,
+      "forced": false,
+      "fault": null
+    },
+    "bridge": [
+      {
+        "initialized": true,
+        "tool_calls": 1,
+        "tool_errors": 0,
+        "fault": null,
+        "stdin_eof": true
+      }
+    ],
+    "cleanup": {
+      "deleted": 0,
+      "scanned": 76,
+      "residual_files": 0
+    },
+    "original_process_count": 12,
+    "original_processes_unchanged": true,
+    "source_config_unchanged": true,
+    "controller_start_attempted": true
+  },
+  "cost": "UNKNOWN",
+  "soft_token_threshold": 30000,
+  "limit_is_hard": false,
+  "status": "PASSED_FIXED_CONFIG",
+  "finished_at": "2026-11-18T08:58:59.771Z"
+}
