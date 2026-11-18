@@ -85,7 +85,7 @@ export function createServer(
           return;
         }
         const runtimeCommand =
-          /^\/v1\/runtimes\/(codex|deepseek_harness)\/(start|close)$/.exec(
+          /^\/v1\/runtimes\/(codex|deepseek_harness)\/(start|close|approved-turn)$/.exec(
             req.url,
           );
         if (runtimeCommand) {

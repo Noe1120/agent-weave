@@ -251,6 +251,27 @@ test("trusted relay launcher remains inert and unauthorized launch creates no at
     },
     bridge,
   );
+  const validRoute =
+    'model_provider = "test"\nmodel = "fixture-model"\n[model_providers.test]\nbase_url = "http://127.0.0.1:15721/v1"\nwire_api = "responses"\nrequires_openai_auth = false\nexperimental_bearer_token = "synthetic-local-only"';
+  writeFileSync(provider, validRoute);
+  const p = {
+    ...profile,
+    provider_reuse: { source_config: provider, provider_id: "test" },
+  };
+  const bounded = officialCodexRelayLauncher(p, bridge);
+  assert.deepEqual(bounded.taskProfile, {
+    route: "http://127.0.0.1:15721/v1",
+    model: "fixture-model",
+    project_id: f.ids.project,
+    task_id: f.ids.task,
+  });
+  assert.equal(
+    officialCodexRelayLauncher(p, {
+      ...bridge,
+      config: { ...bridge.config, allow_message_poll: true },
+    }).taskProfile,
+    undefined,
+  );
   const before = readdirSync(bridgeData);
   writeFileSync(provider, "synthetic changed");
   await assert.rejects(

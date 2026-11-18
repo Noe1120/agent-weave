@@ -1,4 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
+import { OwnerTaskAuthorizations } from "./owner-task-authorizations.ts";
+import { WorkspaceService } from "./workspace-service.ts";
 import {
   authenticate,
   authorizeGrant,
@@ -111,6 +113,7 @@ interface Action {
   receipt: Receipt;
 }
 interface Owned {
+  decision?: ReturnType<OwnerTaskAuthorizations["claim"]>;
   runtimeId: string;
   projectId: string;
   grantId: string;
@@ -192,6 +195,7 @@ function requestOf(value: unknown, kind: "start" | "turn" | "revision") {
  * never sends anything but the fixed synthetic acceptance instruction.
  */
 export class CodexRuntimeController {
+  private readonly decisions: OwnerTaskAuthorizations;
   private readonly store: Store;
   private readonly launcher: CodexLauncher;
   private readonly now: () => number;
@@ -209,6 +213,9 @@ export class CodexRuntimeController {
     this.store = store;
     this.launcher = launcher;
     this.now = options.now ?? Date.now;
+    this.decisions = new OwnerTaskAuthorizations(
+      new WorkspaceService(store, this.now),
+    );
     contract(fingerprint(launcher.fingerprint));
     const interval = options.monitorMs ?? 250;
     contract(Number.isInteger(interval) && interval >= 0 && interval <= 60000);
@@ -305,6 +312,26 @@ export class CodexRuntimeController {
       if (r.expected_revision !== "0" || this.store.getResource(r.runtime_id))
         throw new AdapterFault("REVISION_CONFLICT");
       const instanceId = randomUUID();
+      if (this.launcher.source === "official_codex")
+        authorizeGrant(
+          this.store,
+          ctx.grant,
+          r.project_id,
+          "runtime_control",
+          this.now(),
+        );
+      const decision =
+        this.launcher.source === "official_codex"
+          ? this.decisions.claim(
+              r.runtime_id,
+              instanceId,
+              r.project_id,
+              ctx.grant.member_id,
+              r.configuration_fingerprint,
+              this.launcher.taskProfile,
+            )
+          : undefined;
+      if (decision) requireResource(this.store, ctx, decision.task_id, "task");
       const resource: Resource<CodexRuntimeData> = {
         id: r.runtime_id,
         project_id: r.project_id,
@@ -341,6 +368,7 @@ export class CodexRuntimeController {
         ...r,
       });
       fresh = {
+        ...(decision ? { decision } : {}),
         runtimeId: r.runtime_id,
         projectId: r.project_id,
         grantId: ctx.grant.id,
@@ -381,6 +409,8 @@ export class CodexRuntimeController {
     try {
       const r = this.current(entry),
         g = this.store.getGrant(entry.grantId);
+      if (entry.decision && !this.decisions.active(entry.runtimeId))
+        return false;
       if (
         !r ||
         !g ||
@@ -397,6 +427,16 @@ export class CodexRuntimeController {
       );
       requireActive(ctx);
       this.runtime(ctx, entry.runtimeId);
+      if (entry.decision) {
+        authorizeGrant(
+          this.store,
+          g,
+          entry.projectId,
+          "runtime_control",
+          this.now(),
+        );
+        requireResource(this.store, ctx, entry.decision.task_id, "task");
+      }
       return true;
     } catch {
       return false;
@@ -523,6 +563,14 @@ export class CodexRuntimeController {
     const initial = this.context(token, project);
     if (initial.grant.connection_constraint) fail("NOT_FOUND_OR_DENIED");
     const first = this.read(token, project, runtimeId);
+    const ownerDecision = this.owned.get(runtimeId)?.decision;
+    if (
+      ownerDecision &&
+      (connectionId !== ownerDecision.connection_id ||
+        permit?.task_id !== ownerDecision.task_id ||
+        !this.decisions.active(runtimeId))
+    )
+      fail("NOT_FOUND_OR_DENIED");
     if (permit) {
       contract(
         Object.keys(permit).sort().join() ===
@@ -565,6 +613,10 @@ export class CodexRuntimeController {
     const snapshot = canonical(initial.grant);
     return (requestedConnection: string): ConnectionObservation | undefined => {
       if (requestedConnection !== connectionId) return undefined;
+      if (ownerDecision) {
+        const entry = this.owned.get(runtimeId);
+        if (!entry || !this.authorized(entry)) return undefined;
+      }
       const ctx = this.context(token, project);
       if (canonical(ctx.grant) !== snapshot || this.disposed) return undefined;
       const view = this.read(token, project, runtimeId);
@@ -581,6 +633,7 @@ export class CodexRuntimeController {
       )
         return undefined;
       return {
+        ...(pinnedPermit ? { task_id: pinnedPermit.task_id } : {}),
         connection_id: connectionId,
         project_id: project,
         member_id: ctx.grant.member_id,
@@ -721,6 +774,14 @@ export class CodexRuntimeController {
       const cached = this.replay(ctx, r.action_id, { operation: "turn", ...r });
       if (cached) return cached;
       const permit = this.acceptance.get(r.runtime_id);
+      const guarded = this.owned.get(r.runtime_id);
+      if (
+        guarded?.decision &&
+        (r.task_id !== guarded.decision.task_id ||
+          resource.data.turn !== null ||
+          !this.authorized(guarded))
+      )
+        fail("NOT_FOUND_OR_DENIED");
       if (
         permit &&
         (resource.data.turn !== null ||
@@ -831,6 +892,7 @@ export class CodexRuntimeController {
             null,
           ),
         });
+        if (entry.decision) this.stop(entry, code);
         return;
       }
       this.awaitTurn(entry, generation, deadline);
@@ -845,6 +907,14 @@ export class CodexRuntimeController {
       // Foreign generations are ignored outright: they belong to an earlier turn
       // and must not decide this one.
       if (facts && facts.generation === generation) {
+        if (
+          entry.decision &&
+          facts.state === "running" &&
+          (facts.token_usage?.total ?? 0) >= entry.decision.soft_tokens
+        ) {
+          this.stop(entry, "CODEX_SOFT_TOKEN_LIMIT");
+          return;
+        }
         if (
           facts.state === "completed" ||
           facts.state === "failed" ||
@@ -867,6 +937,7 @@ export class CodexRuntimeController {
               facts.stale_terminal_notifications,
             ),
           });
+          if (entry.decision) this.stop(entry, null);
           return;
         }
       }
@@ -885,6 +956,7 @@ export class CodexRuntimeController {
               : 0,
           ),
         });
+        if (entry.decision) this.stop(entry, "CODEX_TURN_UNKNOWN");
         return;
       }
       entry.turnTimer = setTimeout(poll, 25).unref();
@@ -1030,9 +1102,23 @@ export class CodexRuntimeController {
   }
   /** Explicit maintenance, independent of progress reads; never starts or retries. */
   reconcileAuthorization() {
-    for (const entry of this.owned.values())
-      if (!entry.finished && !entry.stopRequested && !this.authorized(entry))
+    for (const entry of this.owned.values()) {
+      if (entry.finished || entry.stopRequested) continue;
+      if (!this.authorized(entry))
         this.stop(entry, "CODEX_AUTHORIZATION_CHANGED");
+      else if (
+        entry.decision &&
+        (entry.handle?.statistics.turn?.token_usage?.total ?? 0) >=
+          entry.decision.soft_tokens &&
+        entry.handle?.statistics.turn?.state === "running"
+      )
+        this.stop(entry, "CODEX_SOFT_TOKEN_LIMIT");
+    }
+  }
+  approvedTurn(token: string, value: unknown) {
+    const r = requestOf(value, "turn") as TurnRequest;
+    if (!this.owned.get(r.runtime_id)?.decision) fail("NOT_FOUND_OR_DENIED");
+    return this.turn(token, r);
   }
   async dispose() {
     this.disposed = true;

@@ -60,6 +60,28 @@ export function officialCodexRelayLauncher(
   const pinned = structuredClone(profile) as Record<string, unknown>;
   const base = officialCodexLauncher(pinned);
   const factory = createOwnedBridgeFactory(bridgeConfig);
+  // Only a single-task bridge may be registered for an owner-authorized turn.
+  const cfg = (
+    bridgeConfig as {
+      config: {
+        project_id: string;
+        task_ids: string[];
+        execution_ids: string[];
+        allow_message_poll: boolean;
+      };
+    }
+  ).config;
+  const taskProfile =
+    base.providerMetadata &&
+    cfg.task_ids.length === 1 &&
+    !cfg.execution_ids.length &&
+    !cfg.allow_message_poll
+      ? Object.freeze({
+          ...base.providerMetadata,
+          project_id: cfg.project_id,
+          task_id: cfg.task_ids[0]!,
+        })
+      : undefined;
   const fingerprint = createHash("sha256")
     .update(
       JSON.stringify({
@@ -70,6 +92,7 @@ export function officialCodexRelayLauncher(
     )
     .digest("hex");
   return Object.freeze({
+    ...(taskProfile ? { taskProfile } : {}),
     fingerprint,
     clientVersion: base.clientVersion,
     source: "official_codex" as const,

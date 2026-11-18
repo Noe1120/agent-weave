@@ -116,6 +116,9 @@ const active = (state: RuntimeState) =>
   ["starting", "ready", "closing"].includes(state);
 /** Trusted in-process assembly. Uses W08 permissions/resources, without inventing a native session. */
 export class DshRuntimeController {
+  get isOfficial() {
+    return this.launcher.source !== "development_fixture";
+  }
   private readonly store: Store;
   private readonly launcher: DshLauncher;
   private readonly now: () => number;

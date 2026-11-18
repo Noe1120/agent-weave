@@ -6,6 +6,7 @@ import { fail } from "./errors.ts";
 import type { WorkspaceService, Member } from "./workspace-service.ts";
 
 export interface ConnectionObservation {
+  task_id?: string;
   connection_id: string;
   project_id: string;
   member_id: string;
@@ -127,6 +128,8 @@ export class ConnectionTaskAccess {
           run.epoch === grant.run_epoch &&
           run.native_binding === grant.native_binding &&
           !!observation &&
+          (observation.task_id === undefined ||
+            observation.task_id === taskId) &&
           observation.connection_id === connectionId &&
           observation.project_id === grant.project_id &&
           observation.member_id === grant.member_id &&

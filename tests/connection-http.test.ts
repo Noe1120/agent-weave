@@ -7,6 +7,7 @@ import { CoreService } from "../packages/service/src/service.ts";
 import { createServer } from "../packages/service/src/http.ts";
 import { listenLoopback } from "../packages/service/src/loopback-listener.ts";
 import { ConnectionRegistry } from "../packages/service/src/connection-registry.ts";
+import { OwnerTaskAuthorizations } from "../packages/service/src/owner-task-authorizations.ts";
 import { tempWorkspace } from "./temp.ts";
 import { join } from "node:path";
 import {
@@ -742,10 +743,39 @@ test("durable registration retries survive reopen but real backup restore invali
       configuration_fingerprint: "a".repeat(64),
     };
     const connection = registry.redeem(invitation.invitation_token, redeem);
+    const task = randomUUID(),
+      runtime = randomUUID();
+    s.putResource({
+      id: task,
+      project_id: project.id,
+      kind: "task",
+      revision: "1",
+      domain: "fixture",
+      acl: [],
+      dependencies: [],
+      data: {},
+    });
+    new OwnerTaskAuthorizations(w).approve(session.token, session.csrf, {
+      runtime_id: runtime,
+      task_id: task,
+      project_id: project.id,
+      connection_id: connection.connection_id,
+      configuration_fingerprint: q.configuration_fingerprint,
+      target: "codex",
+      route: "http://127.0.0.1:15721/v1",
+      model: "fixture",
+      soft_tokens: 200,
+      expires_at: new Date(w.now() + 120000).toISOString(),
+    });
     s.close();
     s = new Store(temp.db);
     w = new WorkspaceService(s);
     const reopened = new ConnectionRegistry(w);
+    assert.equal(
+      new OwnerTaskAuthorizations(w).read(session.token, project.id, runtime)
+        .state,
+      "approved",
+    );
     assert.deepEqual(
       reopened.redeem(invitation.invitation_token, redeem),
       connection,
@@ -768,6 +798,15 @@ test("durable registration retries survive reopen but real backup restore invali
     );
     const restored = new Store(result.database);
     try {
+      const rw = new WorkspaceService(restored),
+        owner = rw.auth.pair(rw.auth.newPairing().code);
+      const after = new OwnerTaskAuthorizations(rw).read(
+        owner.token,
+        project.id,
+        runtime,
+      );
+      assert.equal(after.state, "invalidated");
+      assert.equal(after.execution, null);
       const restoredRegistry = new ConnectionRegistry(
         new WorkspaceService(restored),
       );
@@ -944,4 +983,85 @@ test("expired invitation and cross-connection token cannot be used", async (t) =
     ).status,
     200,
   );
+});
+
+test("owner can approve only a registered Codex single task; replay and polling never renew or launch", async (t) => {
+  const f = await setup(t),
+    reg = new ConnectionRegistry(f.w);
+  const q = f.request(),
+    invite = (await f.call(invitePath, q)).body.data;
+  reg.redeem(invite.invitation_token, {
+    connection_id: invite.connection_id,
+    action_id: randomUUID(),
+    configuration_fingerprint: q.configuration_fingerprint,
+  });
+  const task = randomUUID(),
+    runtime = randomUUID();
+  f.store.putResource({
+    id: task,
+    kind: "task",
+    project_id: f.project.id,
+    revision: "1",
+    acl: [],
+    domain: "fixture",
+    dependencies: [],
+    data: {},
+  });
+  const request = {
+    project_id: f.project.id,
+    connection_id: invite.connection_id,
+    runtime_id: runtime,
+    task_id: task,
+    target: "codex",
+    configuration_fingerprint: q.configuration_fingerprint,
+    route: "http://127.0.0.1:15721/v1",
+    model: "gpt-6.1-sol",
+    soft_tokens: 30000,
+    expires_at: new Date(f.w.now() + 60000).toISOString(),
+  };
+  const path = "/v1/console/task-authorizations/approve",
+    view = `/v1/console/projects/${f.project.id}/task-authorizations/${runtime}`;
+  assert.equal((await f.call(path, request, {})).status, 401);
+  assert.equal(
+    (await f.call(path, request, { cookie: f.owner.cookie })).status,
+    403,
+  );
+  assert.equal(
+    (await f.call(path, { ...request, task_id: randomUUID() })).status,
+    404,
+  );
+  assert.equal(
+    (await f.call(path, { ...request, token: "never-accept" })).status,
+    400,
+  );
+  const approved = await f.call(path, request);
+  assert.equal(approved.status, 200);
+  assert.equal(approved.body.data.state, "approved");
+  const changes = () => f.store.db.prepare("select total_changes() n").get()!.n,
+    before = changes();
+  assert.deepEqual((await f.call(view)).body.data, {
+    ...approved.body.data,
+    execution: null,
+  });
+  assert.equal(changes(), before);
+  assert.deepEqual((await f.call(path, request)).body.data, approved.body.data);
+  assert.equal(
+    (await f.call(path, { ...request, soft_tokens: 1 })).status,
+    409,
+  );
+  const revoke = "/v1/console/task-authorizations/revoke";
+  assert.equal(
+    (await f.call(revoke, { project_id: f.project.id, runtime_id: runtime }))
+      .body.data.state,
+    "revoked",
+  );
+  assert.equal((await f.call(path, request)).body.data.state, "revoked");
+  const second = { ...request, runtime_id: randomUUID() };
+  assert.equal((await f.call(path, second)).status, 200);
+  f.advance(60000);
+  assert.equal(
+    (await f.call(view.replace(runtime, second.runtime_id))).body.data.state,
+    "expired",
+  );
+  assert.equal(f.store.getResource(runtime), undefined);
 });

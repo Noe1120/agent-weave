@@ -629,3 +629,28 @@ for (const scenario of [
       f.close();
     }
   });
+
+test("an owner-pinned observation cannot issue a read credential for another otherwise accessible task", async () => {
+  const f = await setup();
+  try {
+    const { ConnectionTaskAccess } =
+      await import("../packages/service/src/connection-task-access.ts");
+    const manager = new ConnectionTaskAccess(f.w, () => ({
+      ...f.observe(),
+      task_id: randomUUID(),
+    }));
+    assert.throws(
+      () =>
+        manager.issue(
+          f.connection.connection_token,
+          f.connection.connection_id,
+          f.grant,
+          f.ids.task,
+        ),
+      /GRANT_REVOKED/,
+    );
+    assert.equal(f.s.getGrant(f.grant.id), undefined);
+  } finally {
+    f.close();
+  }
+});

@@ -103,7 +103,11 @@ export class RuntimeGateway {
     requireActive(ctx);
     if (target !== "codex" && target !== "deepseek_harness")
       fail("NOT_FOUND_OR_DENIED");
-    if (operation !== "start" && operation !== "close")
+    if (
+      operation !== "start" &&
+      operation !== "close" &&
+      !(target === "codex" && operation === "approved-turn")
+    )
       fail("NOT_FOUND_OR_DENIED");
     const existing = this.store.getResource<RuntimeData>(
       request.runtime_id as string,
@@ -118,6 +122,14 @@ export class RuntimeGateway {
     }
     const controller = this.controllers[target];
     if (!controller) throw new TransportFault(503, "RUNTIME_NOT_CONFIGURED");
+    if (operation === "approved-turn")
+      return this.controllers.codex!.approvedTurn(token, value);
+    if (
+      target === "deepseek_harness" &&
+      operation === "start" &&
+      this.controllers.deepseek_harness!.isOfficial
+    )
+      fail("NOT_FOUND_OR_DENIED");
     return controller[operation](token, value);
   }
 }

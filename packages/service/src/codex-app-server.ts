@@ -96,6 +96,8 @@ export interface CodexHandle {
   close(): void;
 }
 export interface CodexLauncher {
+  readonly providerMetadata?: Readonly<{ route: string; model: string }>;
+  readonly taskProfile?: import("./owner-task-authorizations.ts").TaskProfile;
   readonly fingerprint: string;
   readonly clientVersion: string;
   readonly source: "official_codex" | "development_fixture";
@@ -1011,6 +1013,12 @@ export function officialCodexLauncher(
     );
   }
   const p = structuredClone(o) as unknown as CodexProfile;
+  let providerMetadata =
+    p.model_provider &&
+    Object.freeze({
+      route: p.model_provider.base_url,
+      model: p.model_provider.model,
+    });
   p.installation_root = resolve(p.installation_root);
   p.data_root = resolve(p.data_root);
   if (p.bridge) {
@@ -1021,11 +1029,21 @@ export function officialCodexLauncher(
     // The operator's config is read here only to pin its digest; the credential
     // itself is read at launch, kept in memory, and never stored or reported.
     const source = resolve(p.provider_reuse.source_config);
+    const bytes = readFileSync(source),
+      text = bytes.toString("utf8").replace(/^\uFEFF/, "");
+    const route = tomlSectionValue(
+        text,
+        "model_providers." + p.provider_reuse.provider_id,
+        "base_url",
+      ),
+      model = p.provider_reuse.model ?? tomlSectionValue(text, null, "model");
+    if (loopbackBase(route) && typeof model === "string" && label(model))
+      providerMetadata = Object.freeze({ route, model });
     p.provider_reuse = {
       source_config: source,
       provider_id: p.provider_reuse.provider_id,
       ...(p.provider_reuse.model ? { model: p.provider_reuse.model } : {}),
-      sha256: createHash("sha256").update(readFileSync(source)).digest("hex"),
+      sha256: createHash("sha256").update(bytes).digest("hex"),
     };
   }
   const between = relative(p.installation_root, p.data_root);
@@ -1053,6 +1071,7 @@ export function officialCodexLauncher(
     )
     .digest("hex");
   return Object.freeze({
+    ...(providerMetadata ? { providerMetadata } : {}),
     fingerprint: fp,
     clientVersion: p.client_version,
     source: "official_codex" as const,

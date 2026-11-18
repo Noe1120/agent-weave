@@ -1,3 +1,4 @@
+import { OwnerTaskAuthorizations } from "./owner-task-authorizations.ts";
 import { readFile } from "node:fs/promises";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { WorkspaceService } from "./workspace-service.ts";
@@ -116,6 +117,21 @@ export async function handleWorkspace(
       );
       return true;
     }
+    if (
+      path === "/v1/console/task-authorizations/approve" ||
+      path === "/v1/console/task-authorizations/revoke"
+    ) {
+      const auth = new OwnerTaskAuthorizations(w);
+      result(
+        res,
+        auth[path.endsWith("/approve") ? "approve" : "revoke"](
+          token,
+          typeof csrf === "string" ? csrf : "",
+          body,
+        ),
+      );
+      return true;
+    }
     if (path === "/v1/console/logout") {
       if (
         !body ||
@@ -150,6 +166,21 @@ export async function handleWorkspace(
     /^\/v1\/console\/projects\/([0-9a-f-]{36})\/connections$/i.exec(path);
   if (connections) {
     result(res, new ConnectionRegistry(w).list(token, connections[1]!));
+    return true;
+  }
+  const authorization =
+    /^\/v1\/console\/projects\/([0-9a-f-]{36})\/task-authorizations\/([0-9a-f-]{36})$/i.exec(
+      path,
+    );
+  if (authorization) {
+    result(
+      res,
+      new OwnerTaskAuthorizations(w).read(
+        token,
+        authorization[1]!,
+        authorization[2]!,
+      ),
+    );
     return true;
   }
   if (path === "/v1/console/session") {

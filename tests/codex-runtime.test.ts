@@ -1,4 +1,5 @@
-﻿import test, { type TestContext } from "node:test";
+import { OwnerTaskAuthorizations } from "../packages/service/src/owner-task-authorizations.ts";
+import test, { type TestContext } from "node:test";
 import assert from "node:assert/strict";
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { resolve } from "node:path";
@@ -231,19 +232,92 @@ test("observation factory refuses official sources and unstarted runtimes withou
   assert.equal(f.launched(), 1);
 });
 
+function registeredOfficialFixture(f: ReturnType<typeof setup>) {
+  const w = new WorkspaceService(f.s, f.now),
+    owner = w.auth.pair(w.auth.newPairing().code),
+    reg = new ConnectionRegistry(w),
+    approvals = new OwnerTaskAuthorizations(w);
+  const route = "http://127.0.0.1:15721/v1",
+    model = "gpt-6.1-sol";
+  Object.assign(f.launcher, {
+    source: "official_codex",
+    taskProfile: {
+      route,
+      model,
+      project_id: f.ids.project,
+      task_id: f.ids.task,
+    },
+  });
+  f.g.actions.push("runtime_control");
+  f.p.actions.push("runtime_control");
+  f.s.updateGrant(f.g);
+  f.s.putPolicy(f.p);
+  f.s.db
+    .prepare("INSERT INTO workspace_projects VALUES(?,?,?,?,?,?)")
+    .run(
+      f.ids.project,
+      "fixture",
+      "",
+      id(),
+      "1",
+      new Date(f.now()).toISOString(),
+    );
+  f.s.db
+    .prepare("INSERT INTO workspace_members VALUES(?,?,?,?,?,?,?,?)")
+    .run(
+      f.ids.member,
+      f.ids.project,
+      "codex",
+      "Codex",
+      "read",
+      "active",
+      "1",
+      new Date(f.now()).toISOString(),
+    );
+  const fp = f.launcher.fingerprint,
+    invite = reg.invite(owner.token, owner.csrf, {
+      member_id: f.ids.member,
+      project_id: f.ids.project,
+      action_id: id(),
+      expected_member_revision: "1",
+      configuration_fingerprint: fp,
+    });
+  reg.redeem(invite.invitation_token, {
+    connection_id: invite.connection_id,
+    action_id: id(),
+    configuration_fingerprint: fp,
+  });
+  return { owner, approvals, route, model, fp, invite };
+}
+function approveOfficialFixture(f: ReturnType<typeof setup>) {
+  const { owner, approvals, route, model, fp, invite } =
+    registeredOfficialFixture(f);
+  approvals.approve(owner.token, owner.csrf, {
+    project_id: f.ids.project,
+    runtime_id: f.binding,
+    task_id: f.ids.task,
+    connection_id: invite.connection_id,
+    configuration_fingerprint: fp,
+    route,
+    model,
+    target: "codex",
+    soft_tokens: 30000,
+    expires_at: new Date(f.now() + 300000).toISOString(),
+  });
+  return invite.connection_id;
+}
 test("explicit pinned official synthetic acceptance permits observation but only one task turn", async (t) => {
   const f = setup(t);
-  Object.assign(f.launcher, { source: "official_codex" });
+  const connection = approveOfficialFixture(f);
   await f.c.start(f.token, f.start());
-  const connection = id(),
-    permit = {
-      connection_id: connection,
-      task_id: f.ids.task,
-      configuration_fingerprint: f.launcher.fingerprint,
-      expires_at: new Date(f.now() + 300000).toISOString(),
-      data_class: "synthetic_only" as const,
-      max_turns: 1 as const,
-    };
+  const permit = {
+    connection_id: connection,
+    task_id: f.ids.task,
+    configuration_fingerprint: f.launcher.fingerprint,
+    expires_at: new Date(f.now() + 300000).toISOString(),
+    data_class: "synthetic_only" as const,
+    max_turns: 1 as const,
+  };
   const observe = f.c.connectionObserver(
     f.token,
     f.ids.project,
@@ -262,17 +336,16 @@ test("explicit pinned official synthetic acceptance permits observation but only
 for (const bad of ["connection", "task", "config", "expiry", "extra", "turns"])
   test(`official observation permit rejects ${bad}`, async (t) => {
     const f = setup(t);
-    Object.assign(f.launcher, { source: "official_codex" });
+    const connection = approveOfficialFixture(f);
     await f.c.start(f.token, f.start());
-    const connection = id(),
-      permit: any = {
-        connection_id: connection,
-        task_id: f.ids.task,
-        configuration_fingerprint: f.launcher.fingerprint,
-        expires_at: new Date(f.now() + 300000).toISOString(),
-        data_class: "synthetic_only",
-        max_turns: 1,
-      };
+    const permit: any = {
+      connection_id: connection,
+      task_id: f.ids.task,
+      configuration_fingerprint: f.launcher.fingerprint,
+      expires_at: new Date(f.now() + 300000).toISOString(),
+      data_class: "synthetic_only",
+      max_turns: 1,
+    };
     if (bad === "connection") permit.connection_id = id();
     if (bad === "task") permit.task_id = id();
     if (bad === "config") permit.configuration_fingerprint = "b".repeat(64);
@@ -714,3 +787,116 @@ test("a new controller instance cannot bypass an unknown turn", async (t) => {
     "CODEX_OWNER_UNKNOWN",
   );
 });
+
+for (const ending of [
+  "completed",
+  "revoked",
+  "expired",
+  "soft_limit",
+  "control_removed",
+  "launch_failed",
+] as const)
+  test(`owner-scoped runtime: ${ending} cannot launch or bill a second time`, async (t) => {
+    const f = setup(
+      t,
+      ending === "soft_limit"
+        ? "turn-inprogress"
+        : ending === "launch_failed"
+          ? "thread-error"
+          : "success",
+    );
+    const { RuntimeGateway } =
+      await import("../packages/service/src/runtime-gateway.ts");
+    const { owner, approvals, route, model, fp, invite } =
+      registeredOfficialFixture(f);
+    const gateway = new RuntimeGateway(f.s, { codex: f.c }, f.now),
+      start = f.start(),
+      run = () => gateway.command(f.token, "codex", "start", start);
+    await assert.rejects(f.c.start(f.token, start), /NOT_FOUND_OR_DENIED/);
+    await assert.rejects(run(), /NOT_FOUND_OR_DENIED/);
+    assert.equal(f.launched(), 0);
+    const q = {
+      target: "codex",
+      project_id: f.ids.project,
+      connection_id: invite.connection_id,
+      runtime_id: f.binding,
+      task_id: f.ids.task,
+      configuration_fingerprint: fp,
+      route,
+      model,
+      soft_tokens: ending === "soft_limit" ? 100 : 30000,
+      expires_at: new Date(f.now() + 60000).toISOString(),
+    };
+    approvals.approve(owner.token, owner.csrf, q);
+    Object.assign(f.launcher, { taskProfile: { ...q, model: "different" } });
+    await assert.rejects(f.c.start(f.token, start), /NOT_FOUND_OR_DENIED/);
+    await assert.rejects(run(), /NOT_FOUND_OR_DENIED/);
+    assert.equal(f.launched(), 0);
+    Object.assign(f.launcher, {
+      taskProfile: {
+        route,
+        model,
+        project_id: q.project_id,
+        task_id: q.task_id,
+      },
+    });
+    await Promise.all([run(), run()]);
+    assert.equal(f.launched(), 1);
+    assert.equal(
+      approvals.read(owner.token, q.project_id, q.runtime_id).state,
+      "consumed",
+    );
+    if (ending === "launch_failed") {
+      await run();
+      assert.equal(f.launched(), 1);
+      assert.notEqual(f.view().state, "ready");
+      return;
+    }
+    const send = (task = f.ids.task) =>
+      gateway.command(f.token, "codex", "approved-turn", {
+        ...f.turn(),
+        task_id: task,
+      });
+    await assert.rejects(send(id()), /NOT_FOUND_OR_DENIED/);
+    assert.equal(f.handles[0]!.statistics.generation, 0);
+    const n = () => f.s.db.prepare("select total_changes() n").get()!.n,
+      before = n();
+    for (let i = 0; i < 50; i++)
+      gateway.read(f.token, q.project_id, q.runtime_id);
+    assert.equal(n(), before);
+    if (ending === "revoked")
+      approvals.revoke(owner.token, owner.csrf, {
+        project_id: q.project_id,
+        runtime_id: q.runtime_id,
+      });
+    if (ending === "expired") f.advance(60000);
+    if (ending === "control_removed") {
+      f.p.actions = f.p.actions.filter((a) => a !== "runtime_control");
+      f.s.putPolicy(f.p);
+      f.c.reconcileAuthorization();
+      await until(() => f.view().state === "closed");
+      assert.equal(f.handles[0]!.statistics.generation, 0);
+      return;
+    }
+    if (ending === "revoked" || ending === "expired") {
+      await assert.rejects(send(), /NOT_FOUND_OR_DENIED/);
+      f.c.reconcileAuthorization();
+    } else {
+      await send();
+      if (ending === "completed")
+        await until(() => f.view().turn?.state === "completed");
+    }
+    await until(() => f.view().state === "closed");
+    const ownerView = approvals.read(owner.token, q.project_id, q.runtime_id);
+    assert.equal(ownerView.execution?.state, "closed");
+    assert.equal(ownerView.execution?.exit_observed, true);
+    if (ending === "completed") assert.equal(ownerView.execution?.tokens, 120);
+    assert.ok(!JSON.stringify(ownerView).includes("synthetic reply"));
+    if (ending === "soft_limit")
+      assert.equal(f.view().fault, "CODEX_SOFT_TOKEN_LIMIT");
+    await assert.rejects(send());
+    assert.equal(
+      f.handles[0]!.statistics.generation,
+      ending === "revoked" || ending === "expired" ? 0 : 1,
+    );
+  });
