@@ -5,7 +5,7 @@ import {
   readFrames,
   writeFrame,
 } from "../../packages/service/src/bridge-relay-io.ts";
-let relay;
+let relay, frames;
 const answer = (id, result) =>
   process.stdout.write(JSON.stringify({ id, result }) + "\n");
 for await (const text of createInterface({ input: process.stdin })) {
@@ -24,7 +24,7 @@ for await (const text of createInterface({ input: process.stdin })) {
       stdio: ["pipe", "pipe", "pipe"],
     });
     relay.stderr.resume();
-    const frames = readFrames(relay.stdout, 131072, 1048576);
+    frames = readFrames(relay.stdout, 131072, 1048576);
     await writeFrame(
       relay.stdin,
       {
@@ -52,11 +52,46 @@ for await (const text of createInterface({ input: process.stdin })) {
     );
     await frames.next();
     answer(frame.id, { thread: { id: "synthetic-owned-thread" } });
-    void (async () => {
-      for await (const _ of frames) {
-        /* drain owned relay */
-      }
-    })();
+  }
+  if (frame.method === "turn/start") {
+    const id = "fixture-turn",
+      threadId = frame.params.threadId;
+    await writeFrame(
+      relay.stdin,
+      {
+        jsonrpc: "2.0",
+        id: 3,
+        method: "tools/call",
+        params: {
+          name: "task_get",
+          arguments: { task_id: frame.params.input[0].text },
+        },
+      },
+      3000,
+    );
+    const response = (await frames.next()).value;
+    if (response.id !== 3 || response.result.isError)
+      throw new Error("FIXTURE_TASK_READ");
+    const task = JSON.parse(response.result.content[0].text);
+    answer(frame.id, { turn: { id } });
+    for (const notification of [
+      {
+        method: "item/completed",
+        params: {
+          threadId,
+          turnId: id,
+          item: {
+            type: "agentMessage",
+            text: `${task.ref.id}: ${task.data.status}`,
+          },
+        },
+      },
+      {
+        method: "turn/completed",
+        params: { threadId, turn: { id, status: "completed" } },
+      },
+    ])
+      process.stdout.write(JSON.stringify(notification) + "\n");
   }
 }
 relay?.stdin.end();

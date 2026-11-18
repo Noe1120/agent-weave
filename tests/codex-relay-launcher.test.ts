@@ -1,10 +1,19 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdirSync, readdirSync, writeFileSync, existsSync } from "node:fs";
+import {
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+  existsSync,
+} from "node:fs";
 import { spawn } from "node:child_process";
 import { join, resolve } from "node:path";
 import { tempWorkspace } from "./temp.ts";
 import { fixture } from "./helpers.ts";
+import { createServer } from "../packages/service/src/http.ts";
+import { listenLoopback } from "../packages/service/src/loopback-listener.ts";
+import { setTimeout as delay } from "node:timers/promises";
 const modulePath = (name: string) =>
   process.env.W29_COMPILED === "1"
     ? `../dist/packages/service/src/${name}.js`
@@ -19,8 +28,14 @@ const { createOwnedBridgeFactory } = (await import(
   modulePath("owned-bridge")
 )) as typeof import("../packages/service/src/owned-bridge.ts");
 
-for (const revoke of [false, true])
-  test(`production lifecycle binds actual child relay and removes owned home after ${revoke ? "revocation" : "strict exit"}`, async (t) => {
+for (const scenario of [
+  "strict exit",
+  "revocation",
+  "task read and revocation",
+])
+  test(`production lifecycle binds actual child relay and removes owned home after ${scenario}`, async (t) => {
+    const business = scenario === "task read and revocation",
+      revoke = scenario !== "strict exit";
     const temp = tempWorkspace(),
       f = fixture();
     t.after(() => {
@@ -32,12 +47,22 @@ for (const revoke of [false, true])
     mkdirSync(home, { recursive: true });
     mkdirSync(work);
     writeFileSync(join(home, "config.toml"), "synthetic");
+    let origin = "http://127.0.0.1:1";
+    if (business) {
+      const server = createServer(f.service);
+      await listenLoopback(server);
+      origin = `http://127.0.0.1:${(server.address() as import("node:net").AddressInfo).port}`;
+      t.after(async () => {
+        server.closeAllConnections();
+        await new Promise<void>((r) => server.close(() => r()));
+      });
+    }
     const bridge = await createOwnedBridgeFactory({
       dataRoot: temp.directory,
       config: {
         version: 1,
         target: "codex",
-        service_origin: "http://127.0.0.1:1",
+        service_origin: origin,
         project_id: f.ids.project,
         token: f.token,
         task_ids: [f.ids.task],
@@ -70,12 +95,34 @@ for (const revoke of [false, true])
       },
     );
     const handle = lifecycle.attach(
-      new CodexAppServer(child, { workDirectory: work }),
+      new CodexAppServer(child, { workDirectory: work, requestMs: 5000 }),
       child,
     );
     try {
       await handle.ready;
       const thread = await handle.startThread(work);
+      if (business) {
+        const changes = () =>
+          f.s.db.prepare("SELECT total_changes() AS n").get()!.n;
+        const baseline = changes();
+        await handle.startTurn(thread, f.ids.task);
+        const end = Date.now() + 5000;
+        while (handle.statistics.turn?.state === "running" && Date.now() < end)
+          await delay(10);
+        assert.equal(handle.statistics.turn?.state, "completed");
+        assert.equal(
+          handle.statistics.turn?.last_agent_message,
+          `${f.ids.task}: draft`,
+        );
+        assert.equal(changes(), baseline);
+        f.s.updateGrant({ ...f.g, state: "revoked" });
+        const res = await fetch(
+          `${origin}/v1/projects/${f.ids.project}/task/${f.ids.task}`,
+          { headers: { authorization: `Bearer ${f.token}` } },
+        );
+        assert.equal(res.status, 404);
+        assert.equal((await res.json()).code, "NOT_FOUND_OR_DENIED");
+      }
       if (revoke) {
         authorized = false;
         await assert.rejects(
@@ -90,8 +137,23 @@ for (const revoke of [false, true])
       );
       assert.equal(exit.code, 0);
       assert.equal(exit.forced, false);
-      assert.equal(handle.statistics.generation, 0);
+      assert.equal(handle.statistics.generation, business ? 1 : 0);
       assert.equal(bridge.snapshot().state, "closed");
+      if (business) {
+        const reports = readdirSync(temp.directory).filter((name) =>
+          name.startsWith("owned-bridge-"),
+        );
+        assert.equal(reports.length, 1);
+        const final = JSON.parse(
+          readFileSync(
+            join(temp.directory, reports[0]!, "report.json"),
+            "utf8",
+          ),
+        );
+        assert.equal(final.tool_calls, 1);
+        assert.equal(final.tool_errors, 0);
+        assert.equal(final.stdin_eof, true);
+      }
       assert.equal(existsSync(join(home, "config.toml")), false);
     } finally {
       handle.close();

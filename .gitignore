@@ -215,3 +215,4 @@ qa-runtime/
 !/evidence/codex-relay-lifecycle/HOME-CLEANUP.md
 !/evidence/codex-relay-lifecycle/WINDOWS-OBSERVER.md
 !/evidence/codex-relay-lifecycle/TRUSTED-LAUNCHER.md
+!/evidence/codex-relay-lifecycle/no-model-new-pin.json

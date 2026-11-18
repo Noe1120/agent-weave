@@ -1470,6 +1470,7 @@
     "W28-WINDOWS-EXIT-OBSERVER.md",
     "W29-TRUSTED-RELAY-LAUNCHER.md",
     "W30-CODEX-INSTALLATION-PREFLIGHT.md",
+    "W31-W32-TRUSTED-CODEX-ACCEPTANCE.md",
     "WINDOWS-ISOLATION-DECISION.md",
     "contracts/core.schema.json",
     "contracts/error-mapping.json",

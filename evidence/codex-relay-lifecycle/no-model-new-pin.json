@@ -1,0 +1,33 @@
+{
+  "pin": "094d4db493de22025712cc5963854e7654b7c97f4cee795e3e986270a0f4f6b4",
+  "started_at": "2026-11-18T08:44:35.320Z",
+  "status": "PASSED_FIXED_NO_MODEL_LIFECYCLE",
+  "stage": "close",
+  "client_version": "0.169.0-alpha.11.1",
+  "thread_digest": "e22c9c688d9886360ce30be002a96ce0c2bc38cb85392642fb0958bac5757cf9",
+  "exit": {
+    "code": 0,
+    "observed": true,
+    "forced": false,
+    "fault": null
+  },
+  "generation": 0,
+  "bridge": {
+    "initialized": true,
+    "list": 1,
+    "calls": 0,
+    "errors": 0,
+    "eof": true,
+    "fault": null
+  },
+  "no_turn": true,
+  "configs_removed": true,
+  "scan": {
+    "deleted": 0,
+    "scanned": 71,
+    "residual_files": 0
+  },
+  "sink_requests": 0,
+  "originals_unchanged": true,
+  "finished_at": "2026-11-18T08:44:38.399Z"
+}
