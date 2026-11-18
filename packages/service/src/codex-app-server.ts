@@ -1069,9 +1069,7 @@ export function officialCodexLauncher(
           throw new AdapterFault("CODEX_CONFIG_CHANGED");
       }
 
-      await unlinked(executable, true);
-      if ((await hash(executable)) !== p.executable_sha256)
-        throw new AdapterFault("CODEX_CONFIG_CHANGED");
+      await verifyCodexInstallation(p.installation_root, p.executable_sha256);
       if (p.relay_binding) {
         await unlinked(relayEntry, true);
         if (!relaySha || (await hash(relayEntry)) !== relaySha)
@@ -1188,6 +1186,19 @@ async function unlinked(absolute: string, file: boolean) {
     const parent = dirname(current);
     if (parent === current) break;
     current = parent;
+  }
+}
+/** Read-only; never searches for a replacement when the operator's pin is stale. */
+export async function verifyCodexInstallation(root: string, expected: string) {
+  const path = join(root, "codex.exe");
+  try {
+    await unlinked(path, true);
+    if ((await hash(path)) !== expected)
+      throw new AdapterFault("CODEX_CONFIG_CHANGED");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT")
+      throw new AdapterFault("CODEX_INSTALLATION_MISSING");
+    throw error;
   }
 }
 async function hash(filename: string) {

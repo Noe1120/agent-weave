@@ -111,8 +111,10 @@ test("trusted relay launcher remains inert and unauthorized launch creates no at
     bridgeData = join(temp.directory, "bridge");
   mkdirSync(data);
   mkdirSync(bridgeData);
+  const installation = join(temp.directory, "installation");
+  mkdirSync(installation);
   const profile = {
-    installation_root: resolve("tests/fixtures"),
+    installation_root: installation,
     data_root: data,
     client_version: "synthetic",
     executable_sha256: "a".repeat(64),
@@ -147,12 +149,23 @@ test("trusted relay launcher remains inert and unauthorized launch creates no at
   );
   assert.deepEqual(readdirSync(data), []);
   assert.deepEqual(readdirSync(bridgeData), []);
-  await assert.rejects(launcher.launch(() => true)); // nonexistent pinned installation
-  for (const name of readdirSync(bridgeData))
-    assert.equal(
-      readdirSync(join(bridgeData, name)).includes("bridge.json"),
-      false,
-    );
+  await assert.rejects(
+    launcher.launch(() => true),
+    {
+      name: "AdapterFault",
+      code: "CODEX_INSTALLATION_MISSING",
+    },
+  );
+  assert.deepEqual(readdirSync(bridgeData), []);
+  writeFileSync(
+    join(installation, "codex.exe"),
+    "changed fixture, never executed",
+  );
+  await assert.rejects(
+    launcher.launch(() => true),
+    { name: "AdapterFault", code: "CODEX_CONFIG_CHANGED" },
+  );
+  assert.deepEqual(readdirSync(bridgeData), []);
   assert.deepEqual(readdirSync(data), []);
   assert.throws(
     () => officialCodexRelayLauncher({ ...profile, relay_binding: {} }, bridge),

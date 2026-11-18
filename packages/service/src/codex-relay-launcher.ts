@@ -1,7 +1,9 @@
 import { createHash } from "node:crypto";
+import { AdapterFault } from "./adapter-contract.ts";
 import type { ChildProcessWithoutNullStreams } from "node:child_process";
 import {
   officialCodexLauncher,
+  verifyCodexInstallation,
   type CodexLauncher,
   type CodexLaunchLifecycle,
 } from "./codex-app-server.ts";
@@ -72,13 +74,17 @@ export function officialCodexRelayLauncher(
     clientVersion: base.clientVersion,
     source: "official_codex" as const,
     async launch(allowed: () => boolean) {
-      if (!allowed()) throw new Error("CODEX_AUTHORIZATION_CHANGED");
+      if (!allowed()) throw new AdapterFault("CODEX_AUTHORIZATION_CHANGED");
       if (officialCodexLauncher(pinned).fingerprint !== base.fingerprint)
-        throw new Error("CODEX_CONFIG_CHANGED");
+        throw new AdapterFault("CODEX_CONFIG_CHANGED");
+      await verifyCodexInstallation(
+        pinned.installation_root as string,
+        pinned.executable_sha256 as string,
+      );
       const bridge = await factory.prepareClient(allowed);
       try {
         if (officialCodexLauncher(pinned).fingerprint !== base.fingerprint)
-          throw new Error("CODEX_CONFIG_CHANGED");
+          throw new AdapterFault("CODEX_CONFIG_CHANGED");
         const lifecycle = createCodexRelayLifecycle(
           bridge,
           pinned.data_root as string,

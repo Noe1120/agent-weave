@@ -1243,7 +1243,7 @@
   ],
   "document_structure": {
     "json_examples_parsed": 6,
-    "markdown_tables": 96,
+    "markdown_tables": 97,
     "checks": "numbering,mappings,links,sources,fences,tables"
   },
   "schema_verification": {
@@ -1469,6 +1469,7 @@
     "W27-CODEX-HOME-CLEANUP.md",
     "W28-WINDOWS-EXIT-OBSERVER.md",
     "W29-TRUSTED-RELAY-LAUNCHER.md",
+    "W30-CODEX-INSTALLATION-PREFLIGHT.md",
     "WINDOWS-ISOLATION-DECISION.md",
     "contracts/core.schema.json",
     "contracts/error-mapping.json",
